@@ -89,23 +89,28 @@ while (true) {
   } else {
     if (time() - t_padik > 1000) {
       forward = 0
-      turn = (dir - 6) * 50//!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      tone(10,100,100)
+
+      er_dir = dir - 6
+      turn = er_dir * 15 + (er_dir - er_dir_old) * 30
+      er_dir_old = er_dir
+
 
       if (dir == 6) {
         t_padik = time()
       }
 
     } else {
-      forward = (str_max - strres)*0.45 + 40
+      
+      forward = (str_max - strres)*0.45 + 60
       er_dir = dir - 6
       er_str = str4 - str3
 
-      turn = er_dir * 1 + er_dir_old * 0 + er_str * 0.1 + er_str_old * 2 + i * 0.0001//!!!!!!!!!!!!!
+      turn = er_dir * 20 + (er_dir - er_dir_old) * 40 + er_str * 0.1 + (er_str - er_str_old) * 1 + i * 0.0001
       
-      if (abs(i) < 30){
+      if (abs(i) < 30) {
         i = i + er_str
       }
+
       er_dir_old = er_dir
       er_str_old = er_str  
 
