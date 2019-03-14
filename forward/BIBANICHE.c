@@ -84,13 +84,18 @@ t_padik = time()
 while (true) {
 
   if (abs(dir - 6) > 1) {
-    while (dir <> 6) {
       forward = 0
       er_dir = dir - 6
-      turn = er_dir * 17 + (er_dir - er_dir_old)*66
+      er_str = str4 - str3
+      turn = er_dir * 17 + (er_dir - er_dir_old)*66 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.0001
+
+      if (abs(i) < 30) {
+        i = i + er_str
+      }
 
       er_dir_old = er_dir
-    }
+      er_str_old = er_str
+
   } else {
     if (time() - t_padik > 500) {
       forward = (str_max - strres)*0.45 + 60
@@ -99,6 +104,7 @@ while (true) {
       turn = er_dir * 40 + (er_dir - er_dir_old) * 66
       er_dir_old = er_dir
       tone(10,100,100)
+
       if (dir == 6) {
         t_padik = time()
       }
