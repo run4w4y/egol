@@ -93,8 +93,7 @@ while (true) {
       er_dir = dir - 6
       turn = er_dir * 15 + (er_dir - er_dir_old) * 30
       er_dir_old = er_dir
-
-
+      
       if (dir == 6) {
         t_padik = time()
       }
