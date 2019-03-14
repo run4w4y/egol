@@ -105,8 +105,10 @@ while (true) {
       er_dir = dir - 6
       er_str = str4 - str3
 
-      turn = er_dir * 15 + (er_dir - er_dir_old) * 80 + er_str * 0.2 + (er_str - er_str_old) * 2 + i * 0.0001
-      
+      turn = er_dir * 30 + (er_dir - er_dir_old) * 30 + er_str * 0.04 + (er_str - er_str_old) * 30 + i * 0.0001
+      //	u = er * 25 + (er - errold) * 20 + er_str * 0.07 + (er_str - er_str_old) * 20
+      //  u = er * 20 + (er - errold) * 15 + er_str * 0.05 + (er_str - er_str_old) * 66
+
       if (abs(i) < 30) {
         i = i + er_str
       }
