@@ -86,7 +86,7 @@ while (true) {
   if (abs(dir - 6) > 1) {
     forward = 0
     er_dir = dir - 6
-    turn = er_dir * 17 + (er_dir - er_dir_old)*60
+    turn = er_dir * 17 + (er_dir - er_dir_old)*66
 
     er_dir_old = er_dir
   } else {
@@ -107,7 +107,7 @@ while (true) {
       er_dir = dir - 6
       er_str = str4 - str3
 
-      turn = er_dir * 15 + (er_dir - er_dir_old) * 80 + er_str * 0.07 + (er_str - er_str_old) * 66 + i * 0.0001
+      turn = er_dir * 10 + (er_dir - er_dir_old) * 20 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.0001
 
       if (abs(i) < 30) {
         i = i + er_str
