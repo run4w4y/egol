@@ -85,15 +85,18 @@ while (true) {
 
   if (abs(dir - 6) > 1) {
     forward = 0
-    turn = (dir - 6) * 30
+    er_dir = dir - 6
+    turn = er_dir * 17 + (er_dir - er_dir_old)*60
+
+    er_dir_old = er_dir
   } else {
-    if (time() - t_padik > 1000) {
-      forward = 0
+    if (time() - t_padik > 500) {
+      forward = (str_max - strres)*0.45 + 60
 
       er_dir = dir - 6
-      turn = er_dir * 15 + (er_dir - er_dir_old) * 30
+      turn = er_dir * 40 + (er_dir - er_dir_old) * 66
       er_dir_old = er_dir
-      
+
       if (dir == 6) {
         t_padik = time()
       }
@@ -104,9 +107,7 @@ while (true) {
       er_dir = dir - 6
       er_str = str4 - str3
 
-      turn = er_dir * 30 + (er_dir - er_dir_old) * 30 + er_str * 0.04 + (er_str - er_str_old) * 30 + i * 0.0001
-      //	u = er * 25 + (er - errold) * 20 + er_str * 0.07 + (er_str - er_str_old) * 20
-      //  u = er * 20 + (er - errold) * 15 + er_str * 0.05 + (er_str - er_str_old) * 66
+      turn = er_dir * 15 + (er_dir - er_dir_old) * 80 + er_str * 0.07 + (er_str - er_str_old) * 66 + i * 0.0001
 
       if (abs(i) < 30) {
         i = i + er_str
