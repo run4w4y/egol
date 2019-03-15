@@ -34,8 +34,8 @@ if (handle == 0) {
 
 //variables
 
-forward = 0
-turn = 0
+v = 0
+u = 0
 alpha = 0
 er_str_old = 0
 er_dir_old = 0
@@ -69,8 +69,8 @@ void sensors {
 
     //MotorManager
 
-    mt.spw("B", forward + turn)
-    mt.spw("C", forward - turn)
+    mt.spw("B", v + u)
+    mt.spw("C", v - u)
   }
 }
 
@@ -82,53 +82,13 @@ new.thread = sensors
 
 t_padik = time()
 while (true) {
+  while (abs(dir - 6) > 1) {
+    v = abs(100 - 50*abs(dir - 6))
+    u = 25*(dir - 6) + (str4 - str3)*0.05 
+  }
 
-  if (abs(dir - 6) > 1) {
-      forward = 0
-      er_dir = dir - 6
-      er_str = str4 - str3
-      turn = er_dir * 17 + (er_dir - er_dir_old)*66 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.0001
-
-      if (abs(i) < 30) {
-        i = i + er_str
-      }
-
-      er_dir_old = er_dir
-      er_str_old = er_str
-
-  } else {
-    if (time() - t_padik > 500) {
-      forward = (str_max - strres)*0.45 + 60
-
-      er_dir = dir - 6
-      turn = er_dir * 40 + (er_dir - er_dir_old) * 66
-      er_dir_old = er_dir
-      tone(10,100,100)
-
-      if (dir == 6) {
-        t_padik = time()
-      }
-
-    } else {
-      
-      forward = (str_max - strres)*0.45 + 60
-      er_dir = dir - 6
-      er_str = str4 - str3
-
-      turn = er_dir * 10 + (er_dir - er_dir_old) * 20 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.0001
-
-      if (abs(i) < 30) {
-        i = i + er_str
-      }
-
-      er_dir_old = er_dir
-      er_str_old = er_str 
-
-      if (dir == 6) {
-        t_padik = time()
-        i = 0
-      }
-
-    }
+  while (abs(dir - 6) < 1) {
+    v = (str_max - strres) * 0.65 + 40
+    u = 20*(dir - 6) + (str4 - str3)*0.05 
   }
 }
