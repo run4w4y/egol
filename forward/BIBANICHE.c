@@ -81,7 +81,7 @@ new.thread = sensors
 // Main
 
 while (true) {
-  while (abs(dir - 6) > 1) {
+   while (abs(dir - 6) > 1) {
     v = abs(100 - 50*abs(dir - 6))
     u = 25*(dir - 6) + (str4 - str3)*0.05 
   }
