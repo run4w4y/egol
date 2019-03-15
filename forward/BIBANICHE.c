@@ -39,7 +39,7 @@ u = 0
 alpha = 0
 er_str_old = 0
 er_dir_old = 0
-t_padik = 0
+t_padik = time()
 i = 0
 
 //Subs
@@ -81,24 +81,46 @@ new.thread = sensors
 // Main
 
 while (true) {
-   while (abs(dir - 6) > 1) {
-    v = abs(100 - 50*abs(dir - 6))
-    u = 25*(dir - 6) + (str4 - str3)*0.05 
-  }
-
-  while (abs(dir - 6) < 1) {
+   if (abs(dir - 6) > 1) {
     
-    v = (str_max - strres) * 0.65 + 40
-
-    er_str = str4 - str3
-    er_dir = dir - 6
-    u = er_dir * 17 + (er_dir - er_dir_old)*66 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.0001
-
-    if (abs(i) < 30) {
-      i = i + er_str
+    if (dir < 3 and dir > 8) {
+      v = 0
+    } else {
+      v = abs(100 - 50*abs(dir - 6))
     }
-    er_dir_old = er_dir
-    er_str_old = er_str
-    
+
+    u = 25*(dir - 6) + (str4 - str3)*0.05 
+    } else {
+
+    if (time() - t_padik < 800) {
+      v = (str_max - strres) * 0.65 + 40
+
+      er_str = str4 - str3
+      er_dir = dir - 6
+      u = er_dir * 17 + (er_dir - er_dir_old)*66 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.0001
+
+      if (abs(i) < 30) {
+        i = i + er_str
+      }
+
+      if (dir == 6) {
+        i = 0
+        t_padik = time()
+      }
+      er_dir_old = er_dir
+      er_str_old = er_str
+      
+      } else {
+        v = (str_max - strres) * 0.65 + 40
+        
+        er_dir = dir - 6
+        u = er_dir * 30 + (er_dir - er_dir_old)*66
+        er_dir_old = er_dir
+
+        if (dir == 6) {
+          t_padik = time()
+        }
+        tone(100,100,100)
+      }
     }
 }
