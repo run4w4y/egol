@@ -80,7 +80,6 @@ new.thread = sensors
 
 // Main
 
-t_padik = time()
 while (true) {
   while (abs(dir - 6) > 1) {
     v = abs(100 - 50*abs(dir - 6))
@@ -88,7 +87,18 @@ while (true) {
   }
 
   while (abs(dir - 6) < 1) {
+    
     v = (str_max - strres) * 0.65 + 40
-    u = 20*(dir - 6) + (str4 - str3)*0.05 
-  }
+
+    er_str = str4 - str3
+    er_dir = dir - 6
+    u = er_dir * 17 + (er_dir - er_dir_old)*66 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.0001
+
+    if (abs(i) < 30) {
+      i = i + er_str
+    }
+    er_dir_old = er_dir
+    er_str_old = er_str
+    
+    }
 }
