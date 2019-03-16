@@ -89,15 +89,20 @@ while (true) {
       v = abs(100 - 50*abs(dir - 6))
     }
 
-    u = 25*(dir - 6)
+    u = 15*(dir - 6)
     } else {
 
     if (time() - t_padik < 800) {
-      v = (str_max - strres) * 0.65 + 40
-
+      if (strres > 160) {
+        v = (160 - strres) * 0.65 + 40
+      } else {
+        v = 100
+        tone(10,100,100)
+      }
       er_str = str4 - str3
       er_dir = dir - 6
-      u = er_dir * 17 + (er_dir - er_dir_old)*66 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.0001
+      u_1 = er_dir * 17 + (er_dir - er_dir_old)*66 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.0001
+      u = u_1 * v * 0.01
 
       if (abs(i) < 30) {
         i = i + er_str
@@ -112,18 +117,17 @@ while (true) {
       er_str_old = er_str
       
       } else {
-        v = (str_max - strres) * 0.65 + 40
+        v = 40
         
         er_dir = dir - 6
-        u = er_dir * 30 + (er_dir - er_dir_old)*66
-        u = u * v * 0.04
+        u = er_dir * 20 + (er_dir - er_dir_old)*66
         er_dir_old = er_dir
 
 
         if (dir == 6) {
           t_padik = time()
         }
-        
+        tone(10,100,100)
       }
     }
 }
