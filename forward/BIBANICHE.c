@@ -115,12 +115,14 @@ while (true) {
         
         er_dir = dir - 6
         u = er_dir * 30 + (er_dir - er_dir_old)*66
+        u = u * v * 0.04
         er_dir_old = er_dir
+
 
         if (dir == 6) {
           t_padik = time()
         }
-        tone(100,100,100)
+        
       }
     }
 }
