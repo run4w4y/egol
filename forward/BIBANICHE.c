@@ -83,13 +83,13 @@ new.thread = sensors
 while (true) {
    if (abs(dir - 6) > 1) {
     
-    if (dir < 3 and dir > 8) {
+    if (dir < 3 or dir > 8) {
       v = 0
     } else {
       v = abs(100 - 50*abs(dir - 6))
     }
 
-    u = 25*(dir - 6) + (str4 - str3)*0.05 
+    u = 25*(dir - 6)
     } else {
 
     if (time() - t_padik < 800) {
@@ -107,6 +107,7 @@ while (true) {
         i = 0
         t_padik = time()
       }
+      
       er_dir_old = er_dir
       er_str_old = er_str
       
