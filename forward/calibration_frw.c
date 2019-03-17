@@ -4,81 +4,77 @@ handle = open.r("cal.txt")
 
 values = new.vector(10, 0)
 
-names[0] = "str_max"
-names[1] = "com_1"
-names[2] = "com_2"
-names[3] = "com_3"
-names[4] = "com_4"
-names[5] = "com_5"
-names[6] = "light1"
-names[7] = "light2"
-
+names[0] = "strlim"
+names[1] = "com_mid"
+names[2] = "alpha_1"
+names[3] = "alpha_2"
+names[4] = "alpha_3"
+names[5] = "alpha_4"
+names[6] = "alpha_5"
+names[7] = "light1"
 
 if (handle == 0) {
-	str_max = 0
-	com_1 = 0
-	com_2 = 0
-	com_3 = 0
-	com_4 = 0
-	com_5 = 0
+	strlim = 0
+	com_mid = 0
+	alpha_1 = 0
+	alpha_2 = 0
+	alpha_3 = 0
+	alpha_4 = 0
+	alpha_5 = 0
 	light1 = 0
-	light2 = 0
 } else {
-	str_max = tonum(readline(handle))
-	values[0] = str_max
-	com_1 = tonum(readline(handle))
-	values[1] = com_1
-	com_2 = tonum(readline(handle))
-	values[2] = com_2
-	com_3 = tonum(readline(handle))
-	values[3] = com_3
-	com_4 = tonum(readline(handle))
-	values[4] = com_4
-	com_5 = tonum(readline(handle))
-	values[5] = com_5
+	strlim = tonum(readline(handle))
+	values[0] = strlim
+  	com_mid = tonum(readline(handle))
+	values[1] = com_mid
+  	alpha_1 = tonum(readline(handle))
+	values[2] = alpha_1
+  	alpha_2 = tonum(readline(handle))
+	values[3] = alpha_2
+  	alpha_3 = tonum(readline(handle))
+	values[4] = alpha_3
+  	alpha_4 = tonum(readline(handle))
+	values[5] = alpha_4
+  	alpha_5 = tonum(readline(handle))
+	values[6] = alpha_5
 	light1 = tonum(readline(handle))
-	values[6] = light1
-	light2 = tonum(readline(handle))
-	values[7] = light2
-
+	values[7] = light1
 }
 
 closef(handle)
 
 // sensors
 
-forward = 0
-turn = 0
-alpha = 0
-str_err_old = 0
-err_dir_old = 0
-alpha = 0
-
+alpha = com_mid
 name = getname()
 
 void sensors {
 	while (true) {
+		/* seeker */
+		
 		irseeker_array = i2c.readregs(4, 8, 73, 6)
 		dir = irseeker_array[0]
 		str1 = irseeker_array[1]
 		str2 = irseeker_array[2]
 		str3 = irseeker_array[3]
 		str4 = irseeker_array[4]
-		str5 = irseeker_array[5]
+		str5 = irseeker_array[5] 
 
-		if (rm(dir,2) == 0) {
+		if (rm(dir, 2) == 0) {
 			strres = (str1 + str2 + str3 + str4 + str5)/1.8
 		} else {
 			strres = str1 + str2 + str3 + str4 + str5
-		}
+		}		
+		
+		/* compass */
 
 		compass_array = i2c.readregs(2, 1, 66, 4)
-		compass = compass_array[0] * 2 + compass_array[1]
-		err_com = Math.Remainder(compass - alpha + 900, 360) - 180
+		compass = compass_array[0]*2 + compass_array[1]
 
-		l_1 = sen.percent(1)
-		l_2 = sen.percent(3)
+    /* light sensors */
 
+		light1 = sen.percent(1)    
+		light2 = sen.percent(3)
 	}
 }
 
@@ -111,12 +107,12 @@ while (true) {
 	
 	ip = i-1
 	if (ip == -1) {
-		ip = 7
+		ip = 9
 	}
 	txt(1, 0 - floor(len(names[ip])*4), 30, 0, names[ip])
 	txt(1, 0 - floor(len(values[ip])*4), 50, 0, values[ip])
 	in = i+1
-	if (in == 8) {
+	if (in == 10) {
 		in = 0
 	}
 	txt(1, 170 - floor(len(names[in])*4), 30, 0, names[in])
@@ -241,17 +237,14 @@ while (true) {
 		}
 		
 		if (i == 0) {
-			str_max = 0
+			strmax = 0
 			for (j = 0; j < 2000; ++j) { // progress bar
-				
 				if (ispressed(6) == true) { // exit button
 					goto end
 				}
-
-				if (strres > str_max) {
-					str_max = strres
+				if (str3 > strmax) {
+					strmax = str3
 				}
-
 				p = floor(j/20)
 				scr.clear()
 				scr.rect(1, 37, 48, 105, 10)
@@ -264,7 +257,7 @@ while (true) {
 				txt(1, 89-len(p)*4, 30, 1, p+"%")
 				delay(5)
 			}
-			values[i] = str_max
+			values[i] = strmax
 		}
 		
 		if (i == 1) {
@@ -274,30 +267,30 @@ while (true) {
 		if (i == 2) {
 			values[i] = compass
 		}
-
+		
 		if (i == 3) {
 			values[i] = compass
 		}
-
+		
 		if (i == 4) {
 			values[i] = compass
 		}
-
+		
 		if (i == 5) {
 			values[i] = compass
 		}
-		
+
 		if (i == 6) {
-			light1_calib = 0
-			light2_calib = 0
+			values[i] = compass
+		}
+		
+		if (i == 7) {
+			senball_calib = light1
 			for (j = 0; j < 1000; ++j) { // progress bar
 				if (ispressed(6) == true) { // exit button
 					goto end
 				}
-
-				light1_calib = light1_calib + l_1
-				light2_calib = light1_calib + l_2
-
+				senball_calib = senball_calib + light1
 				p = floor(j/10)
 				scr.clear()
 				scr.rect(1, 37, 48, 105, 10)
@@ -310,11 +303,8 @@ while (true) {
 				txt(1, 89-len(p)*4, 30, 1, p+"%")
 				delay(5)
 			}
-			light1_calib = light1_calib / 1000
-			light2_calib = light2_calib / 1000
-
-			values[i] = light1_calib
-			values[i+1] = light2_calib
+			senball_calib = senball_calib / 1000
+			values[i] = senball_calib
 		}
 		
 	}
