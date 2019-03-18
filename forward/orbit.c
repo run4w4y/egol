@@ -67,6 +67,15 @@ void sensors {
 new.thread = sensors
 
 while (true) {
-  v = 100
-  u = 
+  
+  v2 = 100
+  r1 = 100
+  r2 = r1 + 14.3
+
+  v1 = v2 * r1 / (r1 + r2)
+  u = (dir - 3) * 20
+
+  mt.spw("B", v1 + u)
+  mt.spw("C", v2 - u)
+
 }
