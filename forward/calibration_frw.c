@@ -337,14 +337,14 @@ while (true) {
 
 		//lights
 		if (i == 6) {
-			senball_calib1 = light1
-			senball_calib2 = light2
+			senball_calib1 = 0
+			senball_calib2 = 0
 			for (j = 0; j < 1000; ++j) { // progress bar
 				if (ispressed(6) == true) { // exit button
 					goto end
 				}
-				senball_calib1 = senball_calib1 + light1
-				senball_calib2 = senball_calib2 + light2
+				senball_calib1 = senball_calib1 + l1
+				senball_calib2 = senball_calib2 + l2
 				p = floor(j/10)
 				scr.clear()
 				scr.rect(1, 37, 48, 105, 10)
