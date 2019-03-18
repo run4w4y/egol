@@ -31,6 +31,7 @@ alpha = 0
 er_str_old = 0
 er_dir_old = 0
 t_padik = time()
+t_def = time()
 i = 0
 
 //Subs
@@ -72,14 +73,19 @@ void sensors {
 
 new.thread = sensors
 
+//kicker_calib
+mt.spw("A", -100)
+delay(200)
+
 // Main
 
 while (true) {
 
   //padik
-  while (l1 < l1_cal or l2 < l1_cal) {
+  while (l1 < l1_cal and l2 < l2_cal) {
     if (abs(dir - 6) > 1 or (dir == 7 and strres < 18)) {
-    
+      
+      i = 0
       if (dir < 3 or dir > 8) {
         v = 0
       } else {
@@ -93,7 +99,6 @@ while (true) {
       } else {
 
       if (time() - t_padik < 1000) {
-
         if (strres > str_max - 10) {
           v = (str_max - strres) * 0.45 + 40
 
@@ -123,7 +128,8 @@ while (true) {
         er_str_old = er_str
       
         } else {
-        
+          
+          i = 0
           v = (str_max - strres) * 0.45 + 40
 
           if (v < 40) {
@@ -141,10 +147,27 @@ while (true) {
         }
       }
     }
-    
-    while (l1 > l1_cal or l2 > l1_cal) {
+
+
+    //attack
+    k_com = 0.5 
+    t_attack = time()
+
+    while (l1 > l1_cal - 5 or l2 > l1_cal - 5) {
       v = 100
-      alpha = com_mid
-      u = -err_com
+      alpha = com_3
+      u = -err_com * k_com
+
+      if (k_com < 1) {
+        k_com = k_com + 0.1
+      }
+
+      if (time() - t_attack > 500 and time() - t_def > 1000) {
+        mt.shd.pw("A", 100, 0, 270, 0, "True")
+        delay(500)
+        mt.spw("A", -100)
+        delay(200)
+        t_def = time()
+      }
     }
   }

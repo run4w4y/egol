@@ -115,10 +115,10 @@ motor.movepower - mt.move.pw
 motor.movesteer - mt.move.st
 motor.movesync - mt.move.sync
 motor.resetcount - mt.resetcount
-motor.schedule - mt.schedule
-motor.schedulepower - mt.schedule.pw
-motor.schedulesteer - mt.schedule.st
-motor.schedulesync - mt.schedule.sync
+motor.schedule - mt.shd
+motor.schedulepower - mt.shd.pw
+motor.schedulesteer - mt.shd.st
+motor.schedulesync - mt.shd.sync
 motor.start - mt.start
 motor.startpower - mt.spw
 motor.startsteer - mt.start.st
