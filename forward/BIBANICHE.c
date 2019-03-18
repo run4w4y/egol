@@ -11,16 +11,16 @@ if (handle == 0) {
   com_4 = 0
   com_5 = 0
   l1_cal = 0
-  com_mid = 0
+  l2_cal = 0
 } else {
   str_max = tonum(readline(handle))
-  com_mid = tonum(readline(handle))
   com_1 = tonum(readline(handle))
   com_2 = tonum(readline(handle))
   com_3 = tonum(readline(handle))
   com_4 = tonum(readline(handle))
   com_5 = tonum(readline(handle))
   l1_cal = tonum(readline(handle))
+  l2_cal = tonum(readline(handle))
 }
 
 //variables

@@ -2,43 +2,42 @@
 
 handle = open.r("cal.txt")
 
-values = new.vector(10, 0)
+values = new.vector(7, 0)
 
 names[0] = "strlim"
-names[1] = "com_mid"
-names[2] = "alpha_1"
-names[3] = "alpha_2"
-names[4] = "alpha_3"
-names[5] = "alpha_4"
-names[6] = "alpha_5"
-names[7] = "light1"
+names[1] = "alpha_1"
+names[2] = "alpha_2"
+names[3] = "alpha_3"
+names[4] = "alpha_4"
+names[5] = "alpha_5"
+names[6] = "lights"
 
 if (handle == 0) {
 	strlim = 0
-	com_mid = 0
 	alpha_1 = 0
 	alpha_2 = 0
 	alpha_3 = 0
 	alpha_4 = 0
 	alpha_5 = 0
 	light1 = 0
+	light2 = 0
 } else {
 	strlim = tonum(readline(handle))
 	values[0] = strlim
-  	com_mid = tonum(readline(handle))
-	values[1] = com_mid
   	alpha_1 = tonum(readline(handle))
-	values[2] = alpha_1
+	values[1] = alpha_1
   	alpha_2 = tonum(readline(handle))
-	values[3] = alpha_2
+	values[2] = alpha_2
   	alpha_3 = tonum(readline(handle))
-	values[4] = alpha_3
+	values[3] = alpha_3
   	alpha_4 = tonum(readline(handle))
-	values[5] = alpha_4
+	values[4] = alpha_4
   	alpha_5 = tonum(readline(handle))
-	values[6] = alpha_5
+	values[5] = alpha_5
 	light1 = tonum(readline(handle))
-	values[7] = light1
+	values[6] = light1
+	light2 = tonum(readline(handle))
+	values[7] = light2
 }
 
 closef(handle)
@@ -73,8 +72,8 @@ void sensors {
 
     /* light sensors */
 
-		light1 = sen.percent(1)    
-		light2 = sen.percent(3)
+		l1 = sen.percent(1)    
+		l2 = sen.percent(3)
 	}
 }
 
@@ -99,24 +98,47 @@ while (true) {
 	start: // instead of operator continue
 	
 	scr.clear()
-	size_n = len(names[i])*8
-	size_v = len(values[i])*8
-	txt(1, 89 - floor(size_n/2), 30, 1, names[i])
-	txt(1, 89 - floor(size_v/2), 50, 1, values[i])
+
+	if (i < 6) {
+		size_n = len(names[i])*8
+		size_v = len(values[i])*8
+		txt(1, 89 - floor(size_n/2), 30, 1, names[i])
+		txt(1, 89 - floor(size_v/2), 50, 1, values[i])
+	} else {
+		size_n = len(names[i])*8
+		size_v = len(values[i])*8
+		txt(1, 89 - floor(size_n/2), 30, 1, names[i])
+		txt(1, 89 - floor(size_v/2), 50, 1, values[6])
+		txt(1, 89 - floor(size_v/2), 70, 1, values[7])
+	}
 	bottom()
-	
+
 	ip = i-1
 	if (ip == -1) {
-		ip = 9
+		ip = 6
 	}
-	txt(1, 0 - floor(len(names[ip])*4), 30, 0, names[ip])
-	txt(1, 0 - floor(len(values[ip])*4), 50, 0, values[ip])
+	if (ip < 6) {
+		txt(1, 0 - floor(len(names[ip])*4), 30, 0, names[ip])
+		txt(1, 0 - floor(len(values[ip])*4), 50, 0, values[ip])
+	} else {
+		txt(1, 0 - floor(len(names[ip])*4), 30, 0, names[ip])
+		txt(1, 0 - floor(len(values[6])*4), 50, 0, values[6])
+		txt(1, 0 - floor(len(values[7])*4), 70, 0, values[7])
+	}
 	in = i+1
-	if (in == 10) {
+	if (in == 7) {
 		in = 0
 	}
-	txt(1, 170 - floor(len(names[in])*4), 30, 0, names[in])
-	txt(1, 170 - floor(len(values[in])*4), 50, 0, values[in])
+	
+	if (in < 6) {
+		txt(1, 170 - floor(len(names[in])*4), 30, 0, names[in])
+		txt(1, 170 - floor(len(values[in])*4), 50, 0, values[in])
+	} else {
+		txt(1, 170 - floor(len(names[in])*4), 30, 0, names[in])
+		txt(1, 170 - floor(len(values[6])*4), 50, 0, values[6])
+		txt(1, 170 - floor(len(values[7])*4), 70, 0, values[7])
+	}
+
 	t1 = time
 	btn.wait()
 	if (time - t1 > 250) {
@@ -145,11 +167,25 @@ while (true) {
 			p2 = round(j*99/duration)
 			p3 = round(j*89/duration)
 			p4 = round(j*89/duration)
-			txt(1, 89 - floor(size_n/2) + p1, 30, font, names[i])
-			txt(1, 89 - floor(size_v/2) + p2, 50, font, values[i])
-			txt(1, 0 - floor(size_n2/2) + p3, 30, abs(font-1), names[ip])
-			txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[ip])
 			
+			if (i < 6) {
+				txt(1, 89 - floor(size_n/2) + p1, 30, font, names[i])
+				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[i])
+			} else {
+				txt(1, 89 - floor(size_n/2) + p1, 30, font, names[i])
+				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[6])
+				txt(1, 89 - floor(size_v/2) + p2, 70, font, values[7])
+			}
+
+			if (ip < 6) {
+				txt(1, 0 - floor(size_n2/2) + p3, 30, abs(font-1), names[ip])
+				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[ip])
+			} else {
+				txt(1, 0 - floor(size_n2/2) + p3, 30, abs(font-1), names[ip])
+				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[6])
+				txt(1, 0 - floor(size_v2/2) + p4, 70, abs(font-1), values[7])
+			}
+
 			delay(1)
 			if (rm(j, 2) == 0) {
 				scr.clear()
@@ -158,7 +194,7 @@ while (true) {
 		
 		i = i - 1
 		if (i == -1) {
-			i = 7
+			i = 6
 		}
 	}
 	
@@ -180,11 +216,25 @@ while (true) {
 			p2 = round(j*99/duration)
 			p3 = round(j*89/duration)
 			p4 = round(j*89/duration)
-			txt(1, 89 - floor(size_n/2) - p1, 30, font, names[i])
-			txt(1, 89 - floor(size_v/2) - p2, 50, font, values[i])
-			txt(1, 178 - floor(size_n2/2) - p3, 30, abs(font-1), names[in])
-			txt(1, 178 - floor(size_v2/2) - p4, 50, abs(font-1), values[in])
 			
+			if (i < 6) {
+				txt(1, 89 - floor(size_n/2) + p1, 30, font, names[i])
+				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[i])
+			} else {
+				txt(1, 89 - floor(size_n/2) + p1, 30, font, names[i])
+				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[6])
+				txt(1, 89 - floor(size_v/2) + p2, 70, font, values[7])
+			}
+
+			if (ip < 6) {
+				txt(1, 0 - floor(size_n2/2) + p3, 30, abs(font-1), names[ip])
+				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[ip])
+			} else {
+				txt(1, 0 - floor(size_n2/2) + p3, 30, abs(font-1), names[ip])
+				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[6])
+				txt(1, 0 - floor(size_v2/2) + p4, 70, abs(font-1), values[7])
+			}
+
 			delay(1)
 			if (rm(j, 2) == 0) {
 				scr.clear()
@@ -192,7 +242,7 @@ while (true) {
 		}
 		
 		i = i + 1
-		if (i == 8) {
+		if (i == 7) {
 			i = 0
 		}
 	}
@@ -236,7 +286,7 @@ while (true) {
 			goto start
 		}
 		
-		if (i == 0) {
+		if (i == 0) { //str
 			strmax = 0
 			for (j = 0; j < 2000; ++j) { // progress bar
 				if (ispressed(6) == true) { // exit button
@@ -260,37 +310,41 @@ while (true) {
 			values[i] = strmax
 		}
 		
+		//alpha1
 		if (i == 1) {
 			values[i] = compass
 		}
 		
+		//alpha2
 		if (i == 2) {
 			values[i] = compass
 		}
 		
+		//alpha3
 		if (i == 3) {
 			values[i] = compass
 		}
 		
+		//alpha4
 		if (i == 4) {
 			values[i] = compass
 		}
 		
+		//alpha5
 		if (i == 5) {
 			values[i] = compass
 		}
 
+		//lights
 		if (i == 6) {
-			values[i] = compass
-		}
-		
-		if (i == 7) {
-			senball_calib = light1
+			senball_calib1 = light1
+			senball_calib2 = light2
 			for (j = 0; j < 1000; ++j) { // progress bar
 				if (ispressed(6) == true) { // exit button
 					goto end
 				}
-				senball_calib = senball_calib + light1
+				senball_calib1 = senball_calib1 + light1
+				senball_calib2 = senball_calib2 + light2
 				p = floor(j/10)
 				scr.clear()
 				scr.rect(1, 37, 48, 105, 10)
@@ -303,8 +357,10 @@ while (true) {
 				txt(1, 89-len(p)*4, 30, 1, p+"%")
 				delay(5)
 			}
-			senball_calib = senball_calib / 1000
-			values[i] = senball_calib
+			senball_calib1 = senball_calib1 / 1000
+			senball_calib2 = senball_calib2 / 1000
+			values[i] = senball_calib1
+			values[i+1] = senball_calib2
 		}
 		
 	}
@@ -318,7 +374,7 @@ end: // instead of operator break
 
 scr.clear()
 handle = open.w("cal.txt") // writing to the file
-for (i = 0; i < 8; ++i) {
+for (i = 0; i < 7; ++i) {
 	writeline(handle, values[i])
 }
 closef(handle)
