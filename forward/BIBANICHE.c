@@ -108,7 +108,7 @@ while (true) {
 
         er_str = str4 - str3
         er_dir = dir - 6
-        u_1 = er_dir * 20 + (er_dir - er_dir_old)*66 + er_str * 0.06 + (er_str - er_str_old) * 66 + i * 0.001
+        u_1 = er_dir * 18 + (er_dir - er_dir_old)*66 + er_str * 0.06 + (er_str - er_str_old) * 66 + i * 0.001
         u = u_1 * v * 0.01
 
         if (abs(i) < 30) {
