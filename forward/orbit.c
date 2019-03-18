@@ -59,15 +59,14 @@ void sensors {
 
     l1 = sen.percent(1)
     l2 = sen.percent(3)
-
-    //MotorManager
-
-    mt.spw("B", v + u)
-    mt.spw("C", v - u)
-
   }
 }
 
 //Threads
 
 new.thread = sensors
+
+while (true) {
+  v = 100
+  u = 
+}

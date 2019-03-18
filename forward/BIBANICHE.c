@@ -59,12 +59,6 @@ void sensors {
 
     l1 = sen.percent(1)
     l2 = sen.percent(3)
-
-    //MotorManager
-
-    mt.spw("B", v + u)
-    mt.spw("C", v - u)
-
   }
 }
 
@@ -95,6 +89,9 @@ while (true) {
       u = er_dir * 20 + (er_dir - er_dir_old)*40
       er_dir_old = er_dir
     
+      mt.spw("B", v + u)
+      mt.spw("C", v - u)
+
       } else {
 
       if (time() - t_padik < 1000) {
@@ -125,7 +122,11 @@ while (true) {
       
         er_dir_old = er_dir
         er_str_old = er_str
-      
+
+        mt.spw("B", v + u)
+        mt.spw("C", v - u)
+
+
         } else {
           
           i = 0
@@ -139,6 +140,8 @@ while (true) {
           u = er_dir * 25 + (er_dir - er_dir_old)*66
           er_dir_old = er_dir
 
+          mt.spw("B", v + u)
+          mt.spw("C", v - u)
 
           if (dir == 6) {
             t_padik = time()
@@ -160,6 +163,10 @@ while (true) {
       if (k_com < 1) {
         k_com = k_com + 0.05
       }
+
+      mt.spw("B", v + u)
+      mt.spw("C", v - u)
+
 
       if (time() - t_attack > 500 and time() - t_def > 1000) {
         mt.shd.pw("A", 100, 0, 270, 0, "True")
