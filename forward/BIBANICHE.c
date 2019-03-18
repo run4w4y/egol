@@ -75,6 +75,8 @@ new.thread = sensors
 // Main
 
 while (true) {
+
+  //padik
   while (l1 < l1_cal or l2 < l1_cal) {
     if (abs(dir - 6) > 1 or (dir == 7 and strres < 18)) {
     
@@ -105,7 +107,7 @@ while (true) {
 
         er_str = str4 - str3
         er_dir = dir - 6
-        u_1 = er_dir * 17 + (er_dir - er_dir_old)*66 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.0001
+        u_1 = er_dir * 17 + (er_dir - er_dir_old)*66 + er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.001
         u = u_1 * v * 0.01
 
         if (abs(i) < 30) {
@@ -139,6 +141,10 @@ while (true) {
         }
       }
     }
-
-exit()
+    
+    while (l1 > l1_cal or l2 > l1_cal) {
+      v = 100
+      alpha = com_mid
+      u = -err_com
+    }
   }
