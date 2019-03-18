@@ -44,7 +44,7 @@ closef(handle)
 
 // sensors
 
-alpha = com_mid
+alpha = alpha_3
 name = getname()
 
 void sensors {
