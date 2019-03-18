@@ -375,6 +375,11 @@ end: // instead of operator break
 scr.clear()
 handle = open.w("cal.txt") // writing to the file
 for (i = 0; i < 7; ++i) {
-	writeline(handle, values[i])
+	if (i < 6) {
+		writeline(handle, values[i])
+	} else {
+		writeline(handle, values[i])
+		writeline(handle, values[i+1])	
+	}
 }
 closef(handle)
