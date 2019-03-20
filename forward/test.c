@@ -48,7 +48,7 @@ void sensors {
     str5 = irseeker_array[5]
 
     dir = rm(dir1+9, 10)
-    if (rm(dir,2) == 0) {
+    if (rm(dir1,2) == 0) {
       strres = (str1 + str2 + str3 + str4 + str5)/1.8
     } else {
       strres = str1 + str2 + str3 + str4 + str5
