@@ -1,4 +1,3 @@
-mt.invert("BC")
 
 //calibration
 handle = open.r("cal.txt")
@@ -28,8 +27,7 @@ if (handle == 0) {
 v = 0
 u = 0
 alpha = 0
-er_str_old = 0
-er_dir_old = 0
+er_old = 0
 t_padik = time()
 t_def = time()
 i = 0
@@ -40,14 +38,13 @@ fl = 1
 void sensors {
   while (true) {
     irseeker_array = i2c.readregs(4, 8, 73, 6)
-    dir1 = irseeker_array[0]
+    dir = irseeker_array[0]
     str1 = irseeker_array[1]
     str2 = irseeker_array[2]
     str3 = irseeker_array[3]
     str4 = irseeker_array[4]
     str5 = irseeker_array[5]
 
-    dir = rm(dir1+9, 10)
     if (rm(dir,2) == 0) {
       strres = (str1 + str2 + str3 + str4 + str5)/1.8
     } else {
@@ -67,36 +64,8 @@ void sensors {
 
 new.thread = sensors
 
-// Main
-
-while (strres < str_max - 10) {
-
-    if (abs(dir - 5) > 1) {
-        v = 0
-        u = (dir - 5) * 20
-    } else {
-
-        v =  100
-
-        er_str = str4 - str3
-        er_dir = dir - 5
-        u_1 = er_dir * 18 + (er_dir - er_dir_old)*66 + er_str * 0.04 + (er_str - er_str_old) * 66 + i * 0.001
-        u = u_1 * v * 0.01
-
-        if (abs(i) < 30) {
-          i = i + er_str
-        }
-
-        if (dir == 6) {
-          i = 0
-          t_padik = time()
-        }
-      
-        er_dir_old = er_dir
-        er_str_old = er_str
-    }
-    mt.spw("B", v + u)
-    mt.spw("C", v - u)
+while (true) {
+    scr.clear()
+    txt.center(1, 50, 2, rm(dir+9, 10))
+    delay(200)
 }
-mt.stop("BC", true)
-delay(500)
