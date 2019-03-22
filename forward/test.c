@@ -87,7 +87,7 @@ while (strres < str_max - 10) {
           i = i + er_str
         }
 
-        if (dir == 6) {
+        if (dir == 5) {
           i = 0
           t_padik = time()
         }
