@@ -49,7 +49,7 @@ void sensors {
 
     dir = rm(dir1+9, 10)
     if (rm(dir1,2) == 0) {
-      strres = (str1 + str2 + str3 + str4 + str5)/1.8
+      strres = (str1 + str2 + str3 + str4 + str5)/2
     } else {
       strres = str1 + str2 + str3 + str4 + str5
     }
@@ -69,7 +69,7 @@ new.thread = sensors
 
 // Main
 
-while (strres < str_max - 10) {
+while ((strres < str_max - 30  or abs(dir - 6) < 2) and (l1 < l1_cal - 5 or l2 < l2_cal - 5)) {
 
     if (abs(dir - 5) > 1) {
         v = 0
