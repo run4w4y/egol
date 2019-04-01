@@ -49,7 +49,7 @@ void sensors {
 
     dir = rm(dir1+9, 10)
     if (rm(dir1,2) == 0) {
-      strres = (str1 + str2 + str3 + str4 + str5)/2
+      strres = (str1 + str2 + str3 + str4 + str5)/1.76
     } else {
       strres = str1 + str2 + str3 + str4 + str5
     }
@@ -69,7 +69,7 @@ new.thread = sensors
 
 // Main
 
-while ((strres < str_max - 30  or abs(dir - 6) < 2) and (l1 < l1_cal - 5 or l2 < l2_cal - 5)) {
+while ((strres < str_max - 60 or abs(dir - 5) > 1) and l1 < 30 and l2 < 30) {
 
     if (abs(dir - 5) > 1) {
         v = 0
@@ -83,7 +83,7 @@ while ((strres < str_max - 30  or abs(dir - 6) < 2) and (l1 < l1_cal - 5 or l2 <
         u_1 = er_dir * 18 + (er_dir - er_dir_old)*66 + er_str * 0.04 + (er_str - er_str_old) * 66 + i * 0.001
         u = u_1 * v * 0.01
 
-        if (abs(i) < 30) {
+        if (abs(i) < 50) {
           i = i + er_str
         }
 
@@ -99,4 +99,4 @@ while ((strres < str_max - 30  or abs(dir - 6) < 2) and (l1 < l1_cal - 5 or l2 <
     mt.spw("C", v - u)
 }
 mt.stop("BC", true)
-delay(500)
+delay(2000)
