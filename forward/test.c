@@ -1,4 +1,5 @@
 mt.invert("BC")
+mt.stop("BC", "false")
 
 //calibration
 handle = open.r("cal.txt")
@@ -31,7 +32,6 @@ alpha = 0
 er_str_old = 0
 er_dir_old = 0
 t_padik = time()
-t_def = time()
 i = 0
 fl = 1
 
@@ -60,6 +60,7 @@ void sensors {
 
     l1 = sen.percent(1)
     l2 = sen.percent(3)
+
   }
 }
 
@@ -69,18 +70,32 @@ new.thread = sensors
 
 // Main
 
-while ((strres < str_max - 60 or abs(dir - 5) > 1) and l1 < 30 and l2 < 30) {
+while (strres < str_max - 60 and l1 < 30 and l2 < 30) {
 
     if (abs(dir - 5) > 1) {
         v = 0
         u = (dir - 5) * 20
+
+        mt.spw("B", v + u)
+        mt.spw("C", v - u)
+
     } else {
 
-        v =  100
+      if (time() - t_padik < 700) {
+        if (strres > str_max - 40) {
+          v = (str_max - strres) * 0.45 + 40
+
+          if (v < 40) {
+            v = 40
+          }
+
+        } else {
+          v = 100
+        }
 
         er_str = str4 - str3
         er_dir = dir - 5
-        u_1 = er_dir * 18 + (er_dir - er_dir_old)*66 + er_str * 0.04 + (er_str - er_str_old) * 66 + i * 0.001
+        u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str * 0.04 + (er_str - er_str_old) * 66 + i * 0.001
         u = u_1 * v * 0.01
 
         if (abs(i) < 50) {
@@ -94,9 +109,34 @@ while ((strres < str_max - 60 or abs(dir - 5) > 1) and l1 < 30 and l2 < 30) {
       
         er_dir_old = er_dir
         er_str_old = er_str
-    }
-    mt.spw("B", v + u)
-    mt.spw("C", v - u)
+
+        mt.spw("B", v + u)
+        mt.spw("C", v - u)
+
+
+        } else {
+          
+          tone(100,100,100)
+          i = 0
+          v = (str_max - strres) * 0.45
+
+          if (v < 40) {
+            v = 40
+          }
+
+          er_dir = dir - 5
+          u = er_dir * 25 + (er_dir - er_dir_old)*66
+          er_dir_old = er_dir
+
+          mt.spw("B", v + u)
+          mt.spw("C", v - u)
+
+          if (dir == 5) {
+            t_padik = time()
+          }
+        }
+      }
 }
+
 mt.stop("BC", true)
 delay(2000)
