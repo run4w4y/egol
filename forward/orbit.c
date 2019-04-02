@@ -1,4 +1,5 @@
 mt.invert("BC")
+mt.stop("BC", "false")
 
 //calibration
 handle = open.r("cal.txt")
@@ -31,24 +32,23 @@ alpha = 0
 er_str_old = 0
 er_dir_old = 0
 t_padik = time()
-t_def = time()
 i = 0
-fl = 1
 
 //Subs
 
 void sensors {
   while (true) {
     irseeker_array = i2c.readregs(4, 8, 73, 6)
-    dir = irseeker_array[0]
+    dir1 = irseeker_array[0]
     str1 = irseeker_array[1]
     str2 = irseeker_array[2]
     str3 = irseeker_array[3]
     str4 = irseeker_array[4]
     str5 = irseeker_array[5]
 
-    if (rm(dir,2) == 0) {
-      strres = (str1 + str2 + str3 + str4 + str5)/1.8
+    dir = rm(dir1+9, 10)
+    if (rm(dir1,2) == 0) {
+      strres = (str1 + str2 + str3 + str4 + str5)/1.76
     } else {
       strres = str1 + str2 + str3 + str4 + str5
     }
@@ -59,12 +59,15 @@ void sensors {
 
     l1 = sen.percent(1)
     l2 = sen.percent(3)
+
   }
 }
 
 //Threads
 
 new.thread = sensors
+
+// Main
 
 while (true) {
   
