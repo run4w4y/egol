@@ -77,7 +77,7 @@ while (true) {
         v = 0
         er_str = str4 - str3
         er_dir = dir - 5
-        u = er_dir * 20 + (er_dir - er_dir_old)*66 + er_str * 0.03
+        u = er_dir * 20 + (er_dir - er_dir_old)*66 + er_str * 0.05
 
         er_dir_old = er_dir
         er_str_old = er_str
