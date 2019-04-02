@@ -72,74 +72,67 @@ new.thread = sensors
 while (true) {
   while (strres < str_max - 60 and l1 < 30 and l2 < 30) {
 
-    if (abs(dir - 5) > 1) {
-      while (dir <> 5) {
-        v = 0
-        er_str = str4 - str3
-        er_dir = dir - 5
-        u = er_dir * 20 + (er_dir - er_dir_old)*66 + er_str * 0.05
+     if (abs(dir - 5) > 1) {
+          v = 0
+          u = (dir - 5) * 20
 
-        er_dir_old = er_dir
-        er_str_old = er_str
+          mt.spw("B", v + u)
+          mt.spw("C", v - u)
+      } else {
 
-        mt.spw("B", v + u)
-        mt.spw("C", v - u)
-      }
-    } else {
+        if (time() - t_padik < 1000) {
+          if (strres > str_max - 40) {
+            v = (str_max - strres) * 0.45 + 40
 
-      if (time() - t_padik < 1000) {
-        if (strres > str_max - 40) {
-          v = (str_max - strres) * 0.45 + 40
+            if (v < 40) {
+              v = 40
+            }
+
+          } else {
+            v = 100
+          }
+
+          er_str = str4 - str3
+          er_dir = dir - 5
+          u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.02 + (er_str - er_str_old) * 66 + i * 0.003
+          u = u_1 * v * 0.01
+
+          if (abs(i) < 50) {
+            i = i + er_str
+          }
+
+          if (dir == 5) {
+            i = 0
+            t_padik = time()
+          }
+      
+          er_dir_old = er_dir
+          er_str_old = er_str
+
+          mt.spw("B", v + u)
+          mt.spw("C", v - u)
+
+
+        } else {
+          
+          tone(100,100,100)
+          i = 0
+          v = (str_max - strres) * 0.45
 
           if (v < 40) {
             v = 40
           }
 
-        } else {
-          v = 100
-        }
+          er_dir = dir - 5
+          u = er_dir * 25 + (er_dir - er_dir_old)*66
+          er_dir_old = er_dir
 
-        er_str = str4 - str3
-        er_dir = dir - 5
-        u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.02 + (er_str - er_str_old) * 66 + i * 0.003
-        u = u_1 * v * 0.01
+          mt.spw("B", v + u)
+          mt.spw("C", v - u)
 
-        if (abs(i) < 50) {
-          i = i + er_str
-        }
-
-        if (dir == 5) {
-          i = 0
-          t_padik = time()
-        }
-      
-        er_dir_old = er_dir
-        er_str_old = er_str
-
-        mt.spw("B", v + u)
-        mt.spw("C", v - u)
-
-
-      } else {
-          
-        tone(100,100,100)
-        i = 0
-        v = (str_max - strres) * 0.45
-
-        if (v < 40) {
-          v = 40
-        }
-
-        er_dir = dir - 5
-        u = er_dir * 25 + (er_dir - er_dir_old)*66
-        er_dir_old = er_dir
-
-        mt.spw("B", v + u)
-        mt.spw("C", v - u)
-
-        if (dir == 5) {
-          t_padik = time()
-        }
+          if (dir == 5) {
+            t_padik = time()
+          }
       }
     }
   }
