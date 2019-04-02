@@ -1,21 +1,3 @@
-Skip to content
- 
-Search or jump to…
-
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@VOLEDOL Sign out
-0
-0 0 run4w4y/egol Private
- Code  Issues 0  Pull requests 0  Projects 0  Insights
-egol/forward/test.c
-@VOLEDOL VOLEDOL stable
-07b1184 17 minutes ago
-142 lines (110 sloc)  2.61 KB
-    
 mt.invert("BC")
 mt.stop("BC", "false")
 
@@ -95,7 +77,7 @@ while (true) {
         v = 0
         er_str = str4 - str3
         er_dir = dir - 5
-        u = er_dir * 20 + (er_dir - er_dir_old)*66 + er_str *0.02
+        u = er_dir * 20 + (er_dir - er_dir_old)*66 + er_str * 0.03
 
         er_dir_old = er_dir
         er_str_old = er_str
