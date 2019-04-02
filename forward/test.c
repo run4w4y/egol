@@ -70,6 +70,8 @@ new.thread = sensors
 // Main
 
 while (true) {
+  
+  //padik fast 
   while (strres < str_max - 60 and l1 < 30 and l2 < 30) {
 
      if (abs(dir - 5) > 1) {
@@ -136,7 +138,4 @@ while (true) {
       }
     }
   }
-
-  mt.stop("BC", true)
-  delay(2000)
 }
