@@ -1,3 +1,21 @@
+Skip to content
+ 
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ 
+@VOLEDOL Sign out
+0
+0 0 run4w4y/egol Private
+ Code  Issues 0  Pull requests 0  Projects 0  Insights
+egol/forward/test.c
+@VOLEDOL VOLEDOL stable
+07b1184 17 minutes ago
+142 lines (110 sloc)  2.61 KB
+    
 mt.invert("BC")
 mt.stop("BC", "false")
 
