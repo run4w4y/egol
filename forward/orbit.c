@@ -33,6 +33,7 @@ er_str_old = 0
 er_dir_old = 0
 t_padik = time()
 i = 0
+alpha = com_3
 
 //Subs
 
@@ -72,11 +73,11 @@ new.thread = sensors
 while (true) {
   
   v2 = 100
-  r1 = 100
+  r1 = (200 - str2) * 0.5
   r2 = r1 + 14.3
 
   v1 = v2 * r1 / (r1 + r2)
-  u = (dir - 3) * 20
+  u = (dir - 2) * 20
 
   mt.spw("B", v1 + u)
   mt.spw("C", v2 - u)
