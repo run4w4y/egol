@@ -73,11 +73,11 @@ new.thread = sensors
 while (true) {
   
   v2 = 100
-  r1 = (200 - str2) * 0.5
+  r1 = 80 + (260 - str2) * 0.7
   r2 = r1 + 14.3
 
   v1 = v2 * r1 / (r1 + r2)
-  u = (dir - 2) * 20
+  u = (dir - 3) * 20
 
   mt.spw("B", v1 + u)
   mt.spw("C", v2 - u)

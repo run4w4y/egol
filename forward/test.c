@@ -75,11 +75,13 @@ while (true) {
   while (strres < str_max - 60 and l1 < 30 and l2 < 30) {
 
      if (abs(dir - 5) > 1) {
-          v = 0
-          u = (dir - 5) * 20
+        u=28*(5-dir1)
+        v=100-30*abs(5-dir1)
 
-          mt.spw("B", v + u)
-          mt.spw("C", v - u)
+
+        mt.spw("B", v + u)
+        mt.spw("C", v - u)
+      
       } else {
 
         if (time() - t_padik < 1000) {
