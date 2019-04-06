@@ -39,15 +39,15 @@ i = 0
 void sensors {
   while (true) {
     irseeker_array = i2c.readregs(4, 8, 73, 6)
-    dir1 = irseeker_array[0]
+    dir = irseeker_array[0]
     str1 = irseeker_array[1]
     str2 = irseeker_array[2]
     str3 = irseeker_array[3]
     str4 = irseeker_array[4]
     str5 = irseeker_array[5]
 
-    dir = rm(dir1+9, 10)
-    if (rm(dir1,2) == 0) {
+    dir1 = rm(dir1+9, 10)
+    if (rm(dir,2) == 0) {
       strres = (str1 + str2 + str3 + str4 + str5)/1.76
     } else {
       strres = str1 + str2 + str3 + str4 + str5
@@ -74,9 +74,9 @@ while (true) {
   //padik fast 
   while (strres < str_max - 60 and l1 < 30 and l2 < 30) {
 
-     if (abs(dir - 5) > 1) {
-        u=28*(5-dir1)
-        v=100-30*abs(5-dir1)
+     if (abs(dir1 - 5) > 1) {
+        u=28*(dir1-5)
+        v=100-30*abs(dir1-5)
 
 
         mt.spw("B", v + u)
@@ -97,15 +97,16 @@ while (true) {
           }
 
           er_str = str4 - str3
-          er_dir = dir - 5
+          er_dir = dir1 - 5
           u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.02 + (er_str - er_str_old) * 66 + i * 0.003
           u = u_1 * v * 0.01
+          tone(100,100,100)
 
           if (abs(i) < 50) {
             i = i + er_str
           }
 
-          if (dir == 5) {
+          if (dir1 == 5) {
             i = 0
             t_padik = time()
           }
@@ -127,14 +128,14 @@ while (true) {
             v = 40
           }
 
-          er_dir = dir - 5
+          er_dir = dir1 - 5
           u = er_dir * 25 + (er_dir - er_dir_old)*66
           er_dir_old = er_dir
 
           mt.spw("B", v + u)
           mt.spw("C", v - u)
 
-          if (dir == 5) {
+          if (dir1 == 5) {
             t_padik = time()
           }
       }
