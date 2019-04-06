@@ -100,7 +100,6 @@ while (true) {
           er_dir = dir1 - 5
           u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.02 + (er_str - er_str_old) * 66 + i * 0.003
           u = u_1 * v * 0.01
-          tone(100,100,100)
 
           if (abs(i) < 50) {
             i = i + er_str
