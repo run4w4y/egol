@@ -39,6 +39,7 @@ sgn = 0
 lim_com_down = 0
 lim_com_up = 0
 com_l = 180
+com_r = 6
 dir2 = 0
 dir3 = 0
 //Subs
@@ -88,6 +89,8 @@ void dir_orbit {
     }
   }
 }
+
+//----------------------RIGHT------------------------
 void orbit_right {
   t0 = time()
   err90 = 0
@@ -130,10 +133,10 @@ void orbit_right {
       v=80
       d=145
       l=r+30
-      u=-(d*90)/(2*l)+0.45*(strres-r)
+      u=-((1*(d*90)/(2*l))+(0.2*(r-strres)))
 
     } else {
-      u=20*(dir1-3)-(dir1-3)/5*10+0.4*(strres-r)
+      u=-(20*((3-dir1))-((3-dir1)/5*10))+(0.2*(r-strres))
       v=80
     }
 
@@ -173,7 +176,7 @@ void orbit_right {
         }
       }
 
-      if (time() - t0 > 1000) {
+      if (time() - t0 > 800) {
         goto exit2
       }
     }
@@ -183,6 +186,8 @@ void orbit_right {
   err90 = 0
 }
 
+
+//----------------------LEFT------------------------
 void orbit_left {
   err90 = 0
   t0 = time()
@@ -195,7 +200,7 @@ void orbit_left {
     dir_orbit()
 
     u=-(15*((7-dir2))-((7-dir2)/5*10))
-    err90 = rm(compass - com_l + 900, 360) - 180
+    err90 = rm(compass - com_r + 900, 360) - 180
     v = 50
     dir3 = dir2
 
@@ -205,7 +210,7 @@ void orbit_left {
       }
     }
 
-    if (time() - t0 > 100){
+    if (time() - t0 > 800) {
       goto exit3
     } 
   }
@@ -225,24 +230,24 @@ void orbit_left {
   while (err90 < -8) {
     if (dir > 5) {
       if (dir > 6) {
-        err90 = rm(compass - com_l + 900, 360) - 180+40
+        err90 = rm(compass - com_r + 900, 360) - 180+40
       } else {
-        err90 = rm(compass - com_l + 900, 360) - 180-45
+        err90 = rm(compass - com_r + 900, 360) - 180-45
       }
     } else {
-      err90 = rm(compass - com_l + 900, 360) - 180
+      err90 = rm(compass - com_r + 900, 360) - 180
     }
 
     dir_orbit()
 
-    if (dir == 8) {
+     if (dir == 8) {
       v=80
       d=145
-      l=c3+50
-      u=-(-1*(d*90)/(2*l))+(0,2*(c16-c3))
+      l=r+30
+      u=-((-1*(d*90)/(2*l))+(0.2*(strres - r)))
     } else {
-      u=-(20*((7-dir2))-((7-dir2)/5*10))+(0,2*(c16-c3))
-      dir3=dir2
+      u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.2*(strres - r)))
+      dir3 = dir2
       v=80
     }
 
@@ -281,7 +286,7 @@ void orbit_left {
         }
       }
 
-      if (time() - t0 > 500) {
+      if (time() - t0 > 800) {
         goto exit2
       }
     }
@@ -293,7 +298,7 @@ void orbit_left {
 void orbit {
     // поворот на мяч перед орбитой
   while (dir != 6) {
-    u=20*(dir1-5)+0.08*((str4-str3)) + sgn*10
+    u=-(20*(6-dir)+0.08*((str3-str4))+sgn*10)
   
     if (u > 0) {
       sgn = 1
@@ -310,8 +315,11 @@ void orbit {
   }
 
   // определение стороны орбиты
+  if (err_com > 0) {
+    orbit_right()
+  } else {
     orbit_left()
-
+  }
 }
 //Threads
 new.thread = sensors

@@ -77,7 +77,7 @@ new.thread = sensors
 
      if (abs(dir1 - 5) > 1) {
       u=18*(dir1-5)
-      v=100-30*abs(dir1-5)
+      v=0
       
       } else {
 
