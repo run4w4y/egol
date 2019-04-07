@@ -73,7 +73,7 @@ new.thread = sensors
 // Main
   
   //padik fast 
-  while (strres < str_max - 20 and l1 < l1_cal and l2 < l2_cal) {
+  while (strres < str_max - 30 and l1 < l1_cal and l2 < l2_cal) {
 
      if (abs(dir1 - 5) > 1) {
       u=18*(dir1-5)
