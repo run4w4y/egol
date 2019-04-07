@@ -91,11 +91,11 @@ void orbit_right {
     }
   }
   exit1: 
-  
-  // v = 0
-  // u = 0
-  // mt.stop("BC", "True")
-  // btn.wait()
+
+  v = 0
+  u = 0
+  mt.stop("BC", true)
+  btn.wait()
 
   t0 = time()
 
@@ -113,33 +113,14 @@ void orbit_right {
     }
 
     if (dir == 3) {
-      v=80
+      v=70
       d=145
-      l=r+50
-      u=-(d*90)/(2*l)+0.2*(strres-r)
+      l=r+30
+      u=-(d*90)/(2*l)+0.45*(strres-r)
 
     } else {
-      u=20*(dir1-3)-(dir1-3)/5*10+0.2*(strres-r)
+      u=20*(dir1-3)-(dir1-3)/5*10+0.4*(strres-r)
       v=80
-    }
-
-    if (time() - t0 > 600) {
-      t0 = time()
-      goto exit2
-    } else {
-      if (time() - t0 > 200) {
-        if (compass > lim_com_down) {
-          if (compass < lim_com_up) {
-            if (strres < 90) {
-              goto exit2
-            }
-          }
-        }
-      } else {
-        lim_com_down = compass - 4
-        lim_com_up = compass + 4
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAME
-      }
     }
   }
 
@@ -169,15 +150,9 @@ void orbit_left {
 
 }
 
-//Threads
-new.thread = sensors
-
-// Main
-
-while (true) {
+void orbit {
+    // поворот на мяч перед орбитой
   while (dir != 6) {
-
-  // поворот на мяч перед орбитой
     u=20*(dir1-5)+0.08*((str4-str3)) + sgn*10
   
     if (u > 0) {
@@ -193,12 +168,19 @@ while (true) {
     }
     v=10
   }
-  // определение стороны орбиты
 
+  // определение стороны орбиты
   //if (err_com > 0) {
     orbit_right()
   //} else {
   //  orbit_left()
   //}
-  exit2:
+
 }
+//Threads
+new.thread = sensors
+
+// Main
+
+orbit()
+exit2:
