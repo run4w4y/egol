@@ -122,6 +122,26 @@ void orbit_right {
       u=20*(dir1-3)-(dir1-3)/5*10+0.4*(strres-r)
       v=80
     }
+
+
+    if (time() - t0 > 600) {
+      t0 = time()
+      goto exit2
+    } else {
+      if (time() - t0 > 200) {
+        if (compass > lim_com_down) {
+          if (compass < lim_com_up) {
+            if (strres < 90) {
+              goto exit2
+            }
+          }
+        }
+      } else {
+        lim_com_down = compass - 4
+        lim_com_up = compass + 4
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAME
+      }
+    }
   }
 
 
