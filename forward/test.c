@@ -68,6 +68,8 @@ void sensors {
 
     l1 = sen.percent(1)
     l2 = sen.percent(3)
+    
+    l_sum = l1 + l2
 
     mt.spw("B", v + u)
     mt.spw("C", v - u)
@@ -332,6 +334,7 @@ while (true) {
   //padik fast 
   while (strres < str_max - 30 and l1 < l1_cal and l2 < l2_cal) {
 
+    tone(100,100,100)
     if (abs(dir1 - 5) > 1) {
       u=18*(dir1-5)
       v=0
