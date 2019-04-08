@@ -28,7 +28,7 @@ if (handle == 0) {
 
 v = 0
 u = 0
-alpha = 0
+
 er_str_old = 0
 er_dir_old = 0
 t_padik = time()
@@ -321,86 +321,83 @@ new.thread = sensors
 
 // Main
 while (true) {
+  
+  // the ball is far from the robot
+  if (strres < str_max - 10) {
+  //padik fast
+    //back directions
 
-  if (l1 + l2 < l1_cal + l2_cal and strres < str_max - 10) {
-    
-    //padik fast
-    if (strres < str_max - 10 or abs(dir1-5) > 1) {
-      if (abs(dir1 - 5) > 1) {
-        u=18*(dir1-5)
-        v=0
-      
-      } else {
-
-        if (time() - t_padik < 700) {
-          
-          v = 120-0.5*strres
-
-          if (v < 20) {
-            v = 20
-          }
-
-          er_str = str4 - str3
-          er_dir = dir1 - 5
-          u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.08 + (er_str - er_str_old) * 66 + i * 0.003
-          u = u_1 * v * 0.01
-
-          if (dir1 == 5) {
-            i = 0
-            t_padik = time()
-          }
-      
-          er_dir_old = er_dir
-          er_str_old = er_str
-
-        } else {
-          
-          i = 0
-          v = (str_max - strres) * 0.45
-
-          if (v < 40) {
-            v = 40
-          }
-
-          er_dir = dir1 - 5
-          u = er_dir * 25 + (er_dir - er_dir_old)*66
-          er_dir_old = er_dir
-
-          if (dir1 == 5) {
-            t_padik = time()
-          }
-        }
-      }
+    if (abs(dir1 - 5) > 1) {
+      u=18*(dir1-5)
+      v=0
     } else {
-      //slow padik
-        if (strres > str_max - 10) {
-          v=(120-0.4*strres)
+    //front directions
+    
+      if (time() - t_padik < 1000) {
+        
+        v = 120-0.3*strres
 
-          if (v < 40) {
-            v = 40
-          }  
-        } 
+        if (v < 20) {
+          v = 20
+        }
 
         er_str = str4 - str3
-        u_1 = er_str *0.05 + (er_str - er_str_old) * 66 + i * 0.003
+        er_dir = dir1 - 5
+        u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.06 + (er_str - er_str_old) * 66 + i * 0.001
         u = u_1 * v * 0.01
 
-        if (abs(i) < 50) {
-          i = i + er_str
+        if (dir1 == 5) {
+          i = 0
+          t_padik = time()
+        }
+      
+        er_dir_old = er_dir
+        er_str_old = er_str
+
+      } else {
+          
+        i = 0
+        v = (str_max - strres) * 0.45
+
+        if (v < 40) {
+          v = 40
         }
 
-        er_str_old = er_str
-    }
-  } else {
-    if (abs(err_com) > 60) {
-      tone(100,100,100)
-      orbit()
-    } else {
-      k = 0.2
-      v = 40
+        tone(100,100,100)
+        er_dir = dir1 - 5
+        u = er_dir * 25 + (er_dir - er_dir_old)*66
+        er_dir_old = er_dir
 
-      while (l1 + l2 > l1_cal + l2_cal - 10) {
-      
+        if (dir1 == 5) {
+          t_padik = time()
+        }
+      }
+    }
+
+    // ball is near the robot
+  } else {  
+
+    if (abs(err_com) > 60) { //the robot is directed to the opponent's goal
+      //slow padik
+      v=(120-0.6*strres)
+
+      if (v < 40) {
+        v = 40
+      } 
+
+      er_str = str4 - str3
+      u_1 = er_str * 0.05 + (er_str - er_str_old) * 66 + i * 0.003
+      u = u_1 * v * 0.01
+
+      if (abs(i) < 50) {
+        i = i + er_str
+      }
+
+      er_str_old = er_str
+
+      v = 40
+      k = 0.4
+      while (l1 + l2 > l1_cal + l2_cal  - 10) { //attack
         if (v < 101) {
           v = v + 0.5
         }
@@ -411,6 +408,8 @@ while (true) {
           k = k + 0.05
         }
       }
+    } else { //the robot is directed to the our goal
+      orbit()
     }
   }
 }
