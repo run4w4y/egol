@@ -38,9 +38,9 @@ if (handle == 0) {
 	values[4] = alpha_4
   	alpha_5 = tonum(readline(handle))
 	values[5] = alpha_5
-	light1 = tonum(readline(handle))
-	values[6]] = com_l
-  	alpha_5 = tonum(readline(handle))
+	com_l = tonum(readline(handle))
+	values[6] = com_l
+  	com_r = tonum(readline(handle))
 	values[7] = com_r
 	light1 = tonum(readline(handle))
 	values[8] = light1
@@ -343,11 +343,11 @@ while (true) {
 			values[i] = compass
 		}
 
-		if (dir == 6) {
+		if (i == 6) {
 			values[i] = compass
 		}
 
-		if (dir == 7) {
+		if (i == 7) {
 			values[i] = compass
 		}
 
