@@ -10,8 +10,8 @@ names[2] = "alpha_2"
 names[3] = "alpha_3"
 names[4] = "alpha_4"
 names[5] = "alpha_5"
-names[6] = "alpha_l"
-names[7] = "alpha_r"
+names[6] = "com_l"
+names[7] = "com_r"
 names[8] = "lights"
 
 if (handle == 0) {
@@ -21,8 +21,8 @@ if (handle == 0) {
 	alpha_3 = 0
 	alpha_4 = 0
 	alpha_5 = 0
-	alpha_l = 0
-	alpha_r = 0
+	com_l = 0
+	com_r = 0
 	light1 = 0
 	light2 = 0
 } else {
@@ -38,10 +38,10 @@ if (handle == 0) {
 	values[4] = alpha_4
   	alpha_5 = tonum(readline(handle))
 	values[5] = alpha_5
-	alpha_5 = tonum(readline(handle))
-	values[6] = alpha_l
-	alpha_5 = tonum(readline(handle))
-	values[7] = alpha_r
+	light1 = tonum(readline(handle))
+	values[6]] = com_l
+  	alpha_5 = tonum(readline(handle))
+	values[7] = com_r
 	light1 = tonum(readline(handle))
 	values[8] = light1
 	light2 = tonum(readline(handle))
@@ -342,14 +342,12 @@ while (true) {
 		if (i == 5) {
 			values[i] = compass
 		}
-		
-		//alpha_left_90
-		if (i == 6) {
+
+		if (dir == 6) {
 			values[i] = compass
 		}
 
-		//alpha_right_90
-		if (i == 7) {
+		if (dir == 7) {
 			values[i] = compass
 		}
 
