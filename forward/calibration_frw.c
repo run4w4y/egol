@@ -2,7 +2,7 @@
 
 handle = open.r("cal.txt")
 
-values = new.vector(7, 0)
+values = new.vector(9, 0)
 
 names[0] = "strlim"
 names[1] = "alpha_1"
@@ -116,8 +116,8 @@ while (true) {
 		size_n = len(names[i])*8
 		size_v = len(values[i])*8
 		txt(1, 89 - floor(size_n/2), 30, 1, names[i])
-		txt(1, 89 - floor(size_v/2), 50, 1, values[6])
-		txt(1, 89 - floor(size_v/2), 70, 1, values[7])
+		txt(1, 89 - floor(size_v/2), 50, 1, values[8])
+		txt(1, 89 - floor(size_v/2), 70, 1, values[9])
 	}
 	bottom()
 
@@ -130,8 +130,8 @@ while (true) {
 		txt(1, 0 - floor(len(values[ip])*4), 50, 0, values[ip])
 	} else {
 		txt(1, 0 - floor(len(names[ip])*4), 30, 0, names[ip])
-		txt(1, 0 - floor(len(values[6])*4), 50, 0, values[6])
-		txt(1, 0 - floor(len(values[7])*4), 70, 0, values[7])
+		txt(1, 0 - floor(len(values[6])*4), 50, 0, values[8])
+		txt(1, 0 - floor(len(values[7])*4), 70, 0, values[9])
 	}
 	in = i+1
 	if (in == 9) {
@@ -143,8 +143,8 @@ while (true) {
 		txt(1, 170 - floor(len(values[in])*4), 50, 0, values[in])
 	} else {
 		txt(1, 170 - floor(len(names[in])*4), 30, 0, names[in])
-		txt(1, 170 - floor(len(values[6])*4), 50, 0, values[6])
-		txt(1, 170 - floor(len(values[7])*4), 70, 0, values[7])
+		txt(1, 170 - floor(len(values[6])*4), 50, 0, values[8])
+		txt(1, 170 - floor(len(values[7])*4), 70, 0, values[9])
 	}
 
 	t1 = time
@@ -181,8 +181,8 @@ while (true) {
 				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[i])
 			} else {
 				txt(1, 89 - floor(size_n/2) + p1, 30, font, names[i])
-				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[6])
-				txt(1, 89 - floor(size_v/2) + p2, 70, font, values[7])
+				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[8])
+				txt(1, 89 - floor(size_v/2) + p2, 70, font, values[9])
 			}
 
 			if (ip < 8) {
@@ -190,8 +190,8 @@ while (true) {
 				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[ip])
 			} else {
 				txt(1, 0 - floor(size_n2/2) + p3, 30, abs(font-1), names[ip])
-				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[6])
-				txt(1, 0 - floor(size_v2/2) + p4, 70, abs(font-1), values[7])
+				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[8])
+				txt(1, 0 - floor(size_v2/2) + p4, 70, abs(font-1), values[9])
 			}
 
 			delay(1)
@@ -230,8 +230,8 @@ while (true) {
 				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[i])
 			} else {
 				txt(1, 89 - floor(size_n/2) + p1, 30, font, names[i])
-				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[6])
-				txt(1, 89 - floor(size_v/2) + p2, 70, font, values[7])
+				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[8])
+				txt(1, 89 - floor(size_v/2) + p2, 70, font, values[9])
 			}
 
 			if (ip < 8) {
@@ -239,8 +239,8 @@ while (true) {
 				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[ip])
 			} else {
 				txt(1, 0 - floor(size_n2/2) + p3, 30, abs(font-1), names[ip])
-				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[6])
-				txt(1, 0 - floor(size_v2/2) + p4, 70, abs(font-1), values[7])
+				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[8])
+				txt(1, 0 - floor(size_v2/2) + p4, 70, abs(font-1), values[9])
 			}
 
 			delay(1)
