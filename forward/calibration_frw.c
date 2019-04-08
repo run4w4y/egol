@@ -176,7 +176,7 @@ while (true) {
 			p3 = round(j*89/duration)
 			p4 = round(j*89/duration)
 			
-			if (i < 6) {
+			if (i < 8) {
 				txt(1, 89 - floor(size_n/2) + p1, 30, font, names[i])
 				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[i])
 			} else {
@@ -185,7 +185,7 @@ while (true) {
 				txt(1, 89 - floor(size_v/2) + p2, 70, font, values[7])
 			}
 
-			if (ip < 6) {
+			if (ip < 8) {
 				txt(1, 0 - floor(size_n2/2) + p3, 30, abs(font-1), names[ip])
 				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[ip])
 			} else {
