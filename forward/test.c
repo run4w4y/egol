@@ -343,14 +343,18 @@ while (true) {
 
           er_str = str4 - str3
           er_dir = dir1 - 5
-          u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.06 + (er_str - er_str_old) * 66 + i * 0.001
+          u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.05 + (er_str - er_str_old) * 66 + i * 0.001
           u = u_1 * v * 0.01
 
           if (dir1 == 5) {
             i = 0
             t_padik = time()
           }
-        
+
+          if (abs(i) < 50) {
+            i = i + er_str
+          }
+
           er_dir_old = er_dir
           er_str_old = er_str
 
@@ -375,6 +379,7 @@ while (true) {
       }
     }
   } else {  // ball is near the robot
+
     if (abs(err_com) > 60) { //the robot is directed to the opponent's goal
       while (abs(err_com) > 60) {
         //slow padik

@@ -130,8 +130,8 @@ while (true) {
 		txt(1, 0 - floor(len(values[ip])*4), 50, 0, values[ip])
 	} else {
 		txt(1, 0 - floor(len(names[ip])*4), 30, 0, names[ip])
-		txt(1, 0 - floor(len(values[6])*4), 50, 0, values[8])
-		txt(1, 0 - floor(len(values[7])*4), 70, 0, values[9])
+		txt(1, 0 - floor(len(values[8])*4), 50, 0, values[8])
+		txt(1, 0 - floor(len(values[9])*4), 70, 0, values[9])
 	}
 	in = i+1
 	if (in == 9) {
@@ -143,8 +143,8 @@ while (true) {
 		txt(1, 170 - floor(len(values[in])*4), 50, 0, values[in])
 	} else {
 		txt(1, 170 - floor(len(names[in])*4), 30, 0, names[in])
-		txt(1, 170 - floor(len(values[6])*4), 50, 0, values[8])
-		txt(1, 170 - floor(len(values[7])*4), 70, 0, values[9])
+		txt(1, 170 - floor(len(values[8])*4), 50, 0, values[8])
+		txt(1, 170 - floor(len(values[9])*4), 70, 0, values[9])
 	}
 
 	t1 = time
