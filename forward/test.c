@@ -11,6 +11,8 @@ if (handle == 0) {
   com_3 = 0
   com_4 = 0
   com_5 = 0
+  com_l = 0
+  com_r = 0
   l1_cal = 0
   l2_cal = 0
 } else {
@@ -20,6 +22,8 @@ if (handle == 0) {
   com_3 = tonum(readline(handle))
   com_4 = tonum(readline(handle))
   com_5 = tonum(readline(handle))
+  com_l = tonum(readline(handle))
+  com_r = tonum(readline(handle))
   l1_cal = tonum(readline(handle))
   l2_cal = tonum(readline(handle))
 }
@@ -38,8 +42,6 @@ r = 130
 sgn = 0
 lim_com_down = 0
 lim_com_up = 0
-com_l = 180
-com_r = 6
 dir2 = 0
 dir3 = 0
 
