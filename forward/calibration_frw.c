@@ -10,7 +10,9 @@ names[2] = "alpha_2"
 names[3] = "alpha_3"
 names[4] = "alpha_4"
 names[5] = "alpha_5"
-names[6] = "lights"
+names[6] = "alpha_l"
+names[7] = "alpha_r"
+names[8] = "lights"
 
 if (handle == 0) {
 	strlim = 0
@@ -19,6 +21,8 @@ if (handle == 0) {
 	alpha_3 = 0
 	alpha_4 = 0
 	alpha_5 = 0
+	alpha_l = 0
+	alpha_r = 0
 	light1 = 0
 	light2 = 0
 } else {
@@ -34,10 +38,14 @@ if (handle == 0) {
 	values[4] = alpha_4
   	alpha_5 = tonum(readline(handle))
 	values[5] = alpha_5
+	alpha_5 = tonum(readline(handle))
+	values[6] = alpha_l
+	alpha_5 = tonum(readline(handle))
+	values[7] = alpha_r
 	light1 = tonum(readline(handle))
-	values[6] = light1
+	values[8] = light1
 	light2 = tonum(readline(handle))
-	values[7] = light2
+	values[9] = light2
 }
 
 closef(handle)
@@ -99,7 +107,7 @@ while (true) {
 	
 	scr.clear()
 
-	if (i < 6) {
+	if (i < 8) {
 		size_n = len(names[i])*8
 		size_v = len(values[i])*8
 		txt(1, 89 - floor(size_n/2), 30, 1, names[i])
@@ -115,9 +123,9 @@ while (true) {
 
 	ip = i-1
 	if (ip == -1) {
-		ip = 6
+		ip = 8
 	}
-	if (ip < 6) {
+	if (ip < 8) {
 		txt(1, 0 - floor(len(names[ip])*4), 30, 0, names[ip])
 		txt(1, 0 - floor(len(values[ip])*4), 50, 0, values[ip])
 	} else {
@@ -126,11 +134,11 @@ while (true) {
 		txt(1, 0 - floor(len(values[7])*4), 70, 0, values[7])
 	}
 	in = i+1
-	if (in == 7) {
+	if (in == 9) {
 		in = 0
 	}
 	
-	if (in < 6) {
+	if (in < 8) {
 		txt(1, 170 - floor(len(names[in])*4), 30, 0, names[in])
 		txt(1, 170 - floor(len(values[in])*4), 50, 0, values[in])
 	} else {
@@ -194,7 +202,7 @@ while (true) {
 		
 		i = i - 1
 		if (i == -1) {
-			i = 6
+			i = 8
 		}
 	}
 	
@@ -217,7 +225,7 @@ while (true) {
 			p3 = round(j*89/duration)
 			p4 = round(j*89/duration)
 			
-			if (i < 6) {
+			if (i < 8) {
 				txt(1, 89 - floor(size_n/2) + p1, 30, font, names[i])
 				txt(1, 89 - floor(size_v/2) + p2, 50, font, values[i])
 			} else {
@@ -226,7 +234,7 @@ while (true) {
 				txt(1, 89 - floor(size_v/2) + p2, 70, font, values[7])
 			}
 
-			if (ip < 6) {
+			if (ip < 8) {
 				txt(1, 0 - floor(size_n2/2) + p3, 30, abs(font-1), names[ip])
 				txt(1, 0 - floor(size_v2/2) + p4, 50, abs(font-1), values[ip])
 			} else {
@@ -242,7 +250,7 @@ while (true) {
 		}
 		
 		i = i + 1
-		if (i == 7) {
+		if (i == 9) {
 			i = 0
 		}
 	}
@@ -334,9 +342,19 @@ while (true) {
 		if (i == 5) {
 			values[i] = compass
 		}
+		
+		//alpha_left_90
+		if (i == 6) {
+			values[i] = compass
+		}
+
+		//alpha_right_90
+		if (i == 7) {
+			values[i] = compass
+		}
 
 		//lights
-		if (i == 6) {
+		if (i == 8) {
 			senball_calib1 = 0
 			senball_calib2 = 0
 			for (j = 0; j < 1000; ++j) { // progress bar
@@ -374,8 +392,8 @@ end: // instead of operator break
 
 scr.clear()
 handle = open.w("cal.txt") // writing to the file
-for (i = 0; i < 7; ++i) {
-	if (i < 6) {
+for (i = 0; i < 9; ++i) {
+	if (i < 8) {
 		writeline(handle, values[i])
 	} else {
 		writeline(handle, values[i])
