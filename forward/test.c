@@ -326,14 +326,14 @@ while (true) {
   
   // the ball is far from the robot
   if (strres < str_max - 10) {
-  //padik fast
+    //padik fast
     //back directions
 
     if (abs(dir1 - 5) > 1) {
       u=18*(dir1-5)
       v=0
     } else {
-    //front directions
+      //front directions
     
       if (time() - t_padik < 1000) {
         
@@ -376,7 +376,7 @@ while (true) {
       }
     }
 
-    // ball is near the robot
+  // ball is near the robot
   } else {  
 
     if (abs(err_com) > 60) { //the robot is directed to the opponent's goal
