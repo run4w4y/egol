@@ -383,8 +383,8 @@ while (true) {
           
           v = 120-0.5*strres
 
-          if (v < 20) {
-            v = 20
+          if (v < 40) {
+            v = 40
           }
 
           er_str = str4 - str3
@@ -427,4 +427,5 @@ while (true) {
 
   v = 0
   u = 0
+  tone(100,100,100)
 }
