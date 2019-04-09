@@ -37,7 +37,8 @@ lim_com_down = 0
 lim_com_up = 0
 dir2 = 0
 dir3 = 0
-name = ""
+name_sen = ""
+name = getname()
 
 //Subs
 
@@ -52,10 +53,10 @@ void sensors {
     str5 = irseeker_array[5]
 
     err_dir = dir - 6
-    err_dir1 = dir1 - 5
     err_str = str4 - str3
     
     dir1 = rm(dir+9, 10)
+    err_dir1 = dir1 - 5
     if (rm(dir,2) == 0) {
       strres = (str1 + str2 + str3 + str4 + str5)/1.57
     } else {
@@ -84,7 +85,7 @@ void bottom { // values in the bottom of the screen
 
 void top {  // values in the top of the screen
     dotline(1, 0, 20, 178, 20, 4, 4)
-    LCD.CenterText(1, 10, 2, name)
+    LCD.CenterText(1, 10, 1, name_sen)
 }
 
 new.thread = sensors
@@ -99,43 +100,10 @@ duration = 30 // duration (not in ms, it's sth else, idk lol)
 
 while (true) {
 	start: // instead of operator continue
-	
-	scr.clear()
-    top()
-	bottom()
-
-	ip = i-1
-	if (ip == -1) {
-		ip = 2
-	}
-
-	in = i+1
-	if (in == 3) {
-		in = 0
-	}
-	
+	   
+    btn = btn.rn
 	if (btn == "L") { // left button action
-		scr.clear()
 
-		for (j = 0; j < duration; ++j) { // animation
-			if (j < floor(duration/2)) {
-				font = 1
-			} else {
-				font = 0
-			}
-
-            top()
-			bottom()
-			p1 = round(j*99/duration)
-			p2 = round(j*99/duration)
-			p3 = round(j*89/duration)
-			p4 = round(j*89/duration)
-			
-			if (rm(j, 2) == 0) {
-				scr.clear()
-			}
-		}
-		
 		i = i - 1
 		if (i == -1) {
 			i = 2
@@ -143,28 +111,7 @@ while (true) {
 	}
 	
 	if (btn == "R") { // right button action
-		scr.clear()
-		
-		for (j = 0; j < duration; ++j) { // animation
-			if (j < floor(duration/2)) {
-				font = 1
-			} else {
-				font = 0
-			}
-			
-            top()
-			bottom()
-			p1 = round(j*99/duration)
-			p2 = round(j*99/duration)
-			p3 = round(j*89/duration)
-			p4 = round(j*89/duration)
 
-			delay(1)
-			if (rm(j, 2) == 0) {
-				scr.clear()
-			}
-		}
-		
 		i = i + 1
 		if (i == 3) {
 			i = 0
@@ -172,8 +119,8 @@ while (true) {
 	}
 
     if (i == 0) {
-        name = "IRseeker"
-        printUpd()
+        name_sen = "IRseeker"
+        printupd()
         print("dir", dir)
         print("dir1", dir1)
         print("str2", str2)
@@ -187,8 +134,8 @@ while (true) {
     }
 
     if (i == 1) {
-        name = "compass"
-        printUpd()
+        name_sen = "compass"
+        printupd()
         print("cm", compass)
         print("err1", rm(compass - com_1 + 900, 360) - 180)
         print("err2", rm(compass - com_2 + 900, 360) - 180)
@@ -200,10 +147,13 @@ while (true) {
     }
 
     if (i == 2) {
-        name = "lights" 
-        printUpd()
+        name_sen = "lights" 
+        printupd()
         print("l_1", l1)
         print("l_2", l2)
         print("sum", l1 + l2)
     }
+
+    prev_button = btn
+    flush()
 }
