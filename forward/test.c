@@ -123,7 +123,7 @@ void orbit {
     while (true) {
       u=-(15*((3-dir1))-((3-dir1)/5*10))
       err90=rm(compass - com_l + 900, 360) - 180
-      v=50
+      v=70
 
       if (err90 > 10) {
         if (dir < 5) {
@@ -157,10 +157,10 @@ void orbit {
         v=80
         d=145
         l=r+30
-        u=-((1*(d*90)/(2*l))+(0.2*(r-strres)))
+        u=-((1*(d*90)/(2*l))+(0.4*(r-strres)))
 
       } else {
-        u=-(20*((3-dir1))-((3-dir1)/5*10))+(0.2*(r-strres))
+        u=-(20*((3-dir1))-((3-dir1)/5*10))+(0.45*(r-strres))
         v=70
       }
 
@@ -222,7 +222,7 @@ void orbit {
 
       u=-(15*((7-dir2))-((7-dir2)/5*10))
       err90 = rm(compass - com_r + 900, 360) - 180
-      v = 50
+      v = 70
       dir3 = dir2
 
       if (err90 < -9) {
@@ -266,9 +266,9 @@ void orbit {
         v=80
         d=145
         l=r+30
-        u=-((-1*(d*90)/(2*l))+(0.2*(strres - r)))
+        u=-((-1*(d*90)/(2*l))+(0.4*(strres - r)))
       } else {
-        u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.2*(strres - r)))
+        u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.45*(strres - r)))
         dir3 = dir2
         v=70
       }
@@ -338,7 +338,7 @@ while (true) {
         }   
 
         er_str = str4 - str3
-        u_1 = er_str *0.05 + (er_str - er_str_old) * 66 + i * 0.003
+        u_1 = er_str *0.05 + (er_str - er_str_old) * 66 + i * 0.001
         u = u_1 * v * 0.01
 
         if (abs(i) < 50) {
@@ -380,7 +380,6 @@ while (true) {
       } else {
 
         if (time() - t_padik < 700) {
-          
           v = 120-0.5*strres
 
           if (v < 40) {
@@ -424,8 +423,4 @@ while (true) {
       } 
     }
   }
-
-  v = 0
-  u = 0
-  tone(100,100,100)
 }
