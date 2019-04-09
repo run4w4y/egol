@@ -1,3 +1,10 @@
+/*TODO:
+  1. fast padik with stop
+  2. if abs(err) > 60 {orbit()}
+  3. else slow padik
+  4. attack
+*/
+
 mt.invert("BC")
 mt.stop("BC", "false")
 
