@@ -326,7 +326,10 @@ while (true) {
   
   if (strres > str_max - 5) {
     if (abs(err_com) < 60) {
-      while (strres > strmax - 30 and l1 + l2 < l1_cal + l2_cal){ //slow padik
+      i = 0
+      er_dir_old = 0
+      er_str_old = 0
+      while (strres > str_max - 30 and l1 + l2 < l1_cal + l2_cal) { //slow padik
         
         v=(120-0.4*strres)
 
@@ -343,10 +346,10 @@ while (true) {
         }
 
         er_str_old = er_str
-
-        k = 0.2
-        v = 40
       }
+
+      k = 0.2
+      v = 40
 
       while (l1 + l2 > l1_cal + l2_cal - 10) {  //attack
         if (v < 101) {
@@ -360,10 +363,14 @@ while (true) {
         }
       }
     } else {
-      tone(100,100,100)
       orbit()
     }
   } else {
+
+      i = 0
+      er_dir_old = 0
+      er_str_old = 0
+
     while (strres < str_max - 5) {  //padik fast
 
       if (abs(dir1 - 5) > 1) {
@@ -417,4 +424,7 @@ while (true) {
       } 
     }
   }
+
+  v = 0
+  u = 0
 }
