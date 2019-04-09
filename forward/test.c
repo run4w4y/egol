@@ -323,8 +323,7 @@ new.thread = sensors
 
 // Main
 while (true) {
-
-  if (strres < str_max - 5) {
+  if (strres > str_max - 5) {
     //padik fast
     if (abs(dir1 - 5) > 1) {
       u=18*(dir1-5)
