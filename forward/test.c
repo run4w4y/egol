@@ -103,6 +103,7 @@ void dir_orbit {
 void orbit {
     // поворот на мяч перед орбитой
   while (dir != 6) {
+    tone(100,100,100)
     u=-(20*(6-dir)+0.08*((str3-str4))+sgn*10)
   
     if (u > 0) {
@@ -330,63 +331,31 @@ new.thread = sensors
 
 // Main
 while (true) {
-  
   if (strres > str_max - 5) {
-    if (abs(err_com) < 60) {
-      i = 0
-      er_dir_old = 0
-      er_str_old = 0
-      while (strres > str_max - 30 and l1 + l2 < l1_cal + l2_cal) { //slow padik
-        
-        v=(120-0.4*strres)
-
-        if (v < 40) {
-          v = 40
-        }   
-
-        er_str = str4 - str3
-        u_1 = er_str *0.05 + (er_str - er_str_old) * 66 + i * 0.001
-        u = u_1 * v * 0.01
-
-        if (abs(i) < 50) {
-          i = i + er_str
-        }
-
-        er_str_old = er_str
-      }
-
-      k = 0.2
-      v = 40
-
-      while (l1 + l2 > l1_cal + l2_cal - 10) {  //attack
-        if (v < 101) {
-          v = v + 0.5
-        }
-        
-        u = -err_com * k
-
-        if (k < 1) {
-          k = k + 0.05
-        }
-      }
-    } else {
+    if (abs(err_com)>60) {
+      
       orbit()
+    } else {
+      mt.stop("BC", true)
+      v = 0
+      u = 0
+      tone(100,1000,100)
     }
   } else {
-
-      i = 0
-      er_dir_old = 0
-      er_str_old = 0
+    i = 0
+    er_dir_old = 0
+    er_str_old = 0
 
     while (strres < str_max - 5) {  //padik fast
 
       if (abs(dir1 - 5) > 1) {
-        u=18*(dir1-5)
+
+        u=20*(dir1-5)
         v=0
       
       } else {
 
-        if (time() - t_padik < 700) {
+        if (time() - t_padik < 1000) {
           v = 120-0.5*strres
 
           if (v < 40) {
@@ -403,7 +372,7 @@ while (true) {
             t_padik = time()
           }
 
-          if (i < 50) {
+          if (abs(i) < 50) {
             i = i + er_str
           }
 
@@ -431,3 +400,51 @@ while (true) {
     }
   }
 }
+  
+//   if (strres > str_max - 5) {
+//     if (abs(err_com) < 60) {
+//       i = 0
+//       er_dir_old = 0
+//       er_str_old = 0
+//       while (strres > str_max - 30 and l1 + l2 < l1_cal + l2_cal) { //slow padik
+        
+//         v=(120-0.4*strres)
+
+//         if (v < 40) {
+//           v = 40
+//         }   
+
+//         er_str = str4 - str3
+//         u_1 = er_str *0.05 + (er_str - er_str_old) * 66 + i * 0.001
+//         u = u_1 * v * 0.01
+
+//         if (abs(i) < 50) {
+//           i = i + er_str
+//         }
+
+//         er_str_old = er_str
+//       }
+
+//       k = 0.2
+//       v = 40
+
+//       while (l1 + l2 > l1_cal + l2_cal - 10) {  //attack
+//         if (v < 101) {
+//           v = v + 0.5
+//         }
+        
+//         u = -err_com * k
+
+//         if (k < 1) {
+//           k = k + 0.05
+//         }
+//       }
+//     } else {
+//       orbit()
+//     }
+//   } else {
+
+//       } 
+//     }
+//   }
+// }
