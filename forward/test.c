@@ -103,7 +103,6 @@ void dir_orbit {
 void orbit {
     // поворот на мяч перед орбитой
   while (dir != 6) {
-    tone(100,100,100)
     u=-(20*(6-dir)+0.08*((str3-str4))+sgn*10)
   
     if (u > 0) {
@@ -168,7 +167,7 @@ void orbit {
         u=-((1*(d*90)/(2*l))+(0.4*(r-strres)))
 
       } else {
-        u=-(20*((3-dir1))-((3-dir1)/5*10))+(0.45*(r-strres))
+        u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.45*(r-strres)))
         v=70
       }
 
@@ -180,7 +179,7 @@ void orbit {
         if (time() - t0 > 1500) {
           if (compass > lim_com_down) {
             if (compass < lim_com_up) {
-              if (strres < 120) {
+              if (strres < 140) {
                 Goto exit2
               }
             }
@@ -276,7 +275,7 @@ void orbit {
         l=r+30
         u=-((-1*(d*90)/(2*l))+(0.4*(strres - r)))
       } else {
-        u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.45*(strres - r)))
+        u=-((20*((7-dir2))-((7-dir2)/5*10))+(0.45*(strres - r)))
         dir3 = dir2
         v=70
       }
@@ -288,7 +287,7 @@ void orbit {
         if (time() - t0 > 1500) {
           if (compass > lim_com_down) {
             if (compass < lim_com_up) {
-              if (strres < 120) {
+              if (strres < 140) {
                 Goto exit2
               }
             }
@@ -325,6 +324,75 @@ void orbit {
   exit2:
 }
 
+void padik_fast {
+  if (abs(dir1 - 5) > 1) {
+
+    u=20*(dir1-5)
+    v=0
+  
+  } else {
+
+    if (time() - t_padik < 1000) {
+      v = 120-0.5*strres
+
+      if (v < 40) {
+        v = 40
+      }
+
+      er_str = str4 - str3
+      er_dir = dir1 - 5
+      u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.08 + (er_str - er_str_old) * 66 + i * 0.003
+      u = u_1 * v * 0.01
+
+      if (dir1 == 5) {
+        i = 0
+        t_padik = time()
+      }
+
+      if (abs(i) < 50) {
+        i = i + er_str
+      }
+
+      er_dir_old = er_dir
+      er_str_old = er_str
+
+    } else {
+      
+      i = 0
+      v = (str_max - strres) * 0.45
+
+      if (v < 40) {
+        v = 40
+      }
+
+      er_dir = dir1 - 5
+      u = er_dir * 25 + (er_dir - er_dir_old)*66
+      er_dir_old = er_dir
+
+      if (dir1 == 5) {
+        t_padik = time()
+      }
+    }
+  } 
+}
+
+void padik_slow {
+  v=(120-0.4*strres)
+
+  if (v < 40) {
+    v = 40
+  }   
+
+  er_str = str4 - str3
+  u_1 = er_str *0.05 + (er_str - er_str_old) * 66 + i * 0.001
+  u = u_1 * v * 0.01
+
+  if (abs(i) < 50) {
+    i = i + er_str
+  }
+
+  er_str_old = er_str
+}
 //Threads
 
 new.thread = sensors
@@ -333,119 +401,26 @@ new.thread = sensors
 while (true) {
   if (strres > str_max - 5) {
     if (abs(err_com)>60) {
-      led(8)
       orbit()
-      led(1)
     } else {
-      mt.stop("BC", true)
-      v = 0
-      u = 0
-      tone(100,1000,100)
+      i = 0
+      er_dir_old = 0
+      er_str_old = 0
+      while (strres > str_max - 30 and l1 + l2 < l1_cal + l2_cal) { //slow padik
+        padik_slow()
+      }
+
+      while (l1 + l2 > l1_cal + l2_cal) {
+        v = 100
+        u = -err_com
+      }
     }
   } else {
     i = 0
     er_dir_old = 0
     er_str_old = 0
-
     while (strres < str_max - 5) {  //padik fast
-
-      if (abs(dir1 - 5) > 1) {
-
-        u=20*(dir1-5)
-        v=0
-      
-      } else {
-
-        if (time() - t_padik < 1000) {
-          v = 120-0.5*strres
-
-          if (v < 40) {
-            v = 40
-          }
-
-          er_str = str4 - str3
-          er_dir = dir1 - 5
-          u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.08 + (er_str - er_str_old) * 66 + i * 0.003
-          u = u_1 * v * 0.01
-
-          if (dir1 == 5) {
-            i = 0
-            t_padik = time()
-          }
-
-          if (abs(i) < 50) {
-            i = i + er_str
-          }
-
-          er_dir_old = er_dir
-          er_str_old = er_str
-
-        } else {
-          
-          i = 0
-          v = (str_max - strres) * 0.45
-
-          if (v < 40) {
-            v = 40
-          }
-
-          er_dir = dir1 - 5
-          u = er_dir * 25 + (er_dir - er_dir_old)*66
-          er_dir_old = er_dir
-
-          if (dir1 == 5) {
-            t_padik = time()
-          }
-        }
-      } 
+      padik_fast()
     }
   }
 }
-  
-//   if (strres > str_max - 5) {
-//     if (abs(err_com) < 60) {
-//       i = 0
-//       er_dir_old = 0
-//       er_str_old = 0
-//       while (strres > str_max - 30 and l1 + l2 < l1_cal + l2_cal) { //slow padik
-        
-//         v=(120-0.4*strres)
-
-//         if (v < 40) {
-//           v = 40
-//         }   
-
-//         er_str = str4 - str3
-//         u_1 = er_str *0.05 + (er_str - er_str_old) * 66 + i * 0.001
-//         u = u_1 * v * 0.01
-
-//         if (abs(i) < 50) {
-//           i = i + er_str
-//         }
-
-//         er_str_old = er_str
-//       }
-
-//       k = 0.2
-//       v = 40
-
-//       while (l1 + l2 > l1_cal + l2_cal - 10) {  //attack
-//         if (v < 101) {
-//           v = v + 0.5
-//         }
-        
-//         u = -err_com * k
-
-//         if (k < 1) {
-//           k = k + 0.05
-//         }
-//       }
-//     } else {
-//       orbit()
-//     }
-//   } else {
-
-//       } 
-//     }
-//   }
-// }

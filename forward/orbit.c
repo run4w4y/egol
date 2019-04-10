@@ -11,6 +11,8 @@ if (handle == 0) {
   com_3 = 0
   com_4 = 0
   com_5 = 0
+  com_r = 0
+  com_l = 0
   l1_cal = 0
   l2_cal = 0
 } else {
@@ -20,6 +22,8 @@ if (handle == 0) {
   com_3 = tonum(readline(handle))
   com_4 = tonum(readline(handle))
   com_5 = tonum(readline(handle))
+  com_r = tonum(readline(handle))
+  com_l = tonum(readline(handle))
   l1_cal = tonum(readline(handle))
   l2_cal = tonum(readline(handle))
 }
@@ -28,7 +32,7 @@ if (handle == 0) {
 
 v = 0
 u = 0
-alpha = 0
+
 er_str_old = 0
 er_dir_old = 0
 t_padik = time()
@@ -38,8 +42,6 @@ r = 130
 sgn = 0
 lim_com_down = 0
 lim_com_up = 0
-com_l = 180
-com_r = 6
 dir2 = 0
 dir3 = 0
 //Subs
@@ -90,211 +92,6 @@ void dir_orbit {
   }
 }
 
-//----------------------RIGHT------------------------
-void orbit_right {
-  t0 = time()
-  err90 = 0
-  // заход на орбиту
-  //r1
-  while (true) {
-    u=-(15*((3-dir1))-((3-dir1)/5*10))
-    err90=rm(compass - com_l + 900, 360) - 180
-    v=50
-
-    if (err90 > 10) {
-      if (dir < 5) {
-        goto exit1
-      }
-    }
-
-    if (time() - t0 > 800) {
-       goto exit1
-    }
-  }
-  exit1: 
-
-  t0 = time()
-
-  //орбита
-  //r2
-  err90 = 999
-  while (err90 > 8) {
-    if (dir > 5) {
-      if (dir > 6) {
-        err90=rm(compass - com_l + 900, 360) - 180+45
-      } else {
-        err90=rm(compass - com_l + 900, 360) - 180-40
-      }
-    } else {
-      err90=rm(compass - com_l + 900, 360) - 180
-    }
-
-    if (dir == 3) {
-      v=80
-      d=145
-      l=r+30
-      u=-((1*(d*90)/(2*l))+(0.2*(r-strres)))
-
-    } else {
-      u=-(20*((3-dir1))-((3-dir1)/5*10))+(0.2*(r-strres))
-      v=80
-    }
-
-
-    if (time() - t0 > 4500) {
-      t0 = time()
-      goto exit2
-    } else {
-      if (time() - t0 > 1500) {
-        if (compass > lim_com_down) {
-          if (compass < lim_com_up) {
-            if (strres < 90) {
-              goto exit2
-            }
-          }
-        }
-      } else {
-        lim_com_down = compass - 4
-        lim_com_up = compass + 4
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAME
-      }
-    }
-  }
-
-
-  t0 = time()
-  //поворот на мяч
-  //r3
-  if (err90 < 21) {
-    while (abs(err_com) > 20) {
-      v = 48
-      u = -50
-
-      if (dir < 7) {
-        if (abs(err_com) < 69) {
-          goto exit2
-        }
-      }
-
-      if (time() - t0 > 800) {
-        goto exit2
-      }
-    }
-  }
-
-  t0 = time()
-  err90 = 0
-}
-
-
-//----------------------LEFT------------------------
-void orbit_left {
-  err90 = 0
-  t0 = time()
-    
-  // заход на орбиту
-  //l1
-
-  while (true) {
-
-    dir_orbit()
-
-    u=-(15*((7-dir2))-((7-dir2)/5*10))
-    err90 = rm(compass - com_r + 900, 360) - 180
-    v = 50
-    dir3 = dir2
-
-    if (err90 < -9) {
-      if (dir > 7) {
-        goto exit3
-      }
-    }
-
-    if (time() - t0 > 800) {
-      goto exit3
-    } 
-  }
-  exit3:
-
-  t0 = time()
-  
-  // орбита
-  //l2
-
-  err90 = -999
-  v = 0
-  u = 0
-  dir2 = dir1
-  dir3 = dir2
-
-  while (err90 < -8) {
-    if (dir > 5) {
-      if (dir > 6) {
-        err90 = rm(compass - com_r + 900, 360) - 180+40
-      } else {
-        err90 = rm(compass - com_r + 900, 360) - 180-45
-      }
-    } else {
-      err90 = rm(compass - com_r + 900, 360) - 180
-    }
-
-    dir_orbit()
-
-     if (dir == 8) {
-      v=80
-      d=145
-      l=r+30
-      u=-((-1*(d*90)/(2*l))+(0.2*(strres - r)))
-    } else {
-      u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.2*(strres - r)))
-      dir3 = dir2
-      v=80
-    }
-
-    if (time() - t0 > 4500) {
-      t0 = time()
-      goto exit2
-    } else {
-      if (time() - t0 > 1500) {
-        if (compass > lim_com_down) {
-          if (compass < lim_com_up) {
-            if (strres < 90) {
-              goto exit2
-            }
-          }
-        }
-      } else {
-        lim_com_down = compass - 4
-        lim_com_up = compass + 4
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAME
-      }
-    }
-  }
-
-  t0 = time()
-  //поворот на мяч
-  //r3
-
-  if (err90 > -22) {
-    while (abs(err_com) > 20) {
-      v = 48
-      u = 50
-
-      if (dir > 5) {
-        if (abs(err_com) < 69) {
-          goto exit2
-        }
-      }
-
-      if (time() - t0 > 800) {
-        goto exit2
-      }
-    }
-  }
-  t0 = time()
-  err90 = 0
-}
-
 void orbit {
     // поворот на мяч перед орбитой
   while (dir != 6) {
@@ -314,17 +111,227 @@ void orbit {
     v=10
   }
 
+  if (err_com > 0) {
+    txt(1, 10, 10, 2, "right")
+  } else {
+    txt(1, 10, 10, 2, "left")
+  }
+
+  
   // определение стороны орбиты
   if (err_com > 0) {
-    orbit_right()
+  //----------------------RIGHT------------------------
+    t0 = time()
+    err90 = 0
+    // заход на орбиту
+    //r1
+    while (true) {
+      u=-(15*((3-dir1))-((3-dir1)/5*10))
+      err90=rm(compass - com_l + 900, 360) - 180
+      v=70
+
+      if (err90 > 10) {
+        if (dir < 5) {
+          Goto exit1
+        }
+      }
+
+      if (time() - t0 > 800) {
+        Goto exit1
+      }
+    }
+    exit1: 
+
+    t0 = time()
+
+
+
+    //орбита
+    //r2
+    err90 = 999
+    while (err90 > 8) {
+      if (dir > 5) {
+        if (dir > 6) {
+          err90=rm(compass - com_l + 900, 360) - 180+45
+        } else {
+          err90=rm(compass - com_l + 900, 360) - 180-40
+        }
+      } else {
+        err90=rm(compass - com_l + 900, 360) - 180
+      }
+
+      if (dir == 3) {
+        v=80
+        d=145
+        l=r+30
+        u=-((1*(d*90)/(2*l))+(0.4*(r-strres)))
+
+      } else {
+        u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.45*(r-strres)))
+        v=70
+      }
+
+
+      if (time() - t0 > 4500) {
+        t0 = time()
+        Goto exit2
+      } else {
+        if (time() - t0 > 1500) {
+          if (compass > lim_com_down) {
+            if (compass < lim_com_up) {
+              if (strres < 140) {
+                Goto exit2
+              }
+            }
+          }
+        } else {
+          lim_com_down = compass - 4
+          lim_com_up = compass + 4
+          //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAME
+        }
+      }
+    }
+
+
+ 
+    t0 = time()
+    //поворот на мяч
+    //r3
+  
+    if (err90 < 21) {
+      while (abs(err_com) > 20) {
+      
+        v = 48
+        u = -50
+
+        if (dir < 7) {
+          if (abs(err_com) < 69) { 
+            Goto exit2
+          }
+        }
+
+        if (time() - t0 > 800) {
+          Goto exit2
+        }
+      }
+    }
   } else {
-    orbit_left()
+
+    //----------------------LEFT------------------------  
+
+
+    err90 = 0
+    t0 = time()
+    
+    // заход на орбиту
+    //l1
+
+    while (true) {
+
+      dir_orbit()
+
+      u=-(15*((7-dir2))-((7-dir2)/5*10))
+      err90 = rm(compass - com_r + 900, 360) - 180
+      v = 70
+      dir3 = dir2
+
+      if (err90 < -9) {
+       if (dir > 7) {
+          Goto exit3
+        }
+      }
+
+      if (time() - t0 > 800) {
+        Goto exit3
+      } 
+    }
+    exit3:
+
+    t0 = time()
+  
+    // орбита
+    //l2
+
+    err90 = -999
+    v = 0
+    u = 0
+    dir2 = dir1
+    dir3 = dir2
+
+    while (err90 < -8) {
+      if (dir > 5) {
+        if (dir > 6) {
+          err90 = rm(compass - com_r + 900, 360) - 180+40
+        } else {
+          err90 = rm(compass - com_r + 900, 360) - 180-45
+        }
+
+      } else {
+        err90 = rm(compass - com_r + 900, 360) - 180
+      }
+
+      dir_orbit()
+
+      if (dir == 8) {
+        v=80
+        d=145
+        l=r+30
+        u=-((-1*(d*90)/(2*l))+(0.4*(strres - r)))
+      } else {
+        u=-((20*((7-dir2))-((7-dir2)/5*10))+(0.45*(strres - r)))
+        dir3 = dir2
+        v=70
+      }
+
+      if (time() - t0 > 4500) {
+        t0 = time()
+        Goto exit2
+      } else {
+        if (time() - t0 > 1500) {
+          if (compass > lim_com_down) {
+            if (compass < lim_com_up) {
+              if (strres < 140) {
+                Goto exit2
+              }
+            }
+          }
+        } else {
+          lim_com_down = compass - 4
+          lim_com_up = compass + 4
+          //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAME
+        }
+      }
+    }
+
+
+    t0 = time()
+    //поворот на мяч
+    //l3
+    if (err90 > -22) {
+      while (abs(err_com) > 20) {
+
+        v = 48
+        u = 50
+
+        if (dir > 5) {
+          if (abs(err_com) < 69) {
+            Goto exit2
+          }
+        }
+
+        if (time() - t0 > 800) {
+          Goto exit2
+        }
+      }
+    }
   }
+  exit2:
 }
+
 //Threads
 new.thread = sensors
 
 // Main
 
-orbit()
-exit2:
+  
+  orbit()
