@@ -333,8 +333,9 @@ new.thread = sensors
 while (true) {
   if (strres > str_max - 5) {
     if (abs(err_com)>60) {
-      
+      led(8)
       orbit()
+      led(1)
     } else {
       mt.stop("BC", true)
       v = 0
