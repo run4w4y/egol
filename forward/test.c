@@ -118,25 +118,19 @@ void orbit {
     }
     v=10
   }
-
-  if (err_com > 0) {
-    txt(1, 10, 10, 2, "right")
-  } else {
-    txt(1, 10, 10, 2, "left")
-  }
-
   
   // определение стороны орбиты
   if (err_com > 0) {
   //----------------------RIGHT------------------------
-    t0 = time()
+    
     err90 = 0
+    t0 = time()
     // заход на орбиту
     //r1
     while (true) {
       u=-(15*((3-dir1))-((3-dir1)/5*10))
-      err90=rm(compass - com_l + 900, 360) - 180
-      v=70
+      err90=rm(compass - com_r + 900, 360) - 180
+      v=50
 
       if (err90 > 10) {
         if (dir < 5) {
@@ -149,23 +143,20 @@ void orbit {
       }
     }
     exit1: 
-
+    
     t0 = time()
-
-
-
     //орбита
     //r2
     err90 = 999
     while (err90 > 8) {
       if (dir > 5) {
         if (dir > 6) {
-          err90=rm(compass - com_l + 900, 360) - 180+45
+          err90=rm(compass - com_r + 900, 360) - 180+45
         } else {
-          err90=rm(compass - com_l + 900, 360) - 180-40
+          err90=rm(compass - com_r + 900, 360) - 180-40
         }
       } else {
-        err90=rm(compass - com_l + 900, 360) - 180
+        err90=rm(compass - com_r + 900, 360) - 180
       }
 
       if (dir == 3) {
@@ -200,8 +191,6 @@ void orbit {
       }
     }
 
-
- 
     t0 = time()
     //поворот на мяч
     //r3
@@ -229,8 +218,8 @@ void orbit {
 
 
     err90 = 0
+
     t0 = time()
-    
     // заход на орбиту
     //l1
 
@@ -239,8 +228,8 @@ void orbit {
       dir_orbit()
 
       u=-(15*((7-dir2))-((7-dir2)/5*10))
-      err90 = rm(compass - com_r + 900, 360) - 180
-      v = 70
+      err90 = rm(compass - com_l + 900, 360) - 180
+      v = 50
       dir3 = dir2
 
       if (err90 < -9) {
@@ -254,9 +243,8 @@ void orbit {
       } 
     }
     exit3:
-
+    
     t0 = time()
-  
     // орбита
     //l2
 
@@ -269,13 +257,13 @@ void orbit {
     while (err90 < -8) {
       if (dir > 5) {
         if (dir > 6) {
-          err90 = rm(compass - com_r + 900, 360) - 180+40
+          err90 = rm(compass - com_l + 900, 360) - 180+40
         } else {
-          err90 = rm(compass - com_r + 900, 360) - 180-45
+          err90 = rm(compass - com_l + 900, 360) - 180-45
         }
 
       } else {
-        err90 = rm(compass - com_r + 900, 360) - 180
+        err90 = rm(compass - com_l + 900, 360) - 180
       }
 
       dir_orbit()
@@ -310,8 +298,7 @@ void orbit {
         }
       }
     }
-
-
+    
     t0 = time()
     //поворот на мяч
     //l3
@@ -396,7 +383,7 @@ void padik_slow {
   }   
 
   er_str = str4 - str3
-  u_1 = er_str *0.05 + (er_str - er_str_old) * 66 + i * 0.001
+  u_1 = er_str *0.08 + (er_str - er_str_old) * 66 + i * 0.001
   u = u_1 * v * 0.01
 
   if (abs(i) < 50) {
@@ -412,12 +399,9 @@ new.thread = sensors
 // Main
 while (true) {
   if (strres > str_max - 5) {
-    if (abs(err_com)>60) {
-      //orbit()
-      v = 0
-      u = 0
-      mt.stop("BC", true)
+    if (abs(err_com)>90) {
       tone(100,100,100)
+      orbit()
     } else {
       i = 0
       er_dir_old = 0
@@ -426,7 +410,7 @@ while (true) {
         padik_slow()
       }
 
-      while (l1 + l2 > l1_cal + l2_cal) {
+      while (l1 + l2 > l1_cal + l2_cal - 5) {
         v = 100
         u = -err_com
       }
