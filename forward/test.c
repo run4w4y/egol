@@ -118,10 +118,16 @@ void orbit {
     }
     v=10
   }
+
+  if (err_com > 0) {
+    txt(1, 10, 10, 2, "right")
+  } else {
+    txt(1, 10, 10, 2, "left")
+  }
+
   
   // определение стороны орбиты
   if (err_com > 0) {
-  
   //----------------------RIGHT------------------------
     t0 = time()
     err90 = 0
@@ -145,6 +151,8 @@ void orbit {
     exit1: 
 
     t0 = time()
+
+
 
     //орбита
     //r2
@@ -193,6 +201,7 @@ void orbit {
     }
 
 
+ 
     t0 = time()
     //поворот на мяч
     //r3
@@ -217,6 +226,8 @@ void orbit {
   } else {
 
     //----------------------LEFT------------------------  
+
+
     err90 = 0
     t0 = time()
     
@@ -299,6 +310,7 @@ void orbit {
         }
       }
     }
+
 
     t0 = time()
     //поворот на мяч
@@ -401,7 +413,11 @@ new.thread = sensors
 while (true) {
   if (strres > str_max - 5) {
     if (abs(err_com)>60) {
-      orbit()
+      //orbit()
+      v = 0
+      u = 0
+      mt.stop("BC", true)
+      tone(100,100,100)
     } else {
       i = 0
       er_dir_old = 0
