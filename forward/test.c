@@ -1,8 +1,6 @@
 /*TODO:
-  1. fast padik with stop
-  2. if abs(err) > 60 {orbit()}
-  3. else slow padik
-  4. attack
+  1. attack
+  2. right orbit
 */
 
 mt.invert("BC")
@@ -102,8 +100,9 @@ void dir_orbit {
 
 void orbit {
     // поворот на мяч перед орбитой
-  while (dir != 6) {
-    u=-(20*(6-dir)+0.08*((str3-str4))+sgn*10)
+  t0 = time()
+  while (dir != 6 and time() - t0 < 1000) {
+    u=-(22*(6-dir)+0.08*((str3-str4))+sgn*10)
   
     if (u > 0) {
       sgn = 1
@@ -196,7 +195,7 @@ void orbit {
     //r3
   
     if (err90 < 21) {
-      while (abs(err_com) > 20) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
       
         v = 48
         u = -50
@@ -229,7 +228,7 @@ void orbit {
 
       u=-(15*((7-dir2))-((7-dir2)/5*10))
       err90 = rm(compass - com_l + 900, 360) - 180
-      v = 50
+      v=50
       dir3 = dir2
 
       if (err90 < -9) {
@@ -303,7 +302,7 @@ void orbit {
     //поворот на мяч
     //l3
     if (err90 > -22) {
-      while (abs(err_com) > 20) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
 
         v = 48
         u = 50
@@ -340,7 +339,7 @@ void padik_fast {
 
       er_str = str4 - str3
       er_dir = dir1 - 5
-      u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.08 + (er_str - er_str_old) * 66 + i * 0.003
+      u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.06 + (er_str - er_str_old) * 66 + i * 0.003
       u = u_1 * v * 0.01
 
       if (dir1 == 5) {
@@ -348,7 +347,7 @@ void padik_fast {
         t_padik = time()
       }
 
-      if (abs(i) < 50) {
+      if (abs(i) < 30) {
         i = i + er_str
       }
 
