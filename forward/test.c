@@ -3,6 +3,7 @@
   2. right orbit
 */
 
+check.ports("ABC 1234")
 mt.invert("BC")
 mt.stop("BC", "false")
 
@@ -68,7 +69,7 @@ void sensors {
     } else {
       strres = str1 + str2 + str3 + str4 + str5
     }
-
+    
     compass_array = i2c.readregs(2, 1, 66, 4)
     compass = compass_array[0] * 2 + compass_array[1]
     err_com = rm(compass - alpha + 900, 360) - 180
@@ -339,7 +340,7 @@ void padik_fast {
 
       er_str = str4 - str3
       er_dir = dir1 - 5
-      u_1 = er_dir * 15 + (er_dir - er_dir_old)*66 + er_str *0.06 + (er_str - er_str_old) * 66 + i * 0.003
+      u_1 = er_dir * 12 + (er_dir - er_dir_old)*66 + er_str *0.04 + (er_str - er_str_old) * 66 + i * 0.003
       u = u_1 * v * 0.01
 
       if (dir1 == 5) {
@@ -347,7 +348,7 @@ void padik_fast {
         t_padik = time()
       }
 
-      if (abs(i) < 30) {
+      if (abs(i) < 50) {
         i = i + er_str
       }
 
@@ -363,8 +364,11 @@ void padik_fast {
         v = 40
       }
 
+      er_str = str4 - str3
       er_dir = dir1 - 5
-      u = er_dir * 25 + (er_dir - er_dir_old)*66
+      u = er_dir * 18 + (er_dir - er_dir_old)*66 + er_str *0.1 + (er_str - er_str_old) * 66
+      
+      er_str_old = er_str
       er_dir_old = er_dir
 
       if (dir1 == 5) {
@@ -395,6 +399,7 @@ void padik_slow {
 
 new.thread = sensors
 
+/*
 // Main
 while (true) {
   if (strres > str_max - 5) {
@@ -409,7 +414,8 @@ while (true) {
         padik_slow()
       }
 
-      while (l1 + l2 > l1_cal + l2_cal - 5) {
+
+      while (l1 + l2 > l1_cal + l2_cal - 10) {
         v = 100
         u = -err_com
       }
@@ -422,4 +428,19 @@ while (true) {
       padik_fast()
     }
   }
+}
+*/
+
+while (true) {
+  i = 0
+  err_dir_old = 0
+  err_str_old = 0
+
+  while (strres < str_max - 5 and l1 + l2 < l1_cal + l2_cal - 10) {
+    padik_fast()
+  }
+
+  v = 0
+  u = 0
+  mt.stop("BC", true)
 }

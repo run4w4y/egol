@@ -1,5 +1,6 @@
 // reading from file
 
+check.ports("ABC 1234")
 handle = open.r("cal.txt")
 
 values = new.vector(9, 0)
@@ -296,13 +297,13 @@ while (true) {
 		
 		if (i == 0) { //str
 			strmax = 0
-			for (j = 0; j < 2000; ++j) { // progress bar
+			for (j = 0; j < 1000; ++j) { // progress bar
 				if (ispressed(6) == true) { // exit button
 					goto end
 				}
-				if (str3 > strmax) {
-					strmax = str3
-				}
+				
+				strmax = strmax + strres
+
 				p = floor(j/20)
 				scr.clear()
 				scr.rect(1, 37, 48, 105, 10)
@@ -315,6 +316,7 @@ while (true) {
 				txt(1, 89-len(p)*4, 30, 1, p+"%")
 				delay(5)
 			}
+			strmax = strmax / 1000
 			values[i] = strmax
 		}
 		
