@@ -5,6 +5,7 @@
   3. odometry
 */
 
+mt.spw("A", -50)
 check.ports("ABC 1234")
 mt.invert("BC")
 mt.stop("BC", "false")
@@ -68,7 +69,7 @@ void sensors {
 
     dir1 = rm(dir+9, 10)
     if (rm(dir,2) == 0) {
-      strres = (str1 + str2 + str3 + str4 + str5)/1.57
+      strres = (str1 + str2 + str3 + str4 + str5)/1.63
     } else {
       strres = str1 + str2 + str3 + str4 + str5
     }
@@ -131,7 +132,7 @@ void orbit {
     // заход на орбиту
     //r1
     while (true) {
-      u=-(15*((3-dir1))-((3-dir1)/5*10))
+      u=-(25*((3-dir1))-((3-dir1)/5*10))
       err90=rm(compass - com_r + 900, 360) - 180
       v=50
 
@@ -230,7 +231,7 @@ void orbit {
 
       dir_orbit()
 
-      u=-(15*((7-dir2))-((7-dir2)/5*10))
+      u=-(25*((7-dir2))-((7-dir2)/5*10))
       err90 = rm(compass - com_l + 900, 360) - 180
       v=50
       dir3 = dir2
@@ -331,27 +332,32 @@ void padik {
     u=20*(dir1-5)
     v=0
   } else {
-    v = (160-0.75*strres)
+    v = (180-0.75*strres)
 
     if (v > 100) {
       v = 100
     }
 
-    if (v < 30) {
-      v = 30
+    if (v < 40) {
+      v = 40
     } 
 
-    u_1 = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.6*(str3-str4)))
+    u_1 = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.8*(str3-str4)))
     u = u_1 * v * 0.01
   } 
 }
 
 void kicker {
   if (time() - t_attack > 500 and time() - time_def > 1000) {
-    mt.shd.pw("A", 100, 0, 200, 0, true)
+    mt.resetcount("A")
+    while abs(mt.getcount("A")-270 < 0) {
+      mt.spw("A", 100)
+    }
+    mt.stop("A", true)
+
     t_attack = time()
     time_def = time()
-    mt.shd.pw("A", -100, 0, 500, 0, true)
+    mt.spw("A", -50)
   }
 }
 //Threads
@@ -374,11 +380,11 @@ while (true) {
         padik()
       }
       t_attack = time()
-      while (l1 + l2 > l1_cal + l2_cal - 10) {
-        tone(100,100,100)
+      while (l1 + l2 > l1_cal + l2_cal - 10 and abs(dir - 6) < 2) {
+        tone(10,100,100)
         v = 100
         u = -err_com
-        // kicker()
+        kicker()
       }
     }
   } else {
