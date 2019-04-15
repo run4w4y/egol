@@ -1,6 +1,8 @@
 /*TODO:
-  1. attack
-  2. right orbit
+  Main: check new idea of definition side of orbit 
+  1. kicker
+  2. attack
+  3. odometry
 */
 
 check.ports("ABC 1234")
@@ -50,7 +52,7 @@ lim_com_down = 0
 lim_com_up = 0
 dir2 = 0
 dir3 = 0
-
+time_def = time()
 //Subs
 
 void sensors {
@@ -323,83 +325,25 @@ void orbit {
   exit2:
 }
 
-void padik_fast {
+void padik {
   if (abs(dir1 - 5) > 1) {
-
     u=20*(dir1-5)
     v=0
-  
   } else {
-
-    if (time() - t_padik < 1000) {
-      v = 120-0.5*strres
-
-      if (v < 40) {
-        v = 40
-      }
-
-      er_str = str4 - str3
-      er_dir = dir1 - 5
-      u_1 = er_dir * 12 + (er_dir - er_dir_old)*66 + er_str *0.04 + (er_str - er_str_old) * 66 + i * 0.003
-      u = u_1 * v * 0.01
-
-      if (dir1 == 5) {
-        i = 0
-        t_padik = time()
-      }
-
-      if (abs(i) < 50) {
-        i = i + er_str
-      }
-
-      er_dir_old = er_dir
-      er_str_old = er_str
-
-    } else {
-      
-      i = 0
-      v = (str_max - strres) * 0.45
-
-      if (v < 40) {
-        v = 40
-      }
-
-      er_str = str4 - str3
-      er_dir = dir1 - 5
-      u = er_dir * 18 + (er_dir - er_dir_old)*66 + er_str *0.1 + (er_str - er_str_old) * 66
-      
-      er_str_old = er_str
-      er_dir_old = er_dir
-
-      if (dir1 == 5) {
-        t_padik = time()
-      }
-    }
+    v = (120-0.5*strres)
+    u = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.6*(str3-str4)))
   } 
 }
 
-void padik_slow {
-  v=(120-0.4*strres)
-
-  if (v < 40) {
-    v = 40
-  }   
-
-  er_str = str4 - str3
-  u_1 = er_str *0.08 + (er_str - er_str_old) * 66 + i * 0.001
-  u = u_1 * v * 0.01
-
-  if (abs(i) < 50) {
-    i = i + er_str
-  }
-
-  er_str_old = er_str
+void kicker {
+  mt.shd.pw("A", 100, 0, 200, 0, true)
 }
 //Threads
 
 new.thread = sensors
 
-/*
+
+
 // Main
 while (true) {
   if (strres > str_max - 5) {
@@ -411,13 +355,19 @@ while (true) {
       er_dir_old = 0
       er_str_old = 0
       while (strres > str_max - 30 and l1 + l2 < l1_cal + l2_cal) { //slow padik
-        padik_slow()
+        padik()
       }
-
-
+      t_attack = time()
       while (l1 + l2 > l1_cal + l2_cal - 10) {
+        tone(100,100,100)
         v = 100
         u = -err_com
+
+        if (time() - t_attack > 500 and time() - time_def > 1000) {
+          kicker()
+          t_attack = time()
+          time_def = time()
+        }
       }
     }
   } else {
@@ -425,22 +375,7 @@ while (true) {
     er_dir_old = 0
     er_str_old = 0
     while (strres < str_max - 5) {  //padik fast
-      padik_fast()
+      padik()
     }
   }
-}
-*/
-
-while (true) {
-  i = 0
-  err_dir_old = 0
-  err_str_old = 0
-
-  while (strres < str_max - 5 and l1 + l2 < l1_cal + l2_cal - 10) {
-    padik_fast()
-  }
-
-  v = 0
-  u = 0
-  mt.stop("BC", true)
 }
