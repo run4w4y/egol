@@ -53,6 +53,7 @@ lim_com_up = 0
 dir2 = 0
 dir3 = 0
 time_def = time()
+t_attack = time()
 //Subs
 
 void sensors {
@@ -198,7 +199,7 @@ void orbit {
     //r3
   
     if (err90 < 21) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and abs(dir - 6) > 0) {
       
         v = 48
         u = -50
@@ -305,7 +306,7 @@ void orbit {
     //поворот на мяч
     //l3
     if (err90 > -22) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and abs(dir - 6) > 0) {
 
         v = 48
         u = 50
@@ -330,13 +331,28 @@ void padik {
     u=20*(dir1-5)
     v=0
   } else {
-    v = (120-0.5*strres)
-    u = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.6*(str3-str4)))
+    v = (160-0.75*strres)
+
+    if (v > 100) {
+      v = 100
+    }
+
+    if (v < 30) {
+      v = 30
+    } 
+
+    u_1 = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.6*(str3-str4)))
+    u = u_1 * v * 0.01
   } 
 }
 
 void kicker {
-  mt.shd.pw("A", 100, 0, 200, 0, true)
+  if (time() - t_attack > 500 and time() - time_def > 1000) {
+    mt.shd.pw("A", 100, 0, 200, 0, true)
+    t_attack = time()
+    time_def = time()
+    mt.shd.pw("A", -100, 0, 500, 0, true)
+  }
 }
 //Threads
 
@@ -362,12 +378,7 @@ while (true) {
         tone(100,100,100)
         v = 100
         u = -err_com
-
-        if (time() - t_attack > 500 and time() - time_def > 1000) {
-          kicker()
-          t_attack = time()
-          time_def = time()
-        }
+        // kicker()
       }
     }
   } else {
