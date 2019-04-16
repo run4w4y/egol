@@ -69,7 +69,7 @@ void sensors {
 
     dir1 = rm(dir+9, 10)
     if (rm(dir,2) == 0) {
-      strres = (str1 + str2 + str3 + str4 + str5)/1.76
+      strres = (str1 + str2 + str3 + str4 + str5)/1.57
     } else {
       strres = str1 + str2 + str3 + str4 + str5
     }
