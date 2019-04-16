@@ -182,7 +182,7 @@ void orbit {
         if (time() - t0 > 1500) {
           if (compass > lim_com_down) {
             if (compass < lim_com_up) {
-              if (strres < 140) {
+              if (strres < 90) {
                 Goto exit2
               }
             }
@@ -290,7 +290,7 @@ void orbit {
         if (time() - t0 > 1500) {
           if (compass > lim_com_down) {
             if (compass < lim_com_up) {
-              if (strres < 140) {
+              if (strres < 90) {
                 Goto exit2
               }
             }
@@ -342,8 +342,8 @@ void padik {
       v = 40
     } 
 
-    u_1 = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.8*(str3-str4)))
-    u = u_1 * v * 0.01
+    u_1 = 20*(dir-6)+0.065*((0.2*(str5-str2))+(0.9*(str3-str4)))
+    u = u_1 * v * 0.012
   } 
 }
 
