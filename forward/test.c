@@ -104,6 +104,7 @@ void dir_orbit {
 }
 
 void orbit {
+/* 
     // поворот на мяч перед орбитой
   t0 = time()
   while (dir != 6 and time() - t0 < 1000) {
@@ -122,9 +123,10 @@ void orbit {
     }
     v=10
   }
-  
+ */
+
   // определение стороны орбиты
-  if (err_com > 0) {
+  if (err_com-(dir-6)*45 > 0/*err_com > 0*/) {
   //----------------------RIGHT------------------------
     
     err90 = 0
@@ -332,7 +334,7 @@ void padik {
     u=20*(dir1-5)
     v=0
   } else {
-    v = (180-0.75*strres)
+    v = (160-0.75*strres)
 
     if (v > 100) {
       v = 100
@@ -342,7 +344,7 @@ void padik {
       v = 40
     } 
 
-    u_1 = 20*(dir-6)+0.065*((0.2*(str5-str2))+(0.9*(str3-str4)))
+    u_1 = 20*(dir-6)+0.065*((0.3*(str5-str2))+(0.9*(str3-str4)))
     u = u_1 * v * 0.012
   } 
 }
@@ -369,7 +371,7 @@ new.thread = sensors
 // Main
 while (true) {
   if (strres > str_max - 5) {
-    if (abs(err_com)>90) {
+    if (abs(err_com)>60) {
       tone(100,100,100)
       orbit()
     } else {
