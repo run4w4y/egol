@@ -69,7 +69,7 @@ void sensors {
 
     dir1 = rm(dir+9, 10)
     if (rm(dir,2) == 0) {
-      strres = (str1 + str2 + str3 + str4 + str5)/1.78
+      strres = (str1 + str2 + str3 + str4 + str5)/1.57
     } else {
       strres = str1 + str2 + str3 + str4 + str5
     }
@@ -121,6 +121,10 @@ void orbit {
       sgn = 0
     }
     v=10
+
+    if (strres < 90) {
+      Goto exit2
+    }
   }
  
 
@@ -330,11 +334,11 @@ void orbit {
 }
 
 void padik {
-  if (abs(dir1 - 5) > 1) {
-    u=20*(dir1-5)
-    v=0
+  if (dir < 3) {
+    u=36*(dir1-5)
+    v=100-30*abs(dir1-5)
   } else {
-    v = (160-0.75*strres)
+    v = (200-1.1*strres)
 
     if (v > 100) {
       v = 100
@@ -344,8 +348,8 @@ void padik {
       v = 40
     } 
 
-    u_1 = 20*(dir-6)+0.065*((0.3*(str5-str2))+(0.9*(str3-str4)))
-    u = u_1 * v * 0.012
+    u_1 = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.7*(str4-str3)))
+    u = u_1 * v * 0.01
   } 
 }
 
