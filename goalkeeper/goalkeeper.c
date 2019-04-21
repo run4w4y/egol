@@ -13,6 +13,9 @@ BUTTON_DELAY = tonum(readline(handle));
 LIGHT_COLOR_NUM = tonum(readline(handle));
 COMPASS_ALPHA = tonum(readline(handle));
 SEEKER_DIV = tonum(readline(handle)) / 100;
+PORT_MID_MOTOR = "A";
+PORT_LEFT_MOTOR = "B";
+PORT_RIGHT_MOTOR = "C";
 
 // reading from sensors start
 
@@ -148,31 +151,70 @@ func num irseeker_str() { // get seeker current str
 
 // top button start
 
-button_prev_time = time();
-button_prev_value = 0;
+topbutton_prev_time = time();
+topbutton_prev_value = 0;
 
 func num button_top() { // returns 1 if the top button is pressed, else returns 0
     local val;
 
-    if (time() - button_prev_time >= BUTTON_DELAY) {
+    if (time() - topbutton_prev_time >= BUTTON_DELAY) {
         val = sen.percent(PORT_BUTTON);
         if (val == 100) {
-            button_prev_value = 1;
+            topbutton_prev_value = 1;
             return 1;
         } else {
-            button_prev_value = 0;
+            topbutton_prev_value = 0;
             return 0;
         }
     } else {
-        return button_prev_value;
+        return topbutton_prev_value;
     }
 
-    button_prev_time = time();
+    topbutton_prev_time = time();
 }
 
 // top button end
 
+// bot button start
+
+botbutton_prev_time = time();
+botbutton_prev_value = 0;
+
+func num button_bot() { // returns 1 if the top button is pressed, else returns 0
+    if (time() - botbutton_prev_time >= BUTTON_DELAY) {
+        if (btn.rn == "R") {
+            botbutton_prev_value = 1;
+            return 1;
+        } else {
+            botbutton_prev_value = 0;
+            return 0;
+        }
+    } else {
+        return botbutton_prev_value;
+    }
+
+    botbutton_prev_time = time();
+}
+
+// bot button end
+
 // reading from sensors end
+
+// motors start
+
+func num l_m(speed) {
+    mt.spw(PORT_LEFT_MOTOR, speed);
+}
+
+func num r_m(speed) { // right motor move
+    mt.spw(PORT_RIGHT_MOTOR, speed);
+}
+
+func num m_m(speed) { // middle motor move
+    mt.spw(PORT_MID_MOTOR, speed);
+}
+
+// motors end
 
 // main loop goes here
 
@@ -183,5 +225,12 @@ while (true) {
     print("seeker_str", irseeker_str());
     print("seeker_dir", irseeker_dir());
     print("button_top", button_top());
+
+    v = 80;
+    kp = 0.8;
+    err = compass_delta(compass());
+    l_m((v-err*kp));
+    r_m((v+err*kp));
+
     delay(30);
 }
