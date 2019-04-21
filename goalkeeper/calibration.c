@@ -4,30 +4,41 @@ handle = open.r("cal.txt");
 
 values = new.vector(10, 0);
 
-names[0] = "PORT_SEEKER";
-names[1] = "PORT_COMPASS";
-names[2] = "PORT_LIGHT";
-names[3] = "PORT_BUTTON";
-names[4] = "SEEKER_DELAY";
-names[5] = "COMPASS_DELAY";
-names[6] = "LIGHT_DELAY";
-names[7] = "BUTTON_DELAY";
-names[8] = "LIGHT_COLOR_NUM"; 
-names[9] = "COMPASS_ALPHA";
-names[10] = "SEEKER_DIV";
+names[0] = "p_seek";
+names[1] = "p_com";
+names[2] = "p_lt";
+names[3] = "p_btn";
+names[4] = "seek_del";
+names[5] = "com_del";
+names[6] = "lt_del";
+names[7] = "btn_del";
+names[8] = "color_n"; 
+names[9] = "alpha";
+names[10] = "seek_div";
 
 if (handle == 0) {
 	PORT_SEEKER = 4;
+	values[0] = PORT_SEEKER;
 	PORT_COMPASS = 2;
+	values[1] = PORT_COMPASS;
 	PORT_LIGHT = 1;
+	values[2] = PORT_LIGHT;
 	PORT_BUTTON = 3;
+	values[3] = PORT_BUTTON;
 	SEEKER_DELAY = 50;
+	values[4] = SEEKER_DELAY;
 	COMPASS_DELAY = 50;
+	values[5] = COMPASS_DELAY;
 	LIGHT_DELAY = 50;
+	values[6] = LIGHT_DELAY;
 	BUTTON_DELAY = 50;
+	values[7] = BUTTON_DELAY;
 	LIGHT_COLOR_NUM = 1;
+	values[8] = LIGHT_COLOR_NUM;
 	COMPASS_ALPHA = 100;
+	values[9] = COMPASS_ALPHA;
 	SEEKER_DIV = 100;
+	values[10] = SEEKER_DIV;
 } else {
 	PORT_SEEKER = tonum(readline(handle));
 	values[0] = PORT_SEEKER;
@@ -60,13 +71,6 @@ closef(handle);
 sen.setmode(1, 1);
 sen.setmode(3, 4);
 
-com_kp = 1;
-com_kd = 0.001;
-com_ki = 0.0001;
-err_com_old = 0;
-com_i = 0;
-
-alpha = com_mid;
 name = getname();
 
 void bottom { // values in the bottom of the screen
@@ -200,19 +204,15 @@ while (true) {
 	}
 	
 	if (btn == "D") { // down button action
-		if (i != ) {
-			if (prev_button = "D") {
-				button_counter = button_counter + 1;
-			} else {
-				button_counter = 0;
-			}
-			if (button_counter < 6) {
-				values[i] = values[i] - 1;
-			} else {
-				values[i] = values[i] - 5;
-			}
+		if (prev_button = "D") {
+			button_counter = button_counter + 1;
 		} else {
-
+			button_counter = 0;
+		}
+		if (button_counter < 6) {
+			values[i] = values[i] - 1;
+		} else {
+			values[i] = values[i] - 5;
 		}
 	}
 	
@@ -233,7 +233,7 @@ while (true) {
 			if (values[i] <= 1) {
 				values[i] = 1;
 			} else {
-				if (values >= 4) {
+				if (values[i] >= 4) {
 					values[i] = 4;
 				}
 			}
@@ -243,7 +243,7 @@ while (true) {
 			if (values[i] <= 1) {
 				values[i] = 1;
 			} else {
-				if (values >= 4) {
+				if (values[i] >= 4) {
 					values[i] = 4;
 				}
 			}
@@ -253,7 +253,7 @@ while (true) {
 			if (values[i] <= 1) {
 				values[i] = 1;
 			} else {
-				if (values >= 4) {
+				if (values[i] >= 4) {
 					values[i] = 4;
 				}
 			}
@@ -263,7 +263,7 @@ while (true) {
 			if (values[i] <= 1) {
 				values[i] = 1;
 			} else {
-				if (values >= 4) {
+				if (values[i] >= 4) {
 					values[i] = 4;
 				}
 			}

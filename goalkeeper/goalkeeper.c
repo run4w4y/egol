@@ -18,20 +18,6 @@ SEEKER_DIV = tonum(readline(handle)) / 100;
 
 // light sensor start
 
-LIGHT_COLOR = 'g';
-
-if (LIGHT_COLOR_NUM == 0) {
-    LIGHT_COLOR = 'r';
-} else {
-    if (LIGHT_COLOR_NUM == 1) {
-        LIGHT_COLOR = 'g';
-    } else {
-        if (LIGHT_COLOR_NUM == 2) {
-            LIGHT_COLOR = 'b';
-        }
-    }
-}
-
 sen.setmode(PORT_LIGHT, 4);
 
 light_prev_time = time();
@@ -39,23 +25,8 @@ light_prev_value = 0;
 
 func num light() { // get current value of the selected color based on the light sens
     if (time() - light_prev_time >= LIGHT_DELAY) {
-        local r;
-        local g;
-        local b;
-        local light_val;
-        sen.readrgb(PORT_LIGHT, r, g, b);
-
-        if (LIGHT_COLOR == 'r') {
-            light_val = r;
-        } else { 
-            if (LIGHT_COLOR == 'g') {
-                light_val = g;
-            } else { 
-                if (LIGHT_COLOR == 'b') {
-                    light_val = b;
-                }
-            }
-        }
+        local light_val = 0;
+        light_val = sen.read.rawval(PORT_LIGHT, LIGHT_COLOR_NUM);
 
         light_prev_value = light_val;
         return light_val;
@@ -74,7 +45,6 @@ compass_prev_time = time();
 compass_prev_value = 0;
 
 func num compass() { // get compass current azimut
-    local compass_array;
     local compass;
     if (time() - compass_prev_time >= COMPASS_DELAY) {
         compass_array = i2c.readregs(2, 1, 66, 4);
@@ -89,7 +59,8 @@ func num compass() { // get compass current azimut
 }
 
 func num compass_delta(compass_value) { // get compass delta based
-    local error = rm(compass_value - COMPASS_ALPHA + 900, 360) - 180;
+    local error = 0;
+    error = rm(compass_value - COMPASS_ALPHA + 900, 360) - 180;
     return error;
 }
 
@@ -102,7 +73,6 @@ seeker_prev_dir = 0;
 seeker_prev_str = 0;
 
 func num irseeker_dir() { // get seeker current dir
-    local irseeker_array;
     local dir;
     local str1;
     local str2;
@@ -139,7 +109,6 @@ func num irseeker_dir() { // get seeker current dir
 }
 
 func num irseeker_str() { // get seeker current str
-    local irseeker_array;
     local dir;
     local str1;
     local str2;
@@ -177,16 +146,42 @@ func num irseeker_str() { // get seeker current str
 
 // irseeker end
 
-// button start
+// top button start
 
+button_prev_time = time();
+button_prev_value = 0;
 
+func num button_top() { // returns 1 if the top button is pressed, else returns 0
+    local val;
 
-// button end
+    if (time() - button_prev_time >= BUTTON_DELAY) {
+        val = sen.percent(PORT_BUTTON);
+        if (val == 100) {
+            button_prev_value = 1;
+            return 1;
+        } else {
+            button_prev_value = 0;
+            return 0;
+        }
+    } else {
+        return button_prev_value;
+    }
+
+    button_prev_time = time();
+}
+
+// top button end
 
 // reading from sensors end
 
 // main loop goes here
 
 while (true) {
-    // some code
+    printupd();
+    print("light", light());
+    print("compass", compass());
+    print("seeker_str", irseeker_str());
+    print("seeker_dir", irseeker_dir());
+    print("button_top", button_top());
+    delay(30);
 }
