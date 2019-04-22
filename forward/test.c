@@ -55,6 +55,11 @@ dir2 = 0
 dir3 = 0
 time_def = time()
 t_attack = time()
+x = 0
+y = 0
+b = 0
+c = 0
+
 //Subs
 
 void sensors {
@@ -84,6 +89,15 @@ void sensors {
     mt.spw("B", v + u)
     mt.spw("C", v - u)
 
+    e1 = mt.getcount("B")
+    e2 = mt.getcount("C")
+
+    dx = (e1 - b + e2 - c)*0.0453*sin(err_com*pi/180)
+    dy = (e1 - b + e2 - c)*0.0453*cos(err_com*pi/180)
+    x = x + dx
+    y = -(y + dy)
+    b = e1
+    c = e2
   }
 }
 
@@ -174,7 +188,7 @@ void orbit {
         l=r+30
         u=-((1*(d*90)/(2*l))+(0.4*(r - strres)))
       } else {
-        u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.45*(r-strres)))
+        u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.45*(strres - r)))
         v=70
       }
 
