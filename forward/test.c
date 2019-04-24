@@ -352,7 +352,7 @@ void padik {
     u=36*(dir1-5)
     v=100-30*abs(dir1-5)
   } else {
-    v = (200-1.1*strres)
+    v = (180-1.1*strres)
 
     if (v > 100) {
       v = 100
@@ -362,7 +362,7 @@ void padik {
       v = 40
     } 
 
-    u_1 = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.7*(str4-str3)))
+    u_1 = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.9*(str4-str3)))
     u = u_1 * v * 0.01
   } 
 }
@@ -401,8 +401,8 @@ while (true) {
         padik()
       }
       t_attack = time()
-      while (l1 + l2 > l1_cal + l2_cal - 10 and abs(dir - 6) < 2) {
-        tone(30,1000,100)
+      while (l1 + l2 > l1_cal + l2_cal - 10 /*and abs(dir - 6) < 2*/) {
+        tone(100,100,100)
         v = 100
         u = -err_com
         kicker()
