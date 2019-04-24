@@ -1,3 +1,5 @@
+check.ports("ABC 1234"); // checks if everything is connected properly
+
 // const values from calibration
 
 handle = open.r("cal.txt"); // open the file with values
@@ -74,6 +76,11 @@ func num compass_delta(compass_value) { // get compass delta based
 seeker_prev_time = time();
 seeker_prev_dir = 0;
 seeker_prev_str = 0;
+seeker_prev_str1 = 0;
+seeker_prev_str2 = 0;
+seeker_prev_str3 = 0;
+seeker_prev_str4 = 0;
+seeker_prev_str5 = 0;
 
 func num irseeker_dir() { // get seeker current dir
     local dir;
@@ -90,10 +97,15 @@ func num irseeker_dir() { // get seeker current dir
         seeker_prev_dir = dir;
 
         str1 = irseeker_array[1];
+        seeker_prev_str1 = str1;
         str2 = irseeker_array[2];
+        seeker_prev_str2 = str2;
         str3 = irseeker_array[3];
+        seeker_prev_str3 = str3;
         str4 = irseeker_array[4];
+        seeker_prev_str4 = str4;
         str5 = irseeker_array[5];
+        seeker_prev_str1 = str5;
 
         local strres = 0;
         if (rm(dir,2) == 0) {
@@ -111,7 +123,7 @@ func num irseeker_dir() { // get seeker current dir
     seeker_prev_time = time();
 }
 
-func num irseeker_str() { // get seeker current str
+func num irseeker_str(strnum) { // get seeker current str
     local dir;
     local str1;
     local str2;
@@ -126,10 +138,15 @@ func num irseeker_str() { // get seeker current str
         seeker_prev_dir = dir;
 
         str1 = irseeker_array[1];
+        seeker_prev_str1 = str1;
         str2 = irseeker_array[2];
+        seeker_prev_str2 = str2;
         str3 = irseeker_array[3];
+        seeker_prev_str3 = str3;
         str4 = irseeker_array[4];
+        seeker_prev_str4 = str4;
         str5 = irseeker_array[5];
+        seeker_prev_str5 = str5;
 
         local strres = 0;
         if (rm(dir,2) == 0) {
@@ -139,9 +156,43 @@ func num irseeker_str() { // get seeker current str
         }
         seeker_prev_str = strres;
 
-        return strres;
+        if (strnum == 0) {
+            return strres;
+        }
+        if (strnum == 1) {
+            return str1;
+        }
+        if (strnum == 2) {
+            return str2;
+        }
+        if (strnum == 3) {
+            return str3;
+        }
+        if (strnum == 4) {
+            return str4;
+        }
+        if (strnum == 5) {
+            return str5;
+        }
     } else {
-        return seeker_prev_str;
+        if (strnum == 0) {
+            return seeker_prev_str;
+        }
+        if (strnum == 1) {
+            return seeker_prev_str1;
+        }
+        if (strnum == 2) {
+            return seeker_prev_str2;
+        }
+        if (strnum == 3) {
+            return seeker_prev_str3;
+        }
+        if (strnum == 4) {
+            return seeker_prev_str4;
+        }
+        if (strnum == 5) {
+            return seeker_prev_str5;
+        }
     }
 
     seeker_prev_time = time();
@@ -202,7 +253,7 @@ func num button_bot() { // returns 1 if the top button is pressed, else returns 
 
 // motors start
 
-func num l_m(speed) {
+func num l_m(speed) { // left motor move
     mt.spw(PORT_LEFT_MOTOR, speed);
 }
 
@@ -216,21 +267,38 @@ func num m_m(speed) { // middle motor move
 
 // motors end
 
-// main loop goes here
+// other functions
 
-while (true) {
-    printupd();
-    print("light", light());
-    print("compass", compass());
-    print("seeker_str", irseeker_str());
-    print("seeker_dir", irseeker_dir());
-    print("button_top", button_top());
+void watch {
+    kp_watch = 0.2;
+    kd_watch = 0.0465;
+    ki_watch = 0.001;
+    error_watch = 0;
+    error_old_watch = 0;
+    i_watch = 0;
+    k_dir_watch = 0;
 
-    v = 80;
-    kp = 0.8;
-    err = compass_delta(compass());
-    l_m((v-err*kp));
-    r_m((v+err*kp));
+    while (true) {
+        i_watch = i_watch + error_watch*ki_watch;
+        if (irseeker_dir() != 0 and abs(compass_delta(compass())) <= 90) {
+            error_watch = irseeker_str(4) - irseeker_str(3);
+            u_watch = k_dir_watch*(irseeker_dir() - 6) + kp_watch*error_watch + kd_watch*error_old_watch + i_watch;
 
-    delay(30);
+            printupd();
+            print("error", error_watch);
+            print("u", u_watch);
+
+            l_m((u_watch));
+            r_m((0-u_watch));
+
+            error_old_watch = error_watch;
+        } else {
+            l_m(0);
+            r_m(0);
+        }
+    }
 }
+
+// main part of the program
+
+watch();
