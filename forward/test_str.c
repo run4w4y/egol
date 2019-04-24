@@ -59,6 +59,7 @@ x = 0
 y = 0
 b = 0
 c = 0
+strres_old = 0
 
 //Subs
 
@@ -104,5 +105,8 @@ void sensors {
 new.thread = sensors
 handle1 = open.w("Test_str.txt")
 while (true) {
-    writeline(handle1, strres)
+    if (strres != strres_old) {
+      writeline(handle1, strres)
+    }
+    strres_old = strres
 }
