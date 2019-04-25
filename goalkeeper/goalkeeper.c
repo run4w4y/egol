@@ -270,32 +270,58 @@ func num m_m(speed) { // middle motor move
 // other functions
 
 void watch {
-    kp_watch = 0.2;
-    kd_watch = 0.0465;
+    kp_watch = 0.28;
+    kd_watch = 0.195;
     ki_watch = 0.001;
     error_watch = 0;
     error_old_watch = 0;
     i_watch = 0;
     k_dir_watch = 0;
+    prev_dir_watch = 0;
+
+    SEEKER_STR_MAX = 165;
 
     while (true) {
         i_watch = i_watch + error_watch*ki_watch;
-        if (irseeker_dir() != 0 and abs(compass_delta(compass())) <= 90) {
+        if (irseeker_dir() != 0) {
             error_watch = irseeker_str(4) - irseeker_str(3);
+            if (irseeker_str(4) == 0 and irseeker_str(3) == 0) {
+                k_dir_watch = 14;
+            } else {
+                k_dir_watch = 0;
+            }
+
             u_watch = k_dir_watch*(irseeker_dir() - 6) + kp_watch*error_watch + kd_watch*error_old_watch + i_watch;
+            if ((abs(error_watch) <= 20 or irseeker_dir() == 6) and k_dir_watch == 0) {
+                u_watch = 0;
+            }
 
-            printupd();
-            print("error", error_watch);
-            print("u", u_watch);
+            k_dist = (SEEKER_STR_MAX-irseeker_str(0))/SEEKER_STR_MAX;
+            if (k_dist <= 0.4) {
+                k_dist = 0.2;
+            }
 
-            l_m((u_watch));
-            r_m((0-u_watch));
+            l_m((k_dist*u_watch));
+            r_m((0-k_dist*u_watch));
 
             error_old_watch = error_watch;
+            prev_dir_watch = irseeker_dir();
         } else {
             l_m(0);
             r_m(0);
         }
+
+        printupd();
+        print("error", error_watch);
+        print("u", u_watch);
+        print("strres", irseeker_str(0));
+        print("str3", irseeker_str(3));
+        print("str4", irseeker_str(4));
+        print("dir", irseeker_dir());
+        print("k_dir", k_dir_watch);
+        print("k_dist", k_dist);
+
+        delay(10);
     }
 }
 
