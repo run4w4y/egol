@@ -270,16 +270,16 @@ func num m_m(speed) { // middle motor move
 // other functions
 
 void watch {
-    kp_watch = 0.28;
-    kd_watch = 0.195;
-    ki_watch = 0.001;
+    kp_watch = 0.4;
+    kd_watch = 0;
+    ki_watch = 0.003;
     error_watch = 0;
     error_old_watch = 0;
     i_watch = 0;
     k_dir_watch = 0;
     prev_dir_watch = 0;
 
-    SEEKER_STR_MAX = 165;
+    SEEKER_STR_MAX = 195;
 
     while (true) {
         i_watch = i_watch + error_watch*ki_watch;
@@ -289,6 +289,10 @@ void watch {
                 k_dir_watch = 14;
             } else {
                 k_dir_watch = 0;
+            }
+
+            if (irseeker_dir() == 6) {
+                i_watch = 0;
             }
 
             u_watch = k_dir_watch*(irseeker_dir() - 6) + kp_watch*error_watch + kd_watch*error_old_watch + i_watch;
@@ -310,17 +314,7 @@ void watch {
             l_m(0);
             r_m(0);
         }
-
-        printupd();
-        print("error", error_watch);
-        print("u", u_watch);
-        print("strres", irseeker_str(0));
-        print("str3", irseeker_str(3));
-        print("str4", irseeker_str(4));
-        print("dir", irseeker_dir());
-        print("k_dir", k_dir_watch);
-        print("k_dist", k_dist);
-
+        
         delay(10);
     }
 }
