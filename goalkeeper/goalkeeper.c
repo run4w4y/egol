@@ -305,6 +305,13 @@ void watch {
                 k_dist = 0.2;
             }
 
+            if (u_watch <= 0 and compass_delta(compass()) <= -90) {
+                u_watch = 0;
+            }
+            if (u_watch >= 0 and compass_delta(compass()) >= 90) {
+                u_watch = 0;
+            }
+
             l_m((k_dist*u_watch));
             r_m((0-k_dist*u_watch));
 
@@ -314,7 +321,7 @@ void watch {
             l_m(0);
             r_m(0);
         }
-        
+
         delay(10);
     }
 }
