@@ -376,6 +376,16 @@ void kicker {
   }
 }
 
+void attack {
+  t_attack = time()
+  while (l1 > l1_cal - 5 and l2 > l2_cal - 5 /*and abs(dir - 6) < 2*/) {
+    tone(100,100,100)
+    v = 100
+    u = -err_com
+    kicker()
+  }
+}
+
 void fast_return {
   while (abs(dir1 - 5) > 1) {
     v = -100
@@ -394,24 +404,18 @@ while (true) {
     fl_attack = 0
   }
 
-  if (strres > str_max - 5) {
+  if (strres > str_max) {
     if (abs(err_com)>80) {
       tone(100,100,100)
       orbit()
     } else {
-      while (strres > str_max - 30 and l1 + l2 < l1_cal + l2_cal) { //slow padik
+      while (strres > str_max and l1 < l1_cal and l2 < l2_cal) { //slow padik
         padik()
       }
-      t_attack = time()
-      while (l1 + l2 > l1_cal + l2_cal - 10 /*and abs(dir - 6) < 2*/) {
-        tone(100,100,100)
-        v = 100
-        u = -err_com
-        kicker()
-      }
+      attack()
     }
   } else {
-    while (strres < str_max - 5) {  //padik fast
+    while (strres < str_max) {  //padik fast
       padik()
     }
   }
