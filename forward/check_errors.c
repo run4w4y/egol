@@ -1,9 +1,17 @@
 /*TODO:
   Main: check new idea of definition side of orbit 
-  1. kicker
-  2. attack
-  3. odometry
+  1. slowing
+  2. padik
+  3. right orbit
+  4. attack arc  
+  5. communication with goalkeeper
+  6. odometry side_check  
+  7. block checking
 */
+
+if (voltagern() < 8.00) {
+  play(100, "Kung fu")
+}
 
 mt.spw("A", -50)
 check.ports("ABC 1234")
@@ -59,7 +67,6 @@ x = 0
 y = 0
 b = 0
 c = 0
-strres_old = 0
 
 //Subs
 
@@ -102,37 +109,10 @@ void sensors {
   }
 }
 
-void padik {
-  if (dir < 3) {
-    u=36*(dir1-5)
-    v=100-30*abs(dir1-5)
-  } else {
-    v = (190-1.5*strres)
-
-    if (v > 100) {
-      v = 100
-    }
-
-    if (v < 40) {
-      v = 40
-    } 
-
-    u_1 = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.9*(str4-str3)))
-    u = u_1 * v * 0.01
-  } 
-}
-
 new.thread = sensors
-handle1 = open.w("Test_str.txt")
+
 while (true) {
-  while (l1 + l2 < l1_cal + l2_cal) {
-    padik()
-    if (strres_old != strres) {
-      writeline(handle1, v)
-      strres_old = strres
-    }
-  }
-  v = 0
-  u = 0
-  mt.stop("BC", true)
+    printupd()
+    print("str", 0.935*((0.9*(str5-str2))+(0.4*(str4-str3))))
+    print("dir", 20*(dir-6))
 }

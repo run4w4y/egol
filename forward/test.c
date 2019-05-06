@@ -1,8 +1,12 @@
 /*TODO:
   Main: check new idea of definition side of orbit 
-  1. kicker
-  2. attack
-  3. odometry
+  1. slowing
+  2. padik
+  3. right orbit
+  4. attack arc  
+  5. communication with goalkeeper
+  6. odometry side_check  
+  7. block checking
 */
 
 mt.spw("A", -50)
@@ -74,7 +78,7 @@ void sensors {
 
     dir1 = rm(dir+9, 10)
     if (rm(dir,2) == 0) {
-      strres = (str1 + str2 + str3 + str4 + str5)/1.57
+      strres = (str1 + str2 + str3 + str4 + str5)/1.9 //1.57
     } else {
       strres = str1 + str2 + str3 + str4 + str5
     }
@@ -352,7 +356,7 @@ void padik {
     u=36*(dir1-5)
     v=100-30*abs(dir1-5)
   } else {
-    v = (180-1.1*strres)
+    v = (220-1.5*strres)
 
     if (v > 100) {
       v = 100
@@ -362,7 +366,7 @@ void padik {
       v = 40
     } 
 
-    u_1 = 20*(dir-6)+0.065*((0.1*(str5-str2))+(0.9*(str4-str3)))
+    u_1 = 0*(dir-6)+1.7*(str5-str2)+0.3*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -389,20 +393,23 @@ new.thread = sensors
 // Main
 while (true) {
 
-  if (strres > str_max - 5) {
+/*  if (strres > str_max - 5) {
     if (abs(err_com)>80) {
       tone(100,100,100)
       orbit()
     } else {
+*/
       i = 0
       er_dir_old = 0
       er_str_old = 0
-      while (strres > str_max - 30 and l1 + l2 < l1_cal + l2_cal) { //slow padik
+      while (strres > str_max and l1 + l2 < l1_cal + l2_cal) { //slow padik
         padik()
       }
+/*
+
       t_attack = time()
-      while (l1 + l2 > l1_cal + l2_cal - 10 /*and abs(dir - 6) < 2*/) {
-        tone(100,100,100)
+      while (l1 + l2 > l1_cal + l2_cal - 10 /*and abs(dir - 6) < 2 *) {
+        tone(100,100,100) 
         v = 100
         u = -err_com
         kicker()
@@ -416,4 +423,5 @@ while (true) {
       padik()
     }
   }
+*/
 }
