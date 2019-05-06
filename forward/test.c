@@ -216,7 +216,7 @@ void orbit {
       while (abs(err_com) > 10 and l1 + l2 < l1_cal + l2_cal and dir - 6 < 0) {
       
         v = 50
-        u = -40
+        u = -30
 
         if (dir < 7) {
           if (abs(err_com) < 69) { 
@@ -324,7 +324,7 @@ void orbit {
       while (abs(err_com) > 10 and l1 + l2 < l1_cal + l2_cal and dir - 6 > 0) {
 
         v = 50
-        u = 40
+        u = 30
 
         if (dir > 5) {
           if (abs(err_com) < 69) {
@@ -362,7 +362,7 @@ void padik {
 }
 
 void kicker {
-  if (time() - t_attack > 1000 and time() - time_def > 1000) {
+  if (time() - t_attack > 700 and time() - time_def > 1000) {
     mt.resetcount("A")
     while abs(mt.getcount("A")-270 < 0) {
       mt.spw("A", 100)
