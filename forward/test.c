@@ -78,7 +78,7 @@ void sensors {
 
     dir1 = rm(dir+9, 10)
     if (rm(dir,2) == 0) {
-      strres = (str1 + str2 + str3 + str4 + str5)/1.9 //1.57
+      strres = (str1 + str2 + str3 + str4 + str5)/1.57 //1.9
     } else {
       strres = str1 + str2 + str3 + str4 + str5
     }
@@ -126,19 +126,8 @@ void orbit {
   // поворот на мяч перед орбитой
   t0 = time()
   while (dir != 6 and time() - t0 < 1000) {
-    u=-(22*(6-dir)+0.08*((str3-str4))+sgn*10)
-  
-    if (u > 0) {
-      sgn = 1
-    }
-    if (u < 0) {
-      sgn = -1
-    } 
-  
-    if (u == 0) {
-      sgn = 0
-    }
-    v=10
+    u=-(30*(6-dir)+0.08*(str3-str4))
+    v = 10
 
     if (strres < 90) {
       Goto exit2
@@ -175,7 +164,7 @@ void orbit {
     //орбита
     //r2
     err90 = 999
-    while (err90 > 8) {
+    while (err90 > 0) {
       if (dir > 5) {
         if (dir > 6) {
           err90=rm(compass - com_r + 900, 360) - 180+45
@@ -190,9 +179,9 @@ void orbit {
         v=80
         d=145
         l=r+30
-        u=-((1*(d*90)/(2*l))+(0.4*(r - strres)))
+        u=-((1*(d*90)/(2*l))+(0.45*(r-strres)))
       } else {
-        u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.45*(strres - r)))
+        u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.4*(r-strres)))
         v=70
       }
 
@@ -223,10 +212,10 @@ void orbit {
     //r3
   
     if (err90 < 21) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and abs(dir - 6) > 0) {
+      while (abs(err_com) > 10 and l1 + l2 < l1_cal + l2_cal and dir - 6 < 0) {
       
-        v = 48
-        u = -50
+        v = 50
+        u = -40
 
         if (dir < 7) {
           if (abs(err_com) < 69) { 
@@ -282,7 +271,7 @@ void orbit {
     dir2 = dir1
     dir3 = dir2
 
-    while (err90 < -8) {
+    while (err90 < 0) {
       if (dir > 5) {
         if (dir > 6) {
           err90 = rm(compass - com_l + 900, 360) - 180+40
@@ -331,10 +320,10 @@ void orbit {
     //поворот на мяч
     //l3
     if (err90 > -22) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and abs(dir - 6) > 0) {
+      while (abs(err_com) > 10 and l1 + l2 < l1_cal + l2_cal and dir - 6 > 0) {
 
-        v = 48
-        u = 50
+        v = 50
+        u = 40
 
         if (dir > 5) {
           if (abs(err_com) < 69) {
@@ -356,7 +345,7 @@ void padik {
     u=36*(dir1-5)
     v=100-30*abs(dir1-5)
   } else {
-    v = (220-1.5*strres)
+    v = (220-1.45*strres)
 
     if (v > 100) {
       v = 100
@@ -366,7 +355,7 @@ void padik {
       v = 40
     } 
 
-    u_1 = 0*(dir-6)+1.7*(str5-str2)+0.3*(str4-str3)
+    u_1 = 0*(dir-6)+1.1*(str5-str2)+0.3*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -388,40 +377,28 @@ void kicker {
 
 new.thread = sensors
 
-
-
 // Main
 while (true) {
 
-/*  if (strres > str_max - 5) {
+  if (strres > str_max - 5) {
     if (abs(err_com)>80) {
       tone(100,100,100)
       orbit()
     } else {
-*/
-      i = 0
-      er_dir_old = 0
-      er_str_old = 0
-      while (strres > str_max and l1 + l2 < l1_cal + l2_cal) { //slow padik
+      while (strres > str_max - 30 and l1 + l2 < l1_cal + l2_cal) { //slow padik
         padik()
       }
-/*
-
       t_attack = time()
-      while (l1 + l2 > l1_cal + l2_cal - 10 /*and abs(dir - 6) < 2 *) {
-        tone(100,100,100) 
+      while (l1 + l2 > l1_cal + l2_cal - 10 /*and abs(dir - 6) < 2*/) {
+        tone(100,100,100)
         v = 100
         u = -err_com
         kicker()
       }
     }
   } else {
-    i = 0
-    er_dir_old = 0
-    er_str_old = 0
     while (strres < str_max - 5) {  //padik fast
       padik()
     }
   }
-*/
 }
