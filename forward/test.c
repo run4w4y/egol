@@ -213,10 +213,10 @@ void orbit {
     //r3
   
     if (err90 < 21) {
-      while (abs(err_com) > 10 and l1 + l2 < l1_cal + l2_cal and dir - 6 < 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir - 6 < 0) {
       
         v = 50
-        u = -30
+        u = -48
 
         if (dir < 7) {
           if (abs(err_com) < 69) { 
@@ -321,10 +321,10 @@ void orbit {
     //поворот на мяч
     //l3
     if (err90 > -22) {
-      while (abs(err_com) > 10 and l1 + l2 < l1_cal + l2_cal and dir - 6 > 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir - 6 > 0) {
 
         v = 50
-        u = 30
+        u = 48
 
         if (dir > 5) {
           if (abs(err_com) < 69) {
