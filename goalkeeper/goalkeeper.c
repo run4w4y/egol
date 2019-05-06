@@ -18,6 +18,7 @@ SEEKER_DIV = tonum(readline(handle)) / 100;
 PORT_MID_MOTOR = "A";
 PORT_LEFT_MOTOR = "B";
 PORT_RIGHT_MOTOR = "C";
+STR_LIMIT = 130;
 
 // reading from sensors start
 
@@ -30,6 +31,7 @@ light_prev_value = 0;
 
 func num light() { // get current value of the selected color based on the light sens
     if (time() - light_prev_time >= LIGHT_DELAY) {
+        light_prev_time = time();
         local light_val = 0;
         light_val = sen.read.rawval(PORT_LIGHT, LIGHT_COLOR_NUM);
 
@@ -38,8 +40,6 @@ func num light() { // get current value of the selected color based on the light
     } else {
        return light_prev_value;
     }
-
-    light_prev_time = time();
 }
 
 // light sensor end 
@@ -52,6 +52,7 @@ compass_prev_value = 0;
 func num compass() { // get compass current azimut
     local compass;
     if (time() - compass_prev_time >= COMPASS_DELAY) {
+        compass_prev_time = time();
         compass_array = i2c.readregs(2, 1, 66, 4);
         compass = compass_array[0] * 2 + compass_array[1];
         compass_prev_value = compass;
@@ -59,8 +60,6 @@ func num compass() { // get compass current azimut
     } else {
         return compass_prev_value;
     }
-
-    compass_prev_time = time();
 }
 
 func num compass_delta(compass_value) { // get compass delta based
@@ -91,6 +90,7 @@ func num irseeker_dir() { // get seeker current dir
     local str5;
 
     if (time() - seeker_prev_time >= SEEKER_DELAY) {
+        seeker_prev_time = time();
         irseeker_array = i2c.readregs(4, 8, 73, 6);
         
         dir = irseeker_array[0];
@@ -119,8 +119,6 @@ func num irseeker_dir() { // get seeker current dir
     } else {
         return seeker_prev_dir;
     }
-
-    seeker_prev_time = time();
 }
 
 func num irseeker_str(strnum) { // get seeker current str
@@ -132,6 +130,7 @@ func num irseeker_str(strnum) { // get seeker current str
     local str5;
 
     if (time() - seeker_prev_time >= SEEKER_DELAY) {
+        seeker_prev_time = time();
         irseeker_array = i2c.readregs(4, 8, 73, 6);
         
         dir = irseeker_array[0];
@@ -194,8 +193,6 @@ func num irseeker_str(strnum) { // get seeker current str
             return seeker_prev_str5;
         }
     }
-
-    seeker_prev_time = time();
 }
 
 // irseeker end
@@ -209,6 +206,7 @@ func num button_top() { // returns 1 if the top button is pressed, else returns 
     local val;
 
     if (time() - topbutton_prev_time >= BUTTON_DELAY) {
+        topbutton_prev_time = time();
         val = sen.percent(PORT_BUTTON);
         if (val == 100) {
             topbutton_prev_value = 1;
@@ -220,8 +218,6 @@ func num button_top() { // returns 1 if the top button is pressed, else returns 
     } else {
         return topbutton_prev_value;
     }
-
-    topbutton_prev_time = time();
 }
 
 // top button end
@@ -233,6 +229,7 @@ botbutton_prev_value = 0;
 
 func num button_bot() { // returns 1 if the top button is pressed, else returns 0
     if (time() - botbutton_prev_time >= BUTTON_DELAY) {
+        botbutton_prev_time = time();
         if (btn.rn == "R") {
             botbutton_prev_value = 1;
             return 1;
@@ -243,8 +240,6 @@ func num button_bot() { // returns 1 if the top button is pressed, else returns 
     } else {
         return botbutton_prev_value;
     }
-
-    botbutton_prev_time = time();
 }
 
 // bot button end
@@ -270,35 +265,108 @@ func num m_m(speed) { // middle motor move
 // other functions
 
 void watch {
-    kp_watch = 0.2;
-    kd_watch = 0.0465;
-    ki_watch = 0.001;
+    kp_watch = 0.4;
+    kd_watch = 0;
+    ki_watch = 0.003;
     error_watch = 0;
     error_old_watch = 0;
     i_watch = 0;
     k_dir_watch = 0;
+    watch_bool = 0;
 
-    while (true) {
+    SEEKER_STR_MAX = 195;
+
+    while (watch_bool == 0) {
         i_watch = i_watch + error_watch*ki_watch;
-        if (irseeker_dir() != 0 and abs(compass_delta(compass())) <= 90) {
+        if (irseeker_dir() != 0) {
             error_watch = irseeker_str(4) - irseeker_str(3);
+            if (irseeker_str(4) == 0 and irseeker_str(3) == 0) {
+                k_dir_watch = 14;
+            } else {
+                k_dir_watch = 0;
+            }
+
+            if (irseeker_dir() == 6) {
+                i_watch = 0;
+            }
+
             u_watch = k_dir_watch*(irseeker_dir() - 6) + kp_watch*error_watch + kd_watch*error_old_watch + i_watch;
+            if ((abs(error_watch) <= 20 or irseeker_dir() == 6) and k_dir_watch == 0) {
+                u_watch = 0;
+            }
 
-            printupd();
-            print("error", error_watch);
-            print("u", u_watch);
+            k_dist = (SEEKER_STR_MAX-irseeker_str(0))/SEEKER_STR_MAX;
+            if (k_dist <= 0.4) {
+                k_dist = 0.2;
+            }
 
-            l_m((u_watch));
-            r_m((0-u_watch));
+            if (u_watch <= 0 and compass_delta(compass()) <= -90) {
+                u_watch = 0;
+            }
+            if (u_watch >= 0 and compass_delta(compass()) >= 90) {
+                u_watch = 0;
+            }
+
+            l_m((k_dist*u_watch));
+            r_m((0-k_dist*u_watch));
 
             error_old_watch = error_watch;
+            prev_dir_watch = irseeker_dir();
         } else {
             l_m(0);
             r_m(0);
         }
+
+        if (irseeker_str(0) > STR_LIMIT) {
+            watch_bool = 1;
+        }
+        
+        delay(10);
     }
+}
+
+void go_back {
+    v_back = 80;
+    kp_back = 0.4;
+
+    while (button_top() != 1) {
+        error_back = compass_delta();
+    }
+}
+
+void act {
+    kp_act = 0.4;
+    v_act = 80;
+    
+    printupd();
+    print("light", light());
+
+    while (light() >= 10) {
+        error_act = irseeker_str(4) - irseeker_str(3);
+        u_act = kp_act*error_act;
+        if (u_act <= 0 and compass_delta(compass()) <= -90) {
+            u_act = 0;
+        }
+        if (u_act >= 0 and compass_delta(compass()) >= 90) {
+            u_act = 0;
+        }
+
+        l_m((v_act+k_dist*u_watch));
+        r_m((v_act-k_dist*u_watch));
+    }
+
+    l_m(0);
+    r_m(0);
+    m_m(100);
+
+    delay(2000);
+
+    m_m(0);
 }
 
 // main part of the program
 
-watch();
+while (true) {
+    watch();
+    act();
+}
