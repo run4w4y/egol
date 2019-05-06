@@ -63,6 +63,7 @@ x = 0
 y = 0
 b = 0
 c = 0
+fl_attack = 0
 
 //Subs
 
@@ -361,7 +362,7 @@ void padik {
 }
 
 void kicker {
-  if (time() - t_attack > 500 and time() - time_def > 1000) {
+  if (time() - t_attack > 1000 and time() - time_def > 1000) {
     mt.resetcount("A")
     while abs(mt.getcount("A")-270 < 0) {
       mt.spw("A", 100)
@@ -371,6 +372,14 @@ void kicker {
     t_attack = time()
     time_def = time()
     mt.spw("A", -50)
+    fl_attack = 1
+  }
+}
+
+void fast_return {
+  while (abs(dir1 - 5) > 1) {
+    v = -100
+    u = -err_com
   }
 }
 //Threads
@@ -379,6 +388,11 @@ new.thread = sensors
 
 // Main
 while (true) {
+  if (fl_attack = 1 and abs(dir1 - 5) > 1) {
+    fast_return()
+    tone(100,1000,100)
+    fl_attack = 0
+  }
 
   if (strres > str_max - 5) {
     if (abs(err_com)>80) {
