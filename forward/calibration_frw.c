@@ -68,11 +68,18 @@ void sensors {
 		str4 = irseeker_array[4]
 		str5 = irseeker_array[5] 
 
-		if (rm(dir, 2) == 0) {
-			strres = (str1 + str2 + str3 + str4 + str5)/ 1.57//1.9
-		} else {
-			strres = str1 + str2 + str3 + str4 + str5
-		}		
+		dir1 = rm(dir+9, 10)
+		
+		// if (rm(dir,2) == 0) {
+		//   strres = (str1 + str2 + str3 + str4 + str5)/1.57 //1.9
+		// } else {
+		//   strres = str1 + str2 + str3 + str4 + str5
+		// }
+
+		strres = irseeker_array[1]
+		for (i_dx = 2; i_dx < 6; i_dx++) {
+			strres = max(strres, irseeker_array[i_dx])
+		} 		
 		
 		/* compass */
 

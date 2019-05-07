@@ -1,8 +1,6 @@
 /*TODO:
   Main: check new idea of definition side of orbit 
-  1. slowing
   2. padik
-  3. right orbit
   4. attack arc  
   5. communication with goalkeeper
   6. odometry side_check  
@@ -78,12 +76,18 @@ void sensors {
     str5 = irseeker_array[5]
 
     dir1 = rm(dir+9, 10)
-    if (rm(dir,2) == 0) {
-      strres = (str1 + str2 + str3 + str4 + str5)/1.57 //1.9
-    } else {
-      strres = str1 + str2 + str3 + str4 + str5
-    }
     
+    // if (rm(dir,2) == 0) {
+    //   strres = (str1 + str2 + str3 + str4 + str5)/1.57 //1.9
+    // } else {
+    //   strres = str1 + str2 + str3 + str4 + str5
+    // }
+
+    strres = irseeker_array[1]
+    for (i_dx = 2; i_dx < 6; i_dx++) {
+        strres = max(strres, irseeker_array[i_dx])
+    } 
+
     compass_array = i2c.readregs(2, 1, 66, 4)
     compass = compass_array[0] * 2 + compass_array[1]
     err_com = rm(compass - alpha + 900, 360) - 180
@@ -165,7 +169,7 @@ void orbit {
     //орбита
     //r2
     err90 = 999
-    while (err90 > 0) {
+    while (err90 > 8) {
       if (dir > 5) {
         if (dir > 6) {
           err90=rm(compass - com_r + 900, 360) - 180+45
@@ -215,8 +219,8 @@ void orbit {
     if (err90 < 21) {
       while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir - 6 < 0) {
       
-        v = 50
-        u = -48
+        v = 40
+        u = -38
 
         if (dir < 7) {
           if (abs(err_com) < 69) { 
@@ -231,10 +235,7 @@ void orbit {
     }
 
   } else {
-
     //----------------------LEFT------------------------  
-
-
     err90 = 0
 
     t0 = time()
@@ -272,7 +273,7 @@ void orbit {
     dir2 = dir1
     dir3 = dir2
 
-    while (err90 < 0) {
+    while (err90 < -8) {
       if (dir > 5) {
         if (dir > 6) {
           err90 = rm(compass - com_l + 900, 360) - 180+40
@@ -323,8 +324,8 @@ void orbit {
     if (err90 > -22) {
       while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir - 6 > 0) {
 
-        v = 50
-        u = 48
+        v = 40
+        u = 38
 
         if (dir > 5) {
           if (abs(err_com) < 69) {
@@ -343,20 +344,19 @@ void orbit {
 
 void padik {
   if (dir < 3) {
-    u=36*(dir1-5)
+    u=30*(dir1-5)
     v=100-30*abs(dir1-5)
   } else {
-    v = (220-1.45*strres)
-
+    v = (225 - 1.25*strres)
     if (v > 100) {
       v = 100
     }
 
     if (v < 40) {
       v = 40
-    } 
+    }
 
-    u_1 = 0*(dir-6)+1.1*(str5-str2)+0.3*(str4-str3)
+    u_1 = 20*(dir-6)+0.8*(str5-str2)+0.08*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -389,8 +389,23 @@ void attack {
 void fast_return {
   while (abs(dir1 - 5) > 1) {
     v = -100
-    u = -err_com
+    u = -err_com*1.5
   }
+
+  while (dir != 6) {
+    u=-(30*(6-dir)+0.2*(str3-str4))
+    v = 10
+  }
+}
+
+void stop_with_tone {
+  v = 0
+  u = 0  
+  tone(100,100,100)
+  mt.stop("BC", "True")
+  delay(1000)
+  flush()
+  btn.wait()
 }
 //Threads
 
