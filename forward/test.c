@@ -62,6 +62,7 @@ y = 0
 b = 0
 c = 0
 fl_attack = 0
+kf_dir = 27
 
 //Subs
 
@@ -127,7 +128,7 @@ void dir_orbit {
 }
 
 void orbit {
-
+  fl_attack = 0
   // поворот на мяч перед орбитой
   t0 = time()
   while (dir != 6 and time() - t0 < 1000) {
@@ -196,21 +197,13 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (compass > lim_com_down) {
-            if (compass < lim_com_up) {
-              if (strres < 90) {
-                Goto exit2
-              }
-            }
+          if (strres < 90) {
+            Goto exit2
           }
-        } else {
-          lim_com_down = compass - 4
-          lim_com_up = compass + 4
-          //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAME
         }
       }
     }
-
+    
     t0 = time()
 
     //поворот на мяч
@@ -303,21 +296,13 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (compass > lim_com_down) {
-            if (compass < lim_com_up) {
-              if (strres < 90) {
-                Goto exit2
-              }
-            }
+          if (strres < 90) {
+            Goto exit2
           }
-        } else {
-          lim_com_down = compass - 4
-          lim_com_up = compass + 4
-          //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CAME
         }
       }
     }
-    
+
     t0 = time()
     //поворот на мяч
     //l3
@@ -356,7 +341,7 @@ void padik {
       v = 40
     }
 
-    u_1 = 20*(dir-6)+0.8*(str5-str2)+0.08*(str4-str3)
+    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.6*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -387,12 +372,14 @@ void attack {
 }
 
 void fast_return {
-  while (abs(dir1 - 5) > 1) {
+  time_def = time()
+  while (abs(dir1 - 5) > 1 and time() - time_def < 3000) {
     v = -100
-    u = -err_com*1.5
+    u = -err_com*0.8
   }
 
-  while (dir != 6) {
+  time_def = time()
+  while (dir != 6 and time() - time_def < 1000) {
     u=-(30*(6-dir)+0.2*(str3-str4))
     v = 10
   }
@@ -407,6 +394,7 @@ void stop_with_tone {
   flush()
   btn.wait()
 }
+
 //Threads
 
 new.thread = sensors
@@ -425,12 +413,14 @@ while (true) {
       orbit()
     } else {
       while (strres > str_max and l1 < l1_cal and l2 < l2_cal) { //slow padik
+        kf_dir = 14
         padik()
       }
       attack()
     }
   } else {
     while (strres < str_max) {  //padik fast
+      kf_dir = 27
       padik()
     }
   }
