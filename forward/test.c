@@ -63,6 +63,8 @@ b = 0
 c = 0
 fl_attack = 0
 kf_dir = 27
+t_block = time()
+block = 0
 
 //Subs
 
@@ -150,7 +152,7 @@ void orbit {
     // заход на орбиту
     //r1
     while (true) {
-      u=-(20*((3-dir1))-((3-dir1)/5*10))
+      u=-(25*((3-dir1))-((3-dir1)/5*10))
       err90=rm(compass - com_r + 900, 360) - 180
       v=70
 
@@ -239,7 +241,7 @@ void orbit {
 
       dir_orbit()
 
-      u=-(20*((7-dir2))-((7-dir2)/5*10))
+      u=-(25*((7-dir2))-((7-dir2)/5*10))
       err90 = rm(compass - com_l + 900, 360) - 180
       v=70
       dir3 = dir2
@@ -395,9 +397,27 @@ void stop_with_tone {
   btn.wait()
 }
 
-//Threads
+void block_check {
+  while (true) {
+    com_state = compass
+    str_state = strres
+    t_block = time()
 
+    while (time() - t_block < 2000) {
+
+    }
+
+    if (abs(compass - com_state) < 5 or abs(strres - str_state) < 5) {
+      block = 1
+    } else {
+      block = 0
+    }
+  }
+}
+
+//Threads
 new.thread = sensors
+//new.thread = block_check
 
 // Main
 while (true) {
