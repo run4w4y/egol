@@ -1,10 +1,9 @@
 /*TODO:
   Main: check new idea of definition side of orbit 
-  2. padik
   4. attack arc  
+  7. block checking
   5. communication with goalkeeper
   6. odometry side_check  
-  7. block checking
 */
 
 mt.spw("A", -50)
@@ -65,9 +64,14 @@ fl_attack = 0
 kf_dir = 27
 t_block = time()
 block = 0
+at_alpha = com_3
+
+//flags 
+flag1 = 0 //атака
+flag_od = 0 //одометрия
+
 
 //Subs
-
 void sensors {
   while (true) {
     irseeker_array = i2c.readregs(4, 8, 73, 6)
@@ -106,8 +110,8 @@ void sensors {
 
     dx = (e1 - b + e2 - c)*0.0453*sin(err_com*pi/180)
     dy = (e1 - b + e2 - c)*0.0453*cos(err_com*pi/180)
-    x = x + dx
-    y = -(y + dy)
+    x = x - dx
+    y = y - dy
     b = e1
     c = e2
   }
@@ -133,7 +137,7 @@ void orbit {
   fl_attack = 0
   // поворот на мяч перед орбитой
   t0 = time()
-  while (dir != 6 and time() - t0 < 1000) {
+  while (dir != 6 and time() - t0 < 1000 and block == 0) {
     u=-(30*(6-dir)+0.08*(str3-str4))
     v = 10
 
@@ -172,7 +176,7 @@ void orbit {
     //орбита
     //r2
     err90 = 999
-    while (err90 > 8) {
+    while (err90 > 8 and block == 0) {
       if (dir > 5) {
         if (dir > 6) {
           err90=rm(compass - com_r + 900, 360) - 180+45
@@ -212,7 +216,7 @@ void orbit {
     //r3
   
     if (err90 < 21) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir - 6 < 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir < 6 and block == 0) {
       
         v = 40
         u = -38
@@ -268,7 +272,7 @@ void orbit {
     dir2 = dir1
     dir3 = dir2
 
-    while (err90 < -8) {
+    while (err90 < -8 and block == 0) {
       if (dir > 5) {
         if (dir > 6) {
           err90 = rm(compass - com_l + 900, 360) - 180+40
@@ -308,8 +312,9 @@ void orbit {
     t0 = time()
     //поворот на мяч
     //l3
-    if (err90 > -22) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir - 6 > 0) {
+    if (err90 > -21) {
+      sound()
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir > 6 and block == 0) {
 
         v = 40
         u = 38
@@ -344,7 +349,7 @@ void padik {
     }
 
     u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.6*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
-    u = u_1 * v * 0.01
+    u = u_1// * v * 0.01
   } 
 }
 
@@ -364,13 +369,22 @@ void kicker {
 }
 
 void attack {
+  flag1 = 1
   t_attack = time()
+  
+  if (flag_od == 1) {
+    alp = at_alpha
+  } else {
+    alp = com_3
+  }
+
   while (l1 > l1_cal - 5 and l2 > l2_cal - 5 /*and abs(dir - 6) < 2*/) {
     tone(100,100,100)
     v = 100
-    u = -err_com
+    u = -(rm(compass - alp + 900, 360) - 180)
     kicker()
   }
+  flag1 = 0
 }
 
 void fast_return {
@@ -400,48 +414,89 @@ void stop_with_tone {
 void block_check {
   while (true) {
     com_state = compass
-    str_state = strres
     t_block = time()
 
-    while (time() - t_block < 2000) {
+    while (time() - t_block < 1000) {
 
     }
-
-    if (abs(compass - com_state) < 5 or abs(strres - str_state) < 5) {
+        
+    if (abs(compass - com_state) < 5 and flag1 == 0) {
       block = 1
+      flag_od = 0
     } else {
       block = 0
     }
+
+    printupd()
+    print("Block", block)
   }
 }
 
+void sound {
+  tone(100,100,100)
+}
+
+void od_side {
+  while (flag_od == 1) {
+    if (x < -15) {
+      if (y < 0) {
+        at_alpha = com_1
+      } else {
+        at_alpha = com_2
+      }
+    } else {
+      if (x > -15 and x < 15) {
+        at_alpha = com_3
+      } else {
+        if (y < 0) {
+          at_alpha = com_5
+        } else {
+          at_alpha = com_4
+        }
+      }
+    }
+  }
+}
 //Threads
 new.thread = sensors
-//new.thread = block_check
+new.thread = block_check
+new.thread = od_side
 
 // Main
 while (true) {
-  if (fl_attack = 1 and abs(dir1 - 5) > 1) {
-    fast_return()
-    tone(100,1000,100)
-    fl_attack = 0
-  }
+  if (block == 1) {
+    led(1)
+    t_exit = time()
+    while (dir != 6 and time() - t_exit < 2000) {
+      v = -100
+      u = (dir1-5) * 50
+    }
+    block = 0
+    
+  } else {
+    led(2)
+    if (fl_attack = 1 and abs(dir1 - 5) > 1) {
+      fast_return()
+      tone(100,1000,100)
+      fl_attack = 0
+    }
 
-  if (strres > str_max) {
-    if (abs(err_com)>80) {
-      tone(100,100,100)
-      orbit()
+    if (strres > str_max) {
+      if (abs(err_com)>80) {
+        tone(100,100,100)
+        orbit()
+      } else {
+        while (strres > str_max and l1 < l1_cal and l2 < l2_cal and block == 0) { //slow padik
+          kf_dir = 14
+          padik()
+        }
+        attack()
+      }
     } else {
-      while (strres > str_max and l1 < l1_cal and l2 < l2_cal) { //slow padik
-        kf_dir = 14
+      while (strres < str_max and block == 0) {  //padik fast
+        kf_dir = 27
         padik()
       }
-      attack()
-    }
-  } else {
-    while (strres < str_max) {  //padik fast
-      kf_dir = 27
-      padik()
     }
   }
 }
