@@ -15,10 +15,42 @@ BUTTON_DELAY = tonum(readline(handle));
 LIGHT_COLOR_NUM = tonum(readline(handle));
 COMPASS_ALPHA = tonum(readline(handle));
 SEEKER_DIV = tonum(readline(handle)) / 100;
-PORT_MID_MOTOR = "A";
-PORT_LEFT_MOTOR = "B";
-PORT_RIGHT_MOTOR = "C";
-STR_LIMIT = 130;
+PORT_MID_MOTOR_NUM = tonum(readline(handle));
+PORT_LEFT_MOTOR_NUM = tonum(readline(handle));
+PORT_RIGHT_MOTOR_NUM = tonum(readline(handle));
+if (PORT_MID_MOTOR_NUM == 1) {
+    PORT_MID_MOTOR = "A";
+}
+if (PORT_MID_MOTOR_NUM == 2) {
+    PORT_MID_MOTOR = "B";
+}
+if (PORT_MID_MOTOR_NUM == 3) {
+    PORT_MID_MOTOR = "C";
+}
+if (PORT_LEFT_MOTOR_NUM == 1) {
+    PORT_LEFT_MOTOR = "A";
+}
+if (PORT_LEFT_MOTOR_NUM == 2) {
+    PORT_LEFT_MOTOR = "B";
+}
+if (PORT_LEFT_MOTOR_NUM == 3) {
+    PORT_LEFT_MOTOR = "C";
+}
+if (PORT_RIGHT_MOTOR_NUM == 1) {
+    PORT_RIGHT_MOTOR = "A";
+}
+if (PORT_RIGHT_MOTOR_NUM == 2) {
+    PORT_RIGHT_MOTOR = "B";
+}
+if (PORT_RIGHT_MOTOR_NUM == 3) {
+    PORT_RIGHT_MOTOR = "C";
+}
+STR_LIMIT = tonum(readline(handle));
+SEEKER_STR_MAX = tonum(readline(handle));
+LIGHT_LINE_LIMIT = tonum(readline(handle));
+COMPASS_LEFT_ANGLE = tonum(readline(handle));
+COMPASS_RIGHT_ANGLE = tonum(readline(handle));
+CENTER_DISTANCE = 410;
 
 // reading from sensors start
 
@@ -288,8 +320,6 @@ void watch {
     k_dir_watch = 0;
     watch_bool = 0;
 
-    SEEKER_STR_MAX = 195;
-
     while (watch_bool == 0) {
         i_watch = i_watch + error_watch*ki_watch;
         if (irseeker_dir() != 0) {
@@ -417,7 +447,7 @@ void act {
     print("light", light());
     m_m(100);
 
-    while (light() >= 10) {
+    while (light() >= LIGHT_LINE_LIMIT) {
         error_act = irseeker_str(4) - irseeker_str(3);
         u_act = kp_act*error_act;
         if (u_act <= 0 and compass_delta(compass()) <= -90) {
@@ -447,8 +477,9 @@ while (true) {
     print("btn", button_top());
     print("x", odometry_x);
     print("y", odometry_y);
+    // print("cnt", mt.getcount(PORT_LEFT_MOTOR));
 
-    // // actions
+    // actions
     watch();
     act();
     go_back();
