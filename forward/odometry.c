@@ -70,8 +70,8 @@ void sensors {
 
     dx = (e1 - b + e2 - c)*0.0453*sin(err_com*pi/180)
     dy = (e1 - b + e2 - c)*0.0453*cos(err_com*pi/180)
-    x = x + dx
-    y = -(y + dy)
+    x = x - dx
+    y = y - dy
     b = e1
     c = e2
   }
@@ -80,7 +80,27 @@ void sensors {
 new.thread = sensors
 
 while (true) {
+    
+    if (x < -15) {
+      if (y < 0) {
+        zone = 1
+      } else {
+        zone = 2
+      }
+    } else {
+      if (x > -15 and x < 15) {
+        zone = 3
+      } else {
+        if (y < 0) {
+          zone = 5
+        } else {
+          zone = 4
+        }
+      }
+    }
+
     printupd()
     print("X", x)
     print("Y", y)
+    print("zone", zone)
 }
