@@ -222,7 +222,8 @@ topbutton_prev_value = 0;
 func num button_top() { // returns 1 if the top button is pressed, else returns 0
     if (time() - topbutton_prev_time >= BUTTON_DELAY) {
         topbutton_prev_time = time();
-        if (sen.percent(PORT_BUTTON) == 100) {
+        topbutton_value = sen.read.rawval(PORT_BUTTON, 0);
+        if (topbutton_value > 1000) {
             topbutton_prev_value = 1;
             return 1;
         } else {
@@ -373,6 +374,8 @@ void watch {
 void go_back {
     v_back = 0;
     kp_back = 1.15;
+    left_lim_back = compass_delta(COMPASS_LEFT_ANGLE);
+    right_lim_back = compass_delta(COMPASS_RIGHT_ANGLE);
 
     if (odometry_x < 0) {
         error_back = atan(abs(odometry_y / odometry_x));
@@ -394,7 +397,28 @@ void go_back {
     l_m(0);
     r_m(0);
 
-    len_back = sqrt(odometry_x*odometry_x*1.085 + odometry_y*odometry_y);
+    compass_back = compass();
+    if (left_lim_back < 0) {
+        if (compass_delta(compass_back) < left_lim_back) {
+            len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
+        } else {
+            if (compass_delta(compass_back) > right_lim_back) {
+                len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
+            } else {
+                len_back = sqrt(odometry_x*odometry_x*1.085 + odometry_y*odometry_y);
+            }
+        }
+    } else {
+        if (compass_delta(compass_back) < right_lim_back) {
+            len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
+        } else {
+            if (compass_delta(compass_back) > left_lim_back) {
+                len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
+            } else {
+                len_back = sqrt(odometry_x*odometry_x*1.085 + odometry_y*odometry_y);
+            }
+        }
+    }
     v_back = -65;
     motor_count_back = mt.getcount(PORT_LEFT_MOTOR);
     while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_back) < len_back) {
