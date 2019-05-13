@@ -1,9 +1,4 @@
-mt.spw("A", -50)
-check.ports("ABC 1234")
-mt.invert("BC")
-mt.stop("BC", "false")
-
-//calibration
+  //calibration
 handle = open.r("cal.txt")
 
 if (handle == 0) {
@@ -52,6 +47,12 @@ x = 0
 y = 0
 b = 0
 c = 0
+fl_attack = 0
+kf_dir = 27
+block = 0
+
+//flags 
+flag1 = 0 //атака
 
 //Subs
 
@@ -66,12 +67,18 @@ void sensors {
     str5 = irseeker_array[5]
 
     dir1 = rm(dir+9, 10)
-    if (rm(dir,2) == 0) {
-      strres = (str1 + str2 + str3 + str4 + str5)/1.57 //1.9
-    } else {
-      strres = str1 + str2 + str3 + str4 + str5
-    }
     
+    // if (rm(dir,2) == 0) {
+    //   strres = (str1 + str2 + str3 + str4 + str5)/1.57 //1.9
+    // } else {
+    //   strres = str1 + str2 + str3 + str4 + str5
+    // }
+
+    strres = irseeker_array[1]
+    for (i_dx = 2; i_dx < 6; i_dx++) {
+        strres = max(strres, irseeker_array[i_dx])
+    } 
+
     compass_array = i2c.readregs(2, 1, 66, 4)
     compass = compass_array[0] * 2 + compass_array[1]
     err_com = rm(compass - alpha + 900, 360) - 180
@@ -87,61 +94,20 @@ void sensors {
 
     dx = (e1 - b + e2 - c)*0.0453*sin(err_com*pi/180)
     dy = (e1 - b + e2 - c)*0.0453*cos(err_com*pi/180)
-    x = x + dx
-    y = -(y + dy)
+    x = x - dx
+    y = y - dy
     b = e1
     c = e2
   }
 }
 
-void padik {
-  if (dir < 3) {
-    u=36*(dir1-5)
-    v=100-30*abs(dir1-5)
-  } else {
-    v = (220-1.5*strres)
-
-    if (v > 100) {
-      v = 100
-    }
-
-    if (v < 40) {
-      v = 40
-    } 
-
-    u_1 = 0*(dir-6)+1.3*(str5-str2)+0.3*(str4-str3)
-    u = u_1 * v * 0.01
-  } 
-}
-
-void dir_orbit {
-  if (dir > 4) {
-    dir2 = dir1
-  } else {
-    if (dir3 == 9) {
-      dir2 = 9
-    } else {
-      if (dir3 == 0) {
-        dir2 = 9
-      } else {
-        dir2 = dir1
-      }
-    }
-  }
-}
-
 new.thread = sensors
+  
 while (true) {
-  dir_orbit()
+    err_real = rm(abs(err_com - (dir - 6) * 30), 360) * (err_com - (dir - 6) * 30) / abs(err_com - (dir - 6) * 30)
 
-  if (dir == 8) {
-    v=80
-    d=145
-    l=r+30
-    u=-((-1*(d*90)/(2*l))+(0.4*(strres - r)))
-  } else {
-    u=-((20*((7-dir2))-((7-dir2)/5*10))+(0.45*(strres - r)))
-    dir3 = dir2
-    v=70
-  }
+    printupd()
+    print("Dir", dir)
+    print("ERR_com", err_com)
+    print("err_real", err_real)
 }
