@@ -15,10 +15,42 @@ BUTTON_DELAY = tonum(readline(handle));
 LIGHT_COLOR_NUM = tonum(readline(handle));
 COMPASS_ALPHA = tonum(readline(handle));
 SEEKER_DIV = tonum(readline(handle)) / 100;
-PORT_MID_MOTOR = "A";
-PORT_LEFT_MOTOR = "B";
-PORT_RIGHT_MOTOR = "C";
-STR_LIMIT = 130;
+PORT_MID_MOTOR_NUM = tonum(readline(handle));
+PORT_LEFT_MOTOR_NUM = tonum(readline(handle));
+PORT_RIGHT_MOTOR_NUM = tonum(readline(handle));
+if (PORT_MID_MOTOR_NUM == 1) {
+    PORT_MID_MOTOR = "A";
+}
+if (PORT_MID_MOTOR_NUM == 2) {
+    PORT_MID_MOTOR = "B";
+}
+if (PORT_MID_MOTOR_NUM == 3) {
+    PORT_MID_MOTOR = "C";
+}
+if (PORT_LEFT_MOTOR_NUM == 1) {
+    PORT_LEFT_MOTOR = "A";
+}
+if (PORT_LEFT_MOTOR_NUM == 2) {
+    PORT_LEFT_MOTOR = "B";
+}
+if (PORT_LEFT_MOTOR_NUM == 3) {
+    PORT_LEFT_MOTOR = "C";
+}
+if (PORT_RIGHT_MOTOR_NUM == 1) {
+    PORT_RIGHT_MOTOR = "A";
+}
+if (PORT_RIGHT_MOTOR_NUM == 2) {
+    PORT_RIGHT_MOTOR = "B";
+}
+if (PORT_RIGHT_MOTOR_NUM == 3) {
+    PORT_RIGHT_MOTOR = "C";
+}
+STR_LIMIT = tonum(readline(handle));
+SEEKER_STR_MAX = tonum(readline(handle));
+LIGHT_LINE_LIMIT = tonum(readline(handle));
+COMPASS_LEFT_ANGLE = tonum(readline(handle));
+COMPASS_RIGHT_ANGLE = tonum(readline(handle));
+CENTER_DISTANCE = 410;
 
 // reading from sensors start
 
@@ -54,9 +86,9 @@ func num compass() { // get compass current azimut
     if (time() - compass_prev_time >= COMPASS_DELAY) {
         compass_prev_time = time();
         compass_array = i2c.readregs(2, 1, 66, 4);
-        compass = compass_array[0] * 2 + compass_array[1];
-        compass_prev_value = compass;
-        return compass;
+        compass_val = compass_array[0] * 2 + compass_array[1];
+        compass_prev_value = compass_val;
+        return compass_val;
     } else {
         return compass_prev_value;
     }
@@ -82,13 +114,6 @@ seeker_prev_str4 = 0;
 seeker_prev_str5 = 0;
 
 func num irseeker_dir() { // get seeker current dir
-    local dir;
-    local str1;
-    local str2;
-    local str3;
-    local str4;
-    local str5;
-
     if (time() - seeker_prev_time >= SEEKER_DELAY) {
         seeker_prev_time = time();
         irseeker_array = i2c.readregs(4, 8, 73, 6);
@@ -107,7 +132,6 @@ func num irseeker_dir() { // get seeker current dir
         str5 = irseeker_array[5];
         seeker_prev_str1 = str5;
 
-        local strres = 0;
         if (rm(dir,2) == 0) {
             strres = (str1 + str2 + str3 + str4 + str5) / SEEKER_DIV;
         } else {
@@ -122,12 +146,6 @@ func num irseeker_dir() { // get seeker current dir
 }
 
 func num irseeker_str(strnum) { // get seeker current str
-    local dir;
-    local str1;
-    local str2;
-    local str3;
-    local str4;
-    local str5;
 
     if (time() - seeker_prev_time >= SEEKER_DELAY) {
         seeker_prev_time = time();
@@ -147,7 +165,6 @@ func num irseeker_str(strnum) { // get seeker current str
         str5 = irseeker_array[5];
         seeker_prev_str5 = str5;
 
-        local strres = 0;
         if (rm(dir,2) == 0) {
             strres = (str1 + str2 + str3 + str4 + str5) / SEEKER_DIV;
         } else {
@@ -203,12 +220,10 @@ topbutton_prev_time = time();
 topbutton_prev_value = 0;
 
 func num button_top() { // returns 1 if the top button is pressed, else returns 0
-    local val;
-
     if (time() - topbutton_prev_time >= BUTTON_DELAY) {
         topbutton_prev_time = time();
-        val = sen.percent(PORT_BUTTON);
-        if (val == 100) {
+        topbutton_value = sen.read.rawval(PORT_BUTTON, 0);
+        if (topbutton_value > 1000) {
             topbutton_prev_value = 1;
             return 1;
         } else {
@@ -227,7 +242,7 @@ func num button_top() { // returns 1 if the top button is pressed, else returns 
 botbutton_prev_time = time();
 botbutton_prev_value = 0;
 
-func num button_bot() { // returns 1 if the top button is pressed, else returns 0
+func num button_bot() { // returns 1 if the bottom button is pressed, else returns 0
     if (time() - botbutton_prev_time >= BUTTON_DELAY) {
         botbutton_prev_time = time();
         if (btn.rn == "R") {
@@ -262,6 +277,38 @@ func num m_m(speed) { // middle motor move
 
 // motors end
 
+// odometry
+
+odometry_prev_left = 0;
+odometry_prev_right = 0;
+odometry_prev_x = 0;
+odometry_prev_y = 0;
+weight = 720;
+
+void odometry {
+    while (true) {
+        odometry_left = mt.getcount(PORT_LEFT_MOTOR);
+        odometry_right = mt.getcount(PORT_RIGHT_MOTOR);
+        delta_left = odometry_left - odometry_prev_left;
+        delta_right = odometry_right - odometry_prev_right;
+        delta = (delta_left + delta_right)/2;
+        delta_com = compass_delta(compass());
+
+        odometry_x = odometry_prev_x + delta*cos(rad(delta_com));
+        odometry_y = odometry_prev_y + delta*sin(rad(delta_com));
+        odometry_y = -odometry_y;
+
+        odometry_prev_left = odometry_left;
+        odometry_prev_right = odometry_right;
+        odometry_prev_x = odometry_x;
+        odometry_prev_y = odometry_y;
+
+        delay(100);
+    }
+}
+
+new.thread = odometry
+
 // other functions
 
 void watch {
@@ -273,8 +320,6 @@ void watch {
     i_watch = 0;
     k_dir_watch = 0;
     watch_bool = 0;
-
-    SEEKER_STR_MAX = 195;
 
     while (watch_bool == 0) {
         i_watch = i_watch + error_watch*ki_watch;
@@ -290,7 +335,8 @@ void watch {
                 i_watch = 0;
             }
 
-            u_watch = k_dir_watch*(irseeker_dir() - 6) + kp_watch*error_watch + kd_watch*error_old_watch + i_watch;
+            tmp_dir = irseeker_dir()
+            u_watch = k_dir_watch*(tmp_dir - 6) + kp_watch*error_watch + kd_watch*error_old_watch + i_watch;
             if ((abs(error_watch) <= 20 or irseeker_dir() == 6) and k_dir_watch == 0) {
                 u_watch = 0;
             }
@@ -326,12 +372,95 @@ void watch {
 }
 
 void go_back {
-    v_back = 80;
-    kp_back = 0.4;
+    v_back = 0;
+    kp_back = 1.15;
+    left_lim_back = compass_delta(COMPASS_LEFT_ANGLE);
+    right_lim_back = compass_delta(COMPASS_RIGHT_ANGLE);
 
-    while (button_top() != 1) {
-        error_back = compass_delta();
+    if (odometry_x < 0) {
+        error_back = atan(abs(odometry_y / odometry_x));
+        beta_back = rm(COMPASS_ALPHA - error_back + 360, 360);
+    } else {
+        error_back = atan(odometry_y / odometry_x);
+        beta_back = rm(COMPASS_ALPHA + error_back, 360);
     }
+
+    error_back = compass_delta(beta_back);
+    while (abs(error_back) > 5) {
+        error_back = compass_delta(beta_back);
+        u_back = error_back * kp_back;
+
+        l_m(-u_back);
+        r_m(u_back);
+    }
+
+    l_m(0);
+    r_m(0);
+
+    compass_back = compass();
+    if (left_lim_back < 0) {
+        if (compass_delta(compass_back) < left_lim_back) {
+            len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
+        } else {
+            if (compass_delta(compass_back) > right_lim_back) {
+                len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
+            } else {
+                len_back = sqrt(odometry_x*odometry_x*1.085 + odometry_y*odometry_y);
+            }
+        }
+    } else {
+        if (compass_delta(compass_back) < right_lim_back) {
+            len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
+        } else {
+            if (compass_delta(compass_back) > left_lim_back) {
+                len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
+            } else {
+                len_back = sqrt(odometry_x*odometry_x*1.085 + odometry_y*odometry_y);
+            }
+        }
+    }
+    v_back = -65;
+    motor_count_back = mt.getcount(PORT_LEFT_MOTOR);
+    while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_back) < len_back) {
+        l_m(v_back);
+        r_m(v_back);
+    }
+
+    l_m(0);
+    r_m(0);
+    delay(200);
+
+    v_back = 0;
+    compass_back = compass();
+    error_back = compass_delta(compass_back);
+    while (abs(error_back) > 5) {
+        compass_back = compass();
+        error_back = compass_delta(compass_back);
+        u_back = error_back * kp_back;
+
+        l_m(-u_back);
+        r_m(u_back);
+    }
+
+    l_m(0);
+    r_m(0);
+
+    v_back = -65;
+    while (button_top() != 1) {
+        l_m(v_back);
+        r_m(v_back);
+        delay(2);
+    }
+
+    v_back = 65;
+    motor_count_back = mt.getcount(PORT_LEFT_MOTOR);
+    while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_back) < 135) {
+        l_m(v_back);
+        r_m(v_back);
+    }
+
+    l_m(0);
+    r_m(0);
 }
 
 void act {
@@ -340,8 +469,9 @@ void act {
     
     printupd();
     print("light", light());
+    m_m(100);
 
-    while (light() >= 10) {
+    while (light() >= LIGHT_LINE_LIMIT) {
         error_act = irseeker_str(4) - irseeker_str(3);
         u_act = kp_act*error_act;
         if (u_act <= 0 and compass_delta(compass()) <= -90) {
@@ -351,13 +481,12 @@ void act {
             u_act = 0;
         }
 
-        l_m((v_act+k_dist*u_watch));
-        r_m((v_act-k_dist*u_watch));
+        l_m(v_act+k_dist*u_watch);
+        r_m(v_act-k_dist*u_watch);
     }
 
     l_m(0);
     r_m(0);
-    m_m(100);
 
     delay(2000);
 
@@ -367,6 +496,15 @@ void act {
 // main part of the program
 
 while (true) {
+    // prints
+    printupd();
+    print("btn", button_top());
+    print("x", odometry_x);
+    print("y", odometry_y);
+    // print("cnt", mt.getcount(PORT_LEFT_MOTOR));
+
+    // actions
     watch();
     act();
+    go_back();
 }

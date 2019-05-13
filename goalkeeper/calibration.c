@@ -2,7 +2,8 @@
 
 handle = open.r("cal.txt");
 
-values = new.vector(10, 0);
+values_len = 19;
+values = new.vector(values_len, 0);
 
 names[0] = "p_seek";
 names[1] = "p_com";
@@ -15,6 +16,14 @@ names[7] = "btn_del";
 names[8] = "color_n"; 
 names[9] = "alpha";
 names[10] = "seek_div";
+names[11] = "p_mmid";
+names[12] = "p_mleft";
+names[13] = "p_mright";
+names[14] = "str_lim";
+names[15] = "str_inf";
+names[16] = "line_lim";
+names[17] = "left_ang";
+names[18] = "right_ang";
 
 if (handle == 0) {
 	PORT_SEEKER = 4;
@@ -39,6 +48,22 @@ if (handle == 0) {
 	values[9] = COMPASS_ALPHA;
 	SEEKER_DIV = 100;
 	values[10] = SEEKER_DIV;
+	PORT_MID_MOTOR = 1;
+	values[11] = PORT_MID_MOTOR;
+	PORT_LEFT_MOTOR = 2;
+	values[12] = PORT_LEFT_MOTOR;
+	PORT_RIGHT_MOTOR = 2;
+	values[13] = PORT_RIGHT_MOTOR;
+	STR_LIMIT = 130;
+	values[14] = STR_LIMIT;
+	SEEKER_STR_MAX = 195;
+	values[15] = SEEKER_STR_MAX;
+	LIGHT_LINE_LIMIT = 10;
+	values[16] = LIGHT_LINE_LIMIT;
+	COMPASS_LEFT_ANGLE = 0;
+	values[17] = COMPASS_LEFT_ANGLE;
+	COMPASS_RIGHT_ANGLE = 0;
+	values[18] = COMPASS_RIGHT_ANGLE;
 } else {
 	PORT_SEEKER = tonum(readline(handle));
 	values[0] = PORT_SEEKER;
@@ -62,6 +87,22 @@ if (handle == 0) {
 	values[9] = COMPASS_ALPHA;
 	SEEKER_DIV = tonum(readline(handle));
 	values[10] = SEEKER_DIV;
+	PORT_MID_MOTOR = tonum(readline(handle));
+	values[11] = PORT_MID_MOTOR;
+	PORT_LEFT_MOTOR = tonum(readline(handle));
+	values[12] = PORT_LEFT_MOTOR;
+	PORT_RIGHT_MOTOR = tonum(readline(handle));
+	values[13] = PORT_RIGHT_MOTOR;
+	STR_LIMIT = tonum(readline(handle));
+	values[14] = STR_LIMIT;
+	SEEKER_STR_MAX = tonum(readline(handle));
+	values[15] = SEEKER_STR_MAX;
+	LIGHT_LINE_LIMIT = tonum(readline(handle));
+	values[16] = LIGHT_LINE_LIMIT;
+	COMPASS_LEFT_ANGLE = tonum(readline(handle));
+	values[17] = COMPASS_LEFT_ANGLE;
+	COMPASS_RIGHT_ANGLE = tonum(readline(handle));
+	values[18] = COMPASS_RIGHT_ANGLE;
 }
 
 closef(handle);
@@ -100,12 +141,12 @@ while (true) {
 	
 	ip = i-1;
 	if (ip == -1) {
-		ip = 9;
+		ip = values_len-1;
 	}
 	txt(1, 0 - floor(len(names[ip])*4), 30, 0, names[ip]);
 	txt(1, 0 - floor(len(values[ip])*4), 50, 0, values[ip]);
 	in = i+1;
-	if (in == 10) {
+	if (in == values_len) {
 		in = 0;
 	}
 	txt(1, 170 - floor(len(names[in])*4), 30, 0, names[in]);
@@ -151,7 +192,7 @@ while (true) {
 		
 		i = i - 1;
 		if (i == -1) {
-			i = 10;
+			i = values_len-1;
 		}
 	}
 	
@@ -185,7 +226,7 @@ while (true) {
 		}
 		
 		i = i + 1;
-		if (i == 11) {
+		if (i == values_len) {
 			i = 0;
 		}
 	}
@@ -314,6 +355,91 @@ while (true) {
 				values[i] = 1;
 			}
 		}
+
+		if (i == 11) {
+			if (values[i] <= 1) {
+				values[i] = 1;
+			} else {
+				if (values[i] >= 3) {
+					values[i] = 3;
+				}
+			}
+		}
+
+		if (i == 12) {
+			if (values[i] <= 1) {
+				values[i] = 1;
+			} else {
+				if (values[i] >= 3) {
+					values[i] = 3;
+				}
+			}
+		}
+
+		if (i == 13) {
+			if (values[i] <= 1) {
+				values[i] = 1;
+			} else {
+				if (values[i] >= 3) {
+					values[i] = 3;
+				}
+			}
+		}
+
+		if (i == 14) {
+			irseeker_array = i2c.readregs(4, 8, 73, 6);
+        
+			dir = irseeker_array[0];
+			str1 = irseeker_array[1];
+			str2 = irseeker_array[2];
+			str3 = irseeker_array[3];
+			str4 = irseeker_array[4];
+			str5 = irseeker_array[5];
+
+			if (rm(dir,2) == 0) {
+				strres = (str1 + str2 + str3 + str4 + str5) / SEEKER_DIV;
+			} else {
+				strres = str1 + str2 + str3 + str4 + str5;
+			}
+
+			values[i] = strres;
+		}
+
+		if (i == 15) {
+			irseeker_array = i2c.readregs(4, 8, 73, 6);
+        
+			dir = irseeker_array[0];
+			str1 = irseeker_array[1];
+			str2 = irseeker_array[2];
+			str3 = irseeker_array[3];
+			str4 = irseeker_array[4];
+			str5 = irseeker_array[5];
+
+			if (rm(dir,2) == 0) {
+				strres = (str1 + str2 + str3 + str4 + str5) / SEEKER_DIV;
+			} else {
+				strres = str1 + str2 + str3 + str4 + str5;
+			}
+			
+			values[i] = strres;
+		}
+
+		if (i == 16) {
+			light_val = sen.read.rawval(PORT_LIGHT, LIGHT_COLOR_NUM);
+			values[i] = light_val;
+		}
+
+		if (i == 17) {
+			compass_array = i2c.readregs(2, 1, 66, 4);
+        	compass = compass_array[0] * 2 + compass_array[1];
+			values[i] = compass;
+		}
+
+		if (i == 18) {
+			compass_array = i2c.readregs(2, 1, 66, 4);
+        	compass = compass_array[0] * 2 + compass_array[1];
+			values[i] = compass;
+		}
 	}
 	
 	prev_button = btn;
@@ -325,7 +451,7 @@ end: // instead of operator break
 
 scr.clear();
 handle = open.w("cal.txt"); // writing to the file
-for (i = 0; i < 11; ++i) {
+for (i = 0; i < values_len; ++i) {
 	writeline(handle, values[i]);
 }
 closef(handle);
