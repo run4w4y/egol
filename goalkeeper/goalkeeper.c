@@ -50,7 +50,9 @@ SEEKER_STR_MAX = tonum(readline(handle));
 LIGHT_LINE_LIMIT = tonum(readline(handle));
 COMPASS_LEFT_ANGLE = tonum(readline(handle));
 COMPASS_RIGHT_ANGLE = tonum(readline(handle));
-CENTER_DISTANCE = 410;
+COMPASS_LEFT = tonum(readline(handle));
+COMPASS_RIGHT = tonum(readline(handle));
+CENTER_DISTANCE = 380;
 
 // reading from sensors start
 
@@ -97,6 +99,12 @@ func num compass() { // get compass current azimut
 func num compass_delta(compass_value) { // get compass delta based
     local error = 0;
     error = rm(compass_value - COMPASS_ALPHA + 900, 360) - 180;
+    return error;
+}
+
+func num compass_delta_two(compass_value, compass_value2) { // get compass delta based
+    local error = 0;
+    error = rm(compass_value - compass_value2 + 900, 360) - 180;
     return error;
 }
 
@@ -311,6 +319,80 @@ new.thread = odometry
 
 // other functions
 
+void justify {
+    kp_justify = 0.95;
+    v_justify = 0;
+    compass_justify = compass();
+    error_justify = compass_delta_two(COMPASS_LEFT, compass_justify);
+    while (abs(error_justify) > 5) {
+        compass_justify = compass();
+        error_justify = compass_delta_two(COMPASS_LEFT, compass_justify);
+        u_justify = error_justify * kp_justify;
+
+        l_m(u_justify);
+        r_m(-u_justify);
+    }
+
+    l_m(0);
+    r_m(0);
+
+    v_justify = 70;
+    compass_justify = compass();
+    error_justify = compass_delta_two(COMPASS_LEFT, compass_justify);
+    while (light() >= LIGHT_LINE_LIMIT) {
+        compass_justify = compass();
+        error_justify = compass_delta_two(COMPASS_LEFT, compass_justify);
+        u_justify = error_justify * kp_justify;
+
+        l_m(v_justify-u_justify);
+        r_m(v_justify+u_justify);
+    }
+
+    l_m(0);
+    r_m(0);
+
+    v_justify = -70;
+    motor_count_justify = mt.getcount(PORT_LEFT_MOTOR);
+    while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_justify) < CENTER_DISTANCE) {
+        l_m(v_justify);
+        r_m(v_justify);
+    }
+
+    l_m(0);
+    r_m(0);
+
+    v_justify = 0;
+    compass_justify = compass();
+    error_justify = compass_delta(compass_justify);
+    while (abs(error_justify) > 5) {
+        compass_justify = compass();
+        error_justify = compass_delta(compass_justify);
+        u_justify = error_justify * kp_justify;
+
+        l_m(-u_justify);
+        r_m(u_justify);
+    }
+
+    l_m(0);
+    r_m(0);
+
+    v_justify = -85;
+    while (button_top() != 1) {
+        l_m(v_justify);
+        r_m(v_justify);
+    }
+
+    v_justify = 65;
+    motor_count_justify = mt.getcount(PORT_LEFT_MOTOR);
+    while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_justify) < 55) {
+        l_m(v_justify);
+        r_m(v_justify);
+    }
+
+    l_m(0);
+    r_m(0);
+}
+
 void watch {
     kp_watch = 0.4;
     kd_watch = 0;
@@ -361,6 +443,10 @@ void watch {
         } else {
             l_m(0);
             r_m(0);
+        }
+
+        if (compass_delta(compass()) <= -60 or compass_delta(compass()) >= 60) {
+            watch_bool = 2;
         }
 
         if (irseeker_str(0) > STR_LIMIT) {
@@ -419,7 +505,7 @@ void go_back {
             }
         }
     }
-    v_back = -65;
+    v_back = -85;
     motor_count_back = mt.getcount(PORT_LEFT_MOTOR);
     while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_back) < len_back) {
         l_m(v_back);
@@ -428,7 +514,7 @@ void go_back {
 
     l_m(0);
     r_m(0);
-    delay(200);
+    // delay(200);
 
     v_back = 0;
     compass_back = compass();
@@ -445,16 +531,15 @@ void go_back {
     l_m(0);
     r_m(0);
 
-    v_back = -65;
+    v_back = -85;
     while (button_top() != 1) {
         l_m(v_back);
         r_m(v_back);
-        delay(2);
     }
 
     v_back = 65;
     motor_count_back = mt.getcount(PORT_LEFT_MOTOR);
-    while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_back) < 135) {
+    while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_back) < 55) {
         l_m(v_back);
         r_m(v_back);
     }
@@ -463,16 +548,51 @@ void go_back {
     r_m(0);
 }
 
-void act {
+void act_side {
     kp_act = 0.4;
-    v_act = 80;
-    
-    printupd();
-    print("light", light());
+    v_act = 100;
+    left_lim_back = compass_delta(COMPASS_LEFT_ANGLE);
+    right_lim_back = compass_delta(COMPASS_RIGHT_ANGLE);
+
+    compass_act = compass();
+    act_type = "none";
+    if (left_lim_back < 0) {
+        delta_act = compass_delta_two(compass_act, COMPASS_LEFT);
+        if (compass_delta(compass_act) < left_lim_back and abs(delta_act) < 60) {
+            act_type = "left";
+        } else {
+            delta_act = compass_delta_two(compass_act, COMPASS_RIGHT);
+            if (compass_delta(compass_act) > right_lim_back and abs(delta_act) < 60) {
+                act_type = "right";
+            } else {
+                act_type = "none";
+            }
+        }
+    } else {
+        delta_act = compass_delta_two(compass_act, COMPASS_LEFT);
+        if (compass_delta(compass_act) > left_lim_back and abs(delta_act) < 60) {
+            act_type = "left";
+        } else {
+            delta_act = compass_delta_two(compass_act, COMPASS_RIGHT);
+            if (compass_delta(compass_act) < right_lim_back and abs(delta_act) < 60) {
+                act_type = "right";
+            } else {
+                act_type = "none"
+            }
+        }
+    }
+
     m_m(100);
 
-    while (light() >= LIGHT_LINE_LIMIT) {
-        error_act = irseeker_str(4) - irseeker_str(3);
+    while (light() >= LIGHT_LINE_LIMIT) { 
+        compass_act = compass();
+
+        if (act_type == "left") {
+            error_act = compass_delta_two(COMPASS_LEFT, compass_act);
+        } else {
+            error_act = compass_delta_two(COMPASS_RIGHT, compass_act);
+        }
+
         u_act = kp_act*error_act;
         if (u_act <= 0 and compass_delta(compass()) <= -90) {
             u_act = 0;
@@ -481,8 +601,43 @@ void act {
             u_act = 0;
         }
 
-        l_m(v_act+k_dist*u_watch);
-        r_m(v_act-k_dist*u_watch);
+        l_m(v_act+u_act);
+        r_m(v_act-u_act);
+    }
+
+    l_m(0);
+    r_m(0);
+
+    dir_act = irseeker_dir();
+    while (dir_act > 3 and dir_act < 8) {
+        dir_act = irseeker_dir();
+        delay(20);
+    }
+
+    m_m(0);
+}
+
+void act_ball {
+    kp_act = 0.4;
+    v_act = 100;
+    
+    printupd();
+    print("light", light());
+    m_m(100);
+
+    while (light() >= LIGHT_LINE_LIMIT) {    
+        error_act = irseeker_str(4) - irseeker_str(3);
+        
+        u_act = kp_act*error_act;
+        if (u_act <= 0 and compass_delta(compass()) <= -90) {
+            u_act = 0;
+        }
+        if (u_act >= 0 and compass_delta(compass()) >= 90) {
+            u_act = 0;
+        }
+
+        l_m(v_act+u_act);
+        r_m(v_act-u_act);
     }
 
     l_m(0);
@@ -491,6 +646,14 @@ void act {
     delay(2000);
 
     m_m(0);
+}
+
+void act {
+    if (watch_bool == 2) {
+        act_side();
+    } else {
+        act_ball();
+    }
 }
 
 // main part of the program
@@ -504,7 +667,9 @@ while (true) {
     // print("cnt", mt.getcount(PORT_LEFT_MOTOR));
 
     // actions
-    watch();
-    act();
-    go_back();
+    // watch();
+    // act();
+    // go_back();
+    justify();
+    delay(5000);
 }
