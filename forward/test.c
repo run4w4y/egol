@@ -133,7 +133,7 @@ void dir_orbit {
 
 void orbit {
 
-  err_real = rm(abs(err_com-(dir-6)*30), 360)*(err_com-(dir-6)*30)/abs(err_com-(dir-6)*30)
+  err_real = (rm(abs(err_com+(dir-6)*30) + 900, 360)-180)*(err_com+(dir-6)*30)/abs(err_com+(dir-6)*30)
 
   fl_attack = 0
   // // поворот на мяч перед орбитой
@@ -204,7 +204,7 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 90) {
+          if (strres < 70) {
             Goto exit2
           }
         }
@@ -303,7 +303,7 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 90) {
+          if (strres < 70) {
             Goto exit2
           }
         }
@@ -339,13 +339,20 @@ void padik {
     u=28*(dir1-5)
     v=100-30*abs(dir1-5)
   } else {
-    v = (225 - 1.25*strres)
+    
+    if (strres < 145) {
+      v = (225 - 1.25*strres)
+    } else {
+      v = (109.3 - 2.36*(l1 + l2)/2)
+      tone(100,100,100)
+    }
+
     if (v > 100) {
       v = 100
     }
 
-    if (v < 40) {
-      v = 40
+    if (v < 50) {
+      v = 50
     }
 
     u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.8*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
@@ -387,7 +394,7 @@ void attack {
       k = k + 0.0005
     }
 
-    if (abs(err_com) < 10 and v > 80) { //attack_angle error
+    if (abs(err_com) < 5 and v > 90) { //attack_angle error
       kicker()
     }
   }

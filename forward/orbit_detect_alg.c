@@ -104,7 +104,7 @@ void sensors {
 new.thread = sensors
   
 while (true) {
-    err_real = rm(abs(err_com - (dir - 6) * 30), 360) * (err_com - (dir - 6) * 30) / abs(err_com - (dir - 6) * 30)
+    err_real = (rm(abs(err_com+(dir-6)*30) + 900, 360)-180)*(err_com+(dir-6)*30)/abs(err_com+(dir-6)*30)
 
     printupd()
     print("Dir", dir)
