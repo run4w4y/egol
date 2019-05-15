@@ -155,5 +155,6 @@ while (true) {
     }
 
     prev_button = btn
+    delay(100)
     flush()
 }
