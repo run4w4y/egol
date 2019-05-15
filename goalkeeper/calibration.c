@@ -2,7 +2,7 @@
 
 handle = open.r("cal.txt");
 
-values_len = 19;
+values_len = 21;
 values = new.vector(values_len, 0);
 
 names[0] = "p_seek";
@@ -24,6 +24,8 @@ names[15] = "str_inf";
 names[16] = "line_lim";
 names[17] = "left_ang";
 names[18] = "right_ang";
+names[19] = "com_left";
+names[20] = "com_right";
 
 if (handle == 0) {
 	PORT_SEEKER = 4;
@@ -64,6 +66,10 @@ if (handle == 0) {
 	values[17] = COMPASS_LEFT_ANGLE;
 	COMPASS_RIGHT_ANGLE = 0;
 	values[18] = COMPASS_RIGHT_ANGLE;
+	COMPASS_LEFT = 0;
+	values[19] = COMPASS_LEFT;
+	COMPASS_RIGHT = 0;
+	values[20] = COMPASS_RIGHT;
 } else {
 	PORT_SEEKER = tonum(readline(handle));
 	values[0] = PORT_SEEKER;
@@ -103,6 +109,10 @@ if (handle == 0) {
 	values[17] = COMPASS_LEFT_ANGLE;
 	COMPASS_RIGHT_ANGLE = tonum(readline(handle));
 	values[18] = COMPASS_RIGHT_ANGLE;
+	COMPASS_LEFT = tonum(readline(handle));
+	values[19] = COMPASS_LEFT;
+	COMPASS_RIGHT = tonum(readline(handle));
+	values[20] = COMPASS_RIGHT;
 }
 
 closef(handle);
@@ -425,6 +435,7 @@ while (true) {
 		}
 
 		if (i == 16) {
+			sen.setmode(PORT_LIGHT, 4);
 			light_val = sen.read.rawval(PORT_LIGHT, LIGHT_COLOR_NUM);
 			values[i] = light_val;
 		}
@@ -436,6 +447,18 @@ while (true) {
 		}
 
 		if (i == 18) {
+			compass_array = i2c.readregs(2, 1, 66, 4);
+        	compass = compass_array[0] * 2 + compass_array[1];
+			values[i] = compass;
+		}
+
+		if (i == 19) {
+			compass_array = i2c.readregs(2, 1, 66, 4);
+        	compass = compass_array[0] * 2 + compass_array[1];
+			values[i] = compass;
+		}
+
+		if (i == 20) {
 			compass_array = i2c.readregs(2, 1, 66, 4);
         	compass = compass_array[0] * 2 + compass_array[1];
 			values[i] = compass;
