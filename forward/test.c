@@ -204,7 +204,7 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 70) {
+          if (strres < 90) {
             Goto exit2
           }
         }
@@ -217,7 +217,7 @@ void orbit {
     //r3
   
     if (err90 < 21) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir - 6 < 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
       
         v = 40
         u = -38
@@ -228,7 +228,7 @@ void orbit {
           }
         }
 
-        if (time() - t0 > 800) {
+        if (time() - t0 > 1000) {
           Goto exit2
         }
       }
@@ -303,7 +303,7 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 70) {
+          if (strres < 90) {
             Goto exit2
           }
         }
@@ -314,7 +314,7 @@ void orbit {
     //поворот на мяч
     //l3
     if (err90 > -22) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir - 6 > 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
 
         v = 40
         u = 38
@@ -325,7 +325,7 @@ void orbit {
           }
         }
 
-        if (time() - t0 > 800) {
+        if (time() - t0 > 1000) {
           Goto exit2
         }
       }
@@ -333,6 +333,7 @@ void orbit {
   }
   exit2:
 }
+
 
 void padik {
   if (dir < 3) {
@@ -343,7 +344,12 @@ void padik {
     if (strres < 145) {
       v = (225 - 1.25*strres)
     } else {
-      v = (109.3 - 2.36*(l1 + l2)/2)
+      v1 = 60
+      v2 = 40
+      l_cal = (l1_cal+l2_cal)/2
+      k = (v1-v2)/(l_cal-21)  //21 - захват пустой
+      a = (v1*(l_cal-21)+21*(v1-v2))/(l_cal-21)
+      v = a - k * (l1+l2)/2
       tone(100,100,100)
     }
 
@@ -351,8 +357,8 @@ void padik {
       v = 100
     }
 
-    if (v < 50) {
-      v = 50
+    if (v < 40) {
+      v = 40
     }
 
     u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.8*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
@@ -383,7 +389,7 @@ void attack {
   t_attack = time()
   v = 40
   k = 0.2
-  while (l1 > l1_cal - 5 and l2 > l2_cal - 5 /*and abs(dir - 6) < 2*/) {
+  while (l1 > l1_cal and l2 > l2_cal /*and abs(dir - 6) < 2*/) {
     led(5)  //tone(100,100,100)
     if (v < 100) {
       v = v + 0.2
@@ -391,7 +397,7 @@ void attack {
     u = -err_com * k
 
     if (k < 0.8) {
-      k = k + 0.0005
+      k = k + 0.0008
     }
 
     if (abs(err_com) < 5 and v > 90) { //attack_angle error
@@ -409,7 +415,7 @@ void fast_return {
 
   time_def = time()
   while (dir != 6 and time() - time_def < 1000) {
-    u=-(30*(6-dir)+0.2*(str3-str4))
+    u=-(30*(6-dir)+0.1*(str3-str4))
     v = 10
   }
 }
