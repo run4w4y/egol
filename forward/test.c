@@ -173,11 +173,12 @@ void orbit {
     }
     exit1: 
     
+    tone(100,100,100)
     t0 = time()
     //орбита
     //r2
     err90 = 999
-    while (err90 > 8) {
+    while (err90 > 8 and block == 0) {
       if (dir > 5) {
         if (dir > 6) {
           err90=rm(compass - com_r + 900, 360) - 180+45
@@ -204,7 +205,8 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 90) {
+          if (strres < 70) {
+            play(100, "Kung Fu")
             Goto exit2
           }
         }
@@ -215,9 +217,9 @@ void orbit {
 
     //поворот на мяч
     //r3
-  
+    tone(100,100,100)
     if (err90 < 21) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and block == 0) {
       
         v = 40
         u = -38
@@ -303,7 +305,8 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 90) {
+          if (strres < 70) {
+            play(100, "Kung Fu")
             Goto exit2
           }
         }
@@ -340,28 +343,18 @@ void padik {
     u=28*(dir1-5)
     v=100-30*abs(dir1-5)
   } else {
-    
-    if (strres < 145) {
-      v = (225 - 1.25*strres)
-    } else {
-      v1 = 60
-      v2 = 40
-      l_cal = (l1_cal+l2_cal)/2
-      k = (v1-v2)/(l_cal-21)  //21 - захват пустой
-      a = (v1*(l_cal-21)+21*(v1-v2))/(l_cal-21)
-      v = a - k * (l1+l2)/2
-      tone(100,100,100)
-    }
+  
+    v = (225 - 1.25*strres)
 
     if (v > 100) {
       v = 100
     }
 
-    if (v < 40) {
-      v = 40
+    if (v < 50) {
+      v = 50
     }
 
-    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.8*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
+    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.9*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -389,7 +382,7 @@ void attack {
   t_attack = time()
   v = 40
   k = 0.2
-  while (l1 > l1_cal and l2 > l2_cal /*and abs(dir - 6) < 2*/) {
+  while ((l1 > l1_cal - 5 or l2 > l2_cal - 5) and (abs(dir - 6) < 2 or dir == 8)) {
     led(5)  //tone(100,100,100)
     if (v < 100) {
       v = v + 0.2
@@ -441,7 +434,7 @@ void block_check {
     }
 
     if (abs(dir - 6) < 2) {
-      if (abs(compass - com_state) < 5 and abs(strres - str_state) < 5 and flag1 == 0) {
+      if (abs(compass - com_state) < 5 and abs(strres - str_state) < 3 and flag1 == 0) {
         block = 1
         flag_od = 0
       } else {
@@ -469,9 +462,9 @@ while (true) {
   if (block == 1) {
     led(1)
     t_exit = time()
-    while (dir != 6 and time() - t_exit < 2000) {
+    while (dir != 6 and time() - t_exit < 1000) {
       v = -100
-      u = (dir1-5) * 50
+      u = (dir1-5) * 40
     }
     block = 0
     
@@ -489,7 +482,7 @@ while (true) {
         orbit()
 
       } else {
-        while (strres > str_max and l1 < l1_cal and l2 < l2_cal and block == 0) { //slow padik
+        while (strres > str_max and (l1 < l1_cal or l2 < l2_cal) and block == 0) { //slow padik
           kf_dir = 14
           padik()
         }
