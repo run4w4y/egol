@@ -181,13 +181,13 @@ void orbit {
       }
 
       if (dir1 == 3) {
-        v=80
+        v=90
         d=145
         l=r+30
         u=-((1*(d*90)/(2*l))+(0.45*(r-strres)))
       } else {
         u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.4*(r-strres)))
-        v=70
+        v=80
       }
 
 
@@ -196,8 +196,7 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 70) {
-            play(100, "Kung Fu")
+          if (strres < 80) {
             Goto exit2
           }
         }
@@ -210,10 +209,10 @@ void orbit {
     //r3
     tone(100,100,100)
     if (err90 < 21) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and block == 0) {
+      while (abs(err_com) > 20 /*and l1 + l2 < l1_cal + l2_cal*/ and block == 0) {
       
-        v = 40
-        u = -38
+        v = 48  //40
+        u = -50  //-38
 
         if (dir < 7) {
           if (abs(err_com) < 69) { 
@@ -260,13 +259,14 @@ void orbit {
     // орбита
     //l2
 
+    tone(100,100,100)
     err90 = -999
     v = 0
     u = 0
     dir2 = dir1
     dir3 = dir2
 
-    while (err90 < -8) {
+    while (err90 < -8 and block == 0) {
       if (dir > 5) {
         if (dir > 6) {
           err90 = rm(compass - com_l + 900, 360) - 180+40
@@ -281,14 +281,14 @@ void orbit {
       dir_orbit()
 
       if (dir == 8) {
-        v=80
+        v=90
         d=145
         l=r+30
         u=-((-1*(d*90)/(2*l))+(0.4*(strres - r)))
       } else {
         u=-((20*((7-dir2))-((7-dir2)/5*10))+(0.45*(strres - r)))
         dir3 = dir2
-        v=70
+        v=80
       }
 
       if (time() - t0 > 4500) {
@@ -296,8 +296,7 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 70) {
-            play(100, "Kung Fu")
+          if (strres < 80) {
             Goto exit2
           }
         }
@@ -307,11 +306,12 @@ void orbit {
     t0 = time()
     //поворот на мяч
     //l3
+    tone(100,100,100)
     if (err90 > -22) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
+      while (abs(err_com) > 20 /*and l1 + l2 < l1_cal + l2_cal*/ and block == 0) {
 
-        v = 40
-        u = 38
+        v = 48 //40
+        u = 50  //38
 
         if (dir > 5) {
           if (abs(err_com) < 69) {

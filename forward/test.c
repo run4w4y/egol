@@ -1,8 +1,8 @@
 /*TODO:
   Main: check new idea of definition side of orbit 
-  # block delay
-  # fast returnings 
-  # communication with goalkeeper
+  # blockcheck on encoders 
+  # BT
+  # attack_side orbit
   # odometry side_check  
 */
 
@@ -219,8 +219,8 @@ void orbit {
     if (err90 < 21) {
       while (abs(err_com) > 20 /*and l1 + l2 < l1_cal + l2_cal*/ and block == 0) {
       
-        v = 40
-        u = -38
+        v = 48  //40
+        u = -50  //-38
 
         if (dir < 7) {
           if (abs(err_com) < 69) { 
@@ -318,8 +318,8 @@ void orbit {
     if (err90 > -22) {
       while (abs(err_com) > 20 /*and l1 + l2 < l1_cal + l2_cal*/ and block == 0) {
 
-        v = 40
-        u = 38
+        v = 40 //48
+        u = 38  //50
 
         if (dir > 5) {
           if (abs(err_com) < 69) {
@@ -407,7 +407,7 @@ void fast_return {
 
   time_def = time()
   while (dir != 6 and time() - time_def < 1000) {
-    u=-(30*(6-dir)+0.1*(str3-str4))
+    u=-(30*(6-dir)+0.15*(str3-str4))
     v = 10
   }
 }
@@ -433,14 +433,14 @@ void block_check {
     }
 
     if (abs(dir - 6) < 2) {
-      if (abs(compass - com_state) < 5 and abs(strres - str_state) < 3 and flag1 == 0) {
+      if (abs(compass - com_state) < 2 and abs(strres - str_state) < 3 and flag1 == 0) {
         block = 1
         flag_od = 0
       } else {
         block = 0
       }
     } else {     
-      if (abs(compass - com_state) < 5 and flag1 == 0) {
+      if (abs(compass - com_state) < 2 and flag1 == 0) {
         block = 1
         flag_od = 0
       } else {
@@ -464,9 +464,11 @@ while (true) {
   if (block == 1) {
     led(1)
     t_exit = time()
+    k = 10
     while (dir != 6 and time() - t_exit < 1000) {
       v = -100
-      u = (dir1-5) * 40
+      u = (dir1-5) * k
+      k = k + 0.01
     }
     block = 0
     
@@ -479,16 +481,15 @@ while (true) {
     }
 
     if (strres > str_max) {
-      if (abs(err_com)>80) {
+      if (abs(err_com)>70) {
         tone(100,100,100)
         orbit()
 
       } else {
-        while (strres > str_max and (l1 < l1_cal or l2 < l2_cal) and block == 0) { //slow padik
+        while (strres > str_max and (l1 < l1_cal or l2 < l2_cal) and block == 0 and abs(err_com)<70) { //slow padik
           kf_dir = 14
           padik()
         }
-
         attack()
       }
     } else {
