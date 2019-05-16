@@ -300,123 +300,180 @@ void odometry {
         delta_left = odometry_left - odometry_prev_left;
         delta_right = odometry_right - odometry_prev_right;
         delta = (delta_left + delta_right)/2;
-        delta_com = compass_delta(compass());
+        compass_odometry = compass(); 
+        delta_com = compass_delta_two(compass_right, compass_odometry);
 
         odometry_x = odometry_prev_x + delta*cos(rad(delta_com));
         odometry_y = odometry_prev_y + delta*sin(rad(delta_com));
-        odometry_y = -odometry_y;
 
         odometry_prev_left = odometry_left;
         odometry_prev_right = odometry_right;
         odometry_prev_x = odometry_x;
         odometry_prev_y = odometry_y;
 
-        delay(100);
+        delay(200);
     }
 }
 
 new.thread = odometry
 
-// other functions
+void reset_odometry {
+    odometry_x = 0;
+    odometry_prev_x = 0;
+    odometry_y = 0;
+    odometry_prev_y = 0;
+}
 
-void justify {
-    kp_justify = 0.95;
-    v_justify = 0;
-    compass_justify = compass();
-    error_justify = compass_delta_two(COMPASS_LEFT, compass_justify);
-    while (abs(error_justify) > 5) {
-        compass_justify = compass();
-        error_justify = compass_delta_two(COMPASS_LEFT, compass_justify);
-        u_justify = error_justify * kp_justify;
+// movements
 
-        l_m(u_justify);
-        r_m(-u_justify);
-    }
-
-    l_m(0);
-    r_m(0);
-
-    v_justify = 70;
-    compass_justify = compass();
-    error_justify = compass_delta_two(COMPASS_LEFT, compass_justify);
-    while (light() >= LIGHT_LINE_LIMIT) {
-        compass_justify = compass();
-        error_justify = compass_delta_two(COMPASS_LEFT, compass_justify);
-        u_justify = error_justify * kp_justify;
-
-        l_m(v_justify+u_justify);
-        r_m(v_justify-u_justify);
-    }
-
-    l_m(0);
-    r_m(0);
-
-    delay(500);
-
-    v_justify = -70;
-    motor_count_justify = mt.getcount(PORT_LEFT_MOTOR);
-    while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_justify) < CENTER_DISTANCE) {
-        l_m(v_justify);
-        r_m(v_justify);
-    }
-
-    l_m(0);
-    r_m(0);
-
-    v_justify = 0;
-    compass_justify = compass();
-    error_justify = compass_delta(compass_justify);
-    while (abs(error_justify) > 5) {
-        compass_justify = compass();
-        error_justify = compass_delta(compass_justify);
-        u_justify = error_justify * kp_justify;
-
-        l_m(-u_justify);
-        r_m(u_justify);
-    }
-
-    l_m(0);
-    r_m(0);
-
-    v_justify = -85;
-    while (button_top() != 1) {
-        l_m(v_justify);
-        r_m(v_justify);
-    }
-
-    v_justify = 65;
-    motor_count_justify = mt.getcount(PORT_LEFT_MOTOR);
-    while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_justify) < 55) {
-        l_m(v_justify);
-        r_m(v_justify);
-    }
-
+func num stop() {
     l_m(0);
     r_m(0);
 }
 
-void return_goal {
-    kp_return = 0.95;
-    kp_justify = 0.95;
-    v_return = 0;
-    compass_return = compass();
-    error_return = compass_delta_two(COMPASS_LEFT, compass_return);
-    while (abs(error_return) > 5) {
-        compass_return = compass();
-        error_return = compass_delta_two(COMPASS_LEFT, compass_return);
-        u_return = error_return * kp_return;
+func num go_both(speed) {
+    l_m(speed);
+    r_m(speed);
+}
 
-        l_m(u_return);
-        r_m(-u_return);
+func num turn_angle(alpha_angle) {
+    local kp = 1.15;
+    local u = 0;
+    local com = 0;
+    local error = 0;
+    tmp = alpha_angle;
+    com = compass();
+    error = compass_delta_two(tmp, com);
+    while (abs(error) > 5) {
+        com = compass();
+        error = compass_delta_two(tmp, com);
+        u = error * kp;
+
+        l_m(u);
+        r_m(-u);
     }
 
-    l_m(0);
-    r_m(0);
-    tone(100, 100, 100);
+    stop();
+}
 
-    v_return = -70;
-    compass_return = compass();
-    error_return = compass_delta_two(COMPASS_LEFT, compass_return);
+func num go_angle(alpha_angle, speed) {
+    local kp = 1.15;
+    local u = 0;
+    local com = 0;
+    local error = 0;
+    local v = 0;
+    v = speed;
+    tmp = alpha_angle;
+    com = compass();
+    error = compass_delta_two(tmp, com);
+    u = error * kp;
+
+    l_m(v + u);
+    r_m(v - u);
+}
+
+func num go_enc(distance, speed) {
+    local v = 0;
+    v = speed;
+    local count = 0;
+    count = mt.getcount(PORT_LEFT_MOTOR);
+    while (abs(mt.getcount(PORT_LEFT_MOTOR) - count) < distance) {
+        go_both(v);
+    }
+
+    stop();
+}
+
+void goal_justify {
+    while (button_top() != 1) {
+        go_both(-85);
+    }
+    go_enc(55, 65);
+    stop();
+}
+
+i_glob = 0;
+prev_dir_glob = 0;
+func num go_ball(speed) {
+    local kp = 0.4;
+    local kd = 0;
+    local ki = 0.003;
+    local kdir = 0;
+    local v = 0;
+    local i = 0;
+    local error = 0;
+    local error_old = 0;
+    local u = 0;
+    local k_dist = 0;
+    local tmp_dir = 0;
+    local prev_dir = 0;
+    prev_dir = prev_dir_glob;
+    v = speed;
+    i = i_glob;
+    i = i + error * ki;
+    if (irseeker_dir() != 0) {
+        error = irseeker_str(4) - irseeker_str(3);
+        if (irseeker_str(4) == 0 and irseeker_str(3) == 0) {
+            kdir = 14;
+        } else {
+            kdir = 0;
+        }
+
+        if (irseeker_dir() == 6) {
+            i = 0;
+        }
+
+        tmp_dir = irseeker_dir();
+        u = kdir*(tmp_dir - 6) + kp * error + kd * error_old + i;
+        if ((abs(error) <= 20 or irseeker_dir() == 6) and kdir == 0) {
+            u = 0;
+        }
+
+        k_dist = (SEEKER_STR_MAX-irseeker_str(0))/SEEKER_STR_MAX;
+        if (k_dist <= 0.4) {
+            k_dist = 0.2;
+        }
+
+        if (u <= 0 and compass_delta(compass()) <= -90) {
+            u = 0;
+        }
+        if (u >= 0 and compass_delta(compass()) >= 90) {
+            u = 0;
+        }
+        u = k_dist * u;
+
+        l_m(v + u);
+        r_m(v - u);
+
+        error_old = error;
+        prev_dir = irseeker_dir();
+    } else {
+        stop();
+    }
+
+    i_glob = i;
+    prev_dir_glob = prev_dir;
+}
+
+// other functions
+
+void justify {
+    turn_angle(COMPASS_LEFT);
+    while (light() >= LIGHT_LINE_LIMIT) {
+        go_angle(COMPASS_LEFT, 70);
+    }
+
+    stop();
+    delay(500);
+
+    go_enc(CENTER_DISTANCE, -70);
+    turn_angle(COMPASS_ALPHA);
+    goal_justify();
+}
+
+void return_goal {
+    turn_angle(COMPASS_LEFT);
+
     exit_return = 0;
     while (exit_return == 0) {
         if (light() < LIGHT_LINE_LIMIT) {
@@ -425,137 +482,28 @@ void return_goal {
         if (button_bot() == 1) {
             exit_return = 2;
         }
-        compass_return = compass();
-        error_return = compass_delta_two(COMPASS_LEFT, compass_return);
-        u_return = error_return * kp_return;
-
-        l_m(v_return+u_return);
-        r_m(v_return-u_return);
+        go_angle(COMPASS_LEFT, -70);
     }
+    stop();
 
     if (exit_return == 1) {
-        v_justify = -70;
-        motor_count_justify = mt.getcount(PORT_LEFT_MOTOR);
-        while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_justify) < CENTER_DISTANCE) {
-            l_m(v_justify);
-            r_m(v_justify);
-        }
-
-        l_m(0);
-        r_m(0);
-
-        v_justify = 0;
-        compass_justify = compass();
-        error_justify = compass_delta(compass_justify);
-        while (abs(error_justify) > 5) {
-            compass_justify = compass();
-            error_justify = compass_delta(compass_justify);
-            u_justify = error_justify * kp_justify;
-
-            l_m(-u_justify);
-            r_m(u_justify);
-        }
-
-        l_m(0);
-        r_m(0);
-
-        v_justify = -85;
-        while (button_top() != 1) {
-            l_m(v_justify);
-            r_m(v_justify);
-        }
-
-        v_justify = 65;
-        motor_count_justify = mt.getcount(PORT_LEFT_MOTOR);
-        while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_justify) < 55) {
-            l_m(v_justify);
-            r_m(v_justify);
-        }
-
-        l_m(0);
-        r_m(0);
+        go_enc(CENTER_DISTANCE, -70);
+        turn_angle(COMPASS_ALPHA);
+        goal_justify();
     } else {
-        tone(100, 100, 100);
-        v_return = 70;
-        compass_return = compass();
-        error_return = compass_delta_two(COMPASS_LEFT, compass_return);
         while (light() >= LIGHT_LINE_LIMIT) {
-            compass_return = compass();
-            error_return = compass_delta_two(COMPASS_LEFT, compass_return);
-            u_return = error_return * kp_return;
-
-            l_m(v_return+u_return);
-            r_m(v_return-u_return);
+            go_angle(COMPASS_LEFT, 70);
         }
-
-        l_m(0);
-        r_m(0);
-        // delay(500);
-        tone(100, 100, 100);
-
-        v_return = 70;
-        motor_count_return = mt.getcount(PORT_LEFT_MOTOR);
-        while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_return) < CENTER_DISTANCE) {
-            l_m(v_return);
-            r_m(v_return);
-        }
-
-        l_m(0);
-        r_m(0);
-        tone(100, 100, 100);
-
-        v_justify = 0;
-        compass_justify = compass();
-        error_justify = compass_delta(compass_justify);
-        while (abs(error_justify) > 5) {
-            compass_justify = compass();
-            error_justify = compass_delta(compass_justify);
-            u_justify = error_justify * kp_justify;
-
-            l_m(-u_justify);
-            r_m(u_justify);
-        }
-
-        l_m(0);
-        r_m(0);
-        tone(100, 100, 100);
-
-        v_justify = -85;
-        while (button_top() != 1) {
-            l_m(v_justify);
-            r_m(v_justify);
-        }
-
-        v_justify = 65;
-        motor_count_justify = mt.getcount(PORT_LEFT_MOTOR);
-        while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_justify) < 55) {
-            l_m(v_justify);
-            r_m(v_justify);
-        }
-
-        l_m(0);
-        r_m(0);
+        stop();
+        go_enc(CENTER_DISTANCE, 70);
+        turn_angle(COMPASS_ALPHA);
+        goal_justify();
     }
 }
 
 void check_wall {
-    kp_check = 0.45;
-    v_check = 0;
-    compass_check = compass();
-    error_check = compass_delta(compass_check);
-    while (abs(error_check) > 5) {
-        compass_check = compass();
-        error_check = compass_delta(compass_check);
-        u_check = error_check * kp_check;
+    turn_angle(COMPASS_ALPHA);
 
-        l_m(-u_check);
-        r_m(u_check);
-    }
-
-    l_m(0);
-    r_m(0);
-
-    v_check = -85;
     exit_check = 0;
     while (exit_check == 0) {
         if (button_top() == 1) {
@@ -565,25 +513,15 @@ void check_wall {
             exit_check = 2;
         } 
 
-        l_m(v_check);
-        r_m(v_check);
+        go_both(-85);
     }
 
-    l_m(0);
-    r_m(0);
-
-    v_justify = 65;
-    motor_count_justify = mt.getcount(PORT_LEFT_MOTOR);
-    while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_justify) < 105) {
-        l_m(v_justify);
-        r_m(v_justify);
-    }
-
-    l_m(0);
-    r_m(0);
+    stop();
+    go_enc(105, 65);
 
     if (exit_check == 2) {
         return_goal();
+        reset_odometry();
     }
 }
 
@@ -599,55 +537,22 @@ void watch {
     k_dir_watch = 0;
     watch_bool = 0;
     time_start_watch = time();
+    check_wall_time = time();
 
     while (watch_bool == 0) {
         if (time() - time_start_watch >= 1000 and act_count >= 1 and irseeker_str(0) <= STR_AWAY) {
             justify();
+            reset_odometry();
+            check_wall_time = time();
             act_count = 0;
-            odometry_x = 0;
-            odometry_y = 0;
         }
 
-        i_watch = i_watch + error_watch*ki_watch;
-        if (irseeker_dir() != 0) {
-            error_watch = irseeker_str(4) - irseeker_str(3);
-            if (irseeker_str(4) == 0 and irseeker_str(3) == 0) {
-                k_dir_watch = 14;
-            } else {
-                k_dir_watch = 0;
-            }
-
-            if (irseeker_dir() == 6) {
-                i_watch = 0;
-            }
-
-            tmp_dir = irseeker_dir()
-            u_watch = k_dir_watch*(tmp_dir - 6) + kp_watch*error_watch + kd_watch*error_old_watch + i_watch;
-            if ((abs(error_watch) <= 20 or irseeker_dir() == 6) and k_dir_watch == 0) {
-                u_watch = 0;
-            }
-
-            k_dist = (SEEKER_STR_MAX-irseeker_str(0))/SEEKER_STR_MAX;
-            if (k_dist <= 0.4) {
-                k_dist = 0.2;
-            }
-
-            if (u_watch <= 0 and compass_delta(compass()) <= -90) {
-                u_watch = 0;
-            }
-            if (u_watch >= 0 and compass_delta(compass()) >= 90) {
-                u_watch = 0;
-            }
-
-            l_m((k_dist*u_watch));
-            r_m((0-k_dist*u_watch));
-
-            error_old_watch = error_watch;
-            prev_dir_watch = irseeker_dir();
-        } else {
-            l_m(0);
-            r_m(0);
+        if (time() - check_wall_time >= 10000 and irseeker_str(0) <= STR_AWAY) {
+            check_wall();
+            check_wall_time = time();
         }
+
+        go_ball(0);
 
         if (compass_delta(compass()) <= -60 or compass_delta(compass()) >= 60) {
             watch_bool = 2;
@@ -662,103 +567,39 @@ void watch {
 }
 
 void go_back {
-    v_back = 0;
-    kp_back = 1.15;
-    left_lim_back = compass_delta(COMPASS_LEFT_ANGLE);
-    right_lim_back = compass_delta(COMPASS_RIGHT_ANGLE);
-
-    if (odometry_x < 0) {
-        error_back = atan(abs(odometry_y / odometry_x));
-        beta_back = rm(COMPASS_ALPHA - error_back + 360, 360);
-    } else {
-        error_back = atan(odometry_y / odometry_x);
-        beta_back = rm(COMPASS_ALPHA + error_back, 360);
-    }
-
-    error_back = compass_delta(beta_back);
-    while (abs(error_back) > 5) {
-        error_back = compass_delta(beta_back);
-        u_back = error_back * kp_back;
-
-        l_m(-u_back);
-        r_m(u_back);
-    }
-
-    l_m(0);
-    r_m(0);
-
-    compass_back = compass();
-    if (left_lim_back < 0) {
-        if (compass_delta(compass_back) < left_lim_back) {
-            len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
+    beta_err = deg(atan(odometry_y / abs(odometry_x)));
+    if (COMPASS_RIGHT < COMPASS_LEFT) {
+        if (odometry_x > 0) {
+            beta_res = rm(COMPASS_RIGHT + beta_err, 360);
         } else {
-            if (compass_delta(compass_back) > right_lim_back) {
-                len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
-            } else {
-                len_back = sqrt(odometry_x*odometry_x*1.085 + odometry_y*odometry_y);
-            }
+            beta_res = rm(COMPASS_LEFT - beta_err + 360, 360);
         }
     } else {
-        if (compass_delta(compass_back) < right_lim_back) {
-            len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
+        if (odometry_x > 0) {
+            beta_res = rm(COMPASS_RIGHT - beta_err + 360, 360);
         } else {
-            if (compass_delta(compass_back) > left_lim_back) {
-                len_back = sqrt(CENTER_DISTANCE*CENTER_DISTANCE + odometry_y*odometry_y);
-            } else {
-                len_back = sqrt(odometry_x*odometry_x*1.085 + odometry_y*odometry_y);
-            }
+            beta_res = rm(COMPASS_LEFT + beta_err, 360);
         }
     }
-    v_back = -85;
-    motor_count_back = mt.getcount(PORT_LEFT_MOTOR);
-    while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_back) < len_back) {
-        l_m(v_back);
-        r_m(v_back);
-    }
 
-    l_m(0);
-    r_m(0);
-    // delay(200);
+    turn_angle(beta_res);
 
-    v_back = 0;
-    compass_back = compass();
-    error_back = compass_delta(compass_back);
-    while (abs(error_back) > 5) {
-        compass_back = compass();
-        error_back = compass_delta(compass_back);
-        u_back = error_back * kp_back;
+    len_back = sqrt(odometry_x*odometry_x*1.085 + odometry_y*odometry_y);
+    go_enc(len_back, -85);
+    turn_angle(COMPASS_ALPHA);
 
-        l_m(-u_back);
-        r_m(u_back);
-    }
-
-    l_m(0);
-    r_m(0);
-
-    v_back = -85;
     while (button_top() != 1 and button_bot() != 1) {
-        l_m(v_back);
-        r_m(v_back);
+        go_both(-85);
     }
 
     if (button_bot() == 1) {
         return_goal();
     } else {
-        v_back = 65;
-        motor_count_back = mt.getcount(PORT_LEFT_MOTOR);
-        while (abs(mt.getcount(PORT_LEFT_MOTOR) - motor_count_back) < 55) {
-            l_m(v_back);
-            r_m(v_back);
-        }
-
-        l_m(0);
-        r_m(0);
+        go_enc(55, 65);
     }
 }
 
 void act_side {
-    kp_act = 0.4;
-    v_act = 100;
     left_lim_back = compass_delta(COMPASS_LEFT_ANGLE);
     right_lim_back = compass_delta(COMPASS_RIGHT_ANGLE);
 
@@ -793,24 +634,11 @@ void act_side {
     m_m(100);
 
     while (light() >= LIGHT_LINE_LIMIT) { 
-        compass_act = compass();
-
         if (act_type == "left") {
-            error_act = compass_delta_two(COMPASS_LEFT, compass_act);
+            go_angle(COMPASS_LEFT, 100);
         } else {
-            error_act = compass_delta_two(COMPASS_RIGHT, compass_act);
+            go_angle(COMPASS_RIGHT, 100);
         }
-
-        u_act = kp_act*error_act;
-        if (u_act <= 0 and compass_delta(compass()) <= -90) {
-            u_act = 0;
-        }
-        if (u_act >= 0 and compass_delta(compass()) >= 90) {
-            u_act = 0;
-        }
-
-        l_m(v_act+u_act);
-        r_m(v_act-u_act);
     }
 
     l_m(0);
@@ -826,39 +654,11 @@ void act_side {
 }
 
 void act_ball {
-    kp_act = 0.45;
-    
-    v_act = 100;
-    
-    printupd();
-    print("light", light());
     m_m(100);
-
     while (light() >= LIGHT_LINE_LIMIT) {
-        error_act = irseeker_str(4) - irseeker_str(3);
-        if (irseeker_str(4) == 0 and irseeker_str(3) == 0) {
-            k_dir_act = 14;
-        } else {
-            k_dir_act = 0;
-        }
-
-        tmp_dir = irseeker_dir()
-        u_watch = k_dir_act*(tmp_dir - 6) + kp_act*error_act;
-        
-        u_act = kp_act*error_act;
-        if (u_act <= 0 and compass_delta(compass()) <= -90) {
-            u_act = 0;
-        }
-        if (u_act >= 0 and compass_delta(compass()) >= 90) {
-            u_act = 0;
-        }
-
-        l_m(v_act+u_act);
-        r_m(v_act-u_act);
+        go_ball(100);
     }
-
-    l_m(0);
-    r_m(0);
+    stop();
 
     delay(2000);
 
@@ -883,12 +683,10 @@ while (true) {
     print("btn", button_bot());
     print("x", odometry_x);
     print("y", odometry_y);
-    // print("cnt", mt.getcount(PORT_LEFT_MOTOR));
+    print("d", delta_com);
 
     // actions
-    // watch();
-    // act();
-    // go_back();
-    check_wall();
-    delay(5000);
+    watch();
+    act();
+    go_back();
 }
