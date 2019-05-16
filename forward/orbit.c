@@ -125,16 +125,7 @@ void dir_orbit {
 void orbit {
 
   err_real = (rm(abs(err_com+(dir-6)*30) + 900, 360)-180)*(err_com+(dir-6)*30)/abs(err_com+(dir-6)*30)
-  scr.clear()
-  txt(1,10,10,2,err_real)
-  btn.wait()
-  
-  scr.clear()
-  if (err_real < 0) {
-    txt(1,10,10,2,"L")
-  } else {
-    txt(1,10,10,2,"R")
-  }
+
   fl_attack = 0
   // // поворот на мяч перед орбитой
   // t0 = time()
@@ -173,11 +164,12 @@ void orbit {
     }
     exit1: 
     
+    tone(100,100,100)
     t0 = time()
     //орбита
     //r2
     err90 = 999
-    while (err90 > 8) {
+    while (err90 > 8 and block == 0) {
       if (dir > 5) {
         if (dir > 6) {
           err90=rm(compass - com_r + 900, 360) - 180+45
@@ -204,7 +196,8 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 90) {
+          if (strres < 70) {
+            play(100, "Kung Fu")
             Goto exit2
           }
         }
@@ -215,12 +208,12 @@ void orbit {
 
     //поворот на мяч
     //r3
-  
+    tone(100,100,100)
     if (err90 < 21) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir - 6 < 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and block == 0) {
       
-        v = 48
-        u = -50
+        v = 40
+        u = -38
 
         if (dir < 7) {
           if (abs(err_com) < 69) { 
@@ -228,7 +221,7 @@ void orbit {
           }
         }
 
-        if (time() - t0 > 800) {
+        if (time() - t0 > 1000) {
           Goto exit2
         }
       }
@@ -303,7 +296,8 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 90) {
+          if (strres < 70) {
+            play(100, "Kung Fu")
             Goto exit2
           }
         }
@@ -314,10 +308,10 @@ void orbit {
     //поворот на мяч
     //l3
     if (err90 > -22) {
-      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and dir - 6 > 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
 
-        v = 48
-        u = 50
+        v = 40
+        u = 38
 
         if (dir > 5) {
           if (abs(err_com) < 69) {
@@ -325,7 +319,7 @@ void orbit {
           }
         }
 
-        if (time() - t0 > 800) {
+        if (time() - t0 > 1000) {
           Goto exit2
         }
       }
@@ -341,4 +335,4 @@ orbit()
 v = 0
 u = 0
 mt.stop("BC", true)
-btn.wait()
+delay(1000)
