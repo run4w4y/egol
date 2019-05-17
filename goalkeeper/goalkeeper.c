@@ -54,6 +54,7 @@ COMPASS_LEFT = tonum(readline(handle));
 COMPASS_RIGHT = tonum(readline(handle));
 STR_AWAY = 60;
 CENTER_DISTANCE = 300;
+CENTER_DISTANCE_BIG = CENTER_DISTANCE + 100;
 
 // reading from sensors start
 
@@ -287,41 +288,47 @@ func num m_m(speed) { // middle motor move
 
 // odometry
 
-odometry_prev_left = 0;
-odometry_prev_right = 0;
-odometry_prev_x = 0;
-odometry_prev_y = 0;
-weight = 720;
-
 void odometry {
-    while (true) {
+    odometry_prev_left = 0;
+    odometry_left = 0;
+    odometry_prev_right = 0;
+    odometry_right = 0;
+    odometry_x = 0;
+    delta_left = 0;
+    delta_right = 0;
+    delta = 0;
+    odometry_y = 0;
+    weight = 720;
+    reset_flag = 0;
+    mt.resetcount(PORT_LEFT_MOTOR);
+    mt.resetcount(PORT_RIGHT_MOTOR);
+
+    while (reset_flag == 0) {
         odometry_left = mt.getcount(PORT_LEFT_MOTOR);
         odometry_right = mt.getcount(PORT_RIGHT_MOTOR);
         delta_left = odometry_left - odometry_prev_left;
         delta_right = odometry_right - odometry_prev_right;
         delta = (delta_left + delta_right)/2;
         compass_odometry = compass(); 
-        delta_com = compass_delta_two(compass_right, compass_odometry);
+        delta_com = compass_delta_two(COMPASS_RIGHT, compass_odometry);
 
-        odometry_x = odometry_prev_x + delta*cos(rad(delta_com));
-        odometry_y = odometry_prev_y + delta*sin(rad(delta_com));
+        odometry_x = odometry_x + delta*cos(rad(delta_com));
+        odometry_y = odometry_y + delta*sin(rad(delta_com));
 
         odometry_prev_left = odometry_left;
         odometry_prev_right = odometry_right;
-        odometry_prev_x = odometry_x;
-        odometry_prev_y = odometry_y;
 
         delay(200);
     }
+    tone(100, 100, 100);
+    delay(100);
 }
 
-new.thread = odometry
+new.thread = odometry;
 
 void reset_odometry {
-    odometry_x = 0;
-    odometry_prev_x = 0;
-    odometry_y = 0;
-    odometry_prev_y = 0;
+    reset_flag = 1;
+    new.thread = odometry;
 }
 
 // movements
@@ -337,7 +344,7 @@ func num go_both(speed) {
 }
 
 func num turn_angle(alpha_angle) {
-    local kp = 1.15;
+    local kp = 1.25;
     local u = 0;
     local com = 0;
     local error = 0;
@@ -385,18 +392,31 @@ func num go_enc(distance, speed) {
 }
 
 void goal_justify {
-    while (button_top() != 1) {
+    exit_goal = 0;
+    while (exit_goal == 0) {
+        if (button_top() == 1) {
+            exit_goal = 1;
+        }
+        if (button_bot() == 2) {
+            exit_goal = 2;
+        }
         go_both(-85);
     }
-    go_enc(55, 65);
-    stop();
+    if (exit_goal == 2) {
+        go_enc(115, 90);
+        delay(100);
+        return_goal();
+        act_count = 0;
+    } else {
+        go_enc(55, 65);
+    }
 }
 
 i_glob = 0;
 prev_dir_glob = 0;
 func num go_ball(speed) {
-    local kp = 0.4;
-    local kd = 0;
+    local kp = 0.55;
+    local kd = 0.1;
     local ki = 0.003;
     local kdir = 0;
     local v = 0;
@@ -459,16 +479,32 @@ func num go_ball(speed) {
 
 void justify {
     turn_angle(COMPASS_LEFT);
-    while (light() >= LIGHT_LINE_LIMIT) {
-        go_angle(COMPASS_LEFT, 70);
+    exit_justify = 0;
+    while (exit_justify == 0) {
+        if (light() < LIGHT_LINE_LIMIT) {
+            exit_justify = 1;
+        }
+        if (button_bot() == 1) {
+            exit_justify = 2;
+        }
+        go_angle(COMPASS_LEFT, -100);
     }
 
-    stop();
-    delay(500);
-
-    go_enc(CENTER_DISTANCE, -70);
-    turn_angle(COMPASS_ALPHA);
-    goal_justify();
+    if (exit_justify == 1) {
+        stop();
+        delay(100);
+        go_enc(CENTER_DISTANCE_BIG, 100);
+        turn_angle(COMPASS_ALPHA);
+        goal_justify();
+    } else {
+        while (light() >= LIGHT_LINE_LIMIT) {
+            go_angle(COMPASS_LEFT, 100);
+        }
+        stop();
+        go_enc(CENTER_DISTANCE_BIG, 100);
+        turn_angle(COMPASS_ALPHA);
+        goal_justify();
+    }
 }
 
 void return_goal {
@@ -482,20 +518,20 @@ void return_goal {
         if (button_bot() == 1) {
             exit_return = 2;
         }
-        go_angle(COMPASS_LEFT, -70);
+        go_angle(COMPASS_LEFT, -100);
     }
     stop();
 
     if (exit_return == 1) {
-        go_enc(CENTER_DISTANCE, -70);
+        go_enc(CENTER_DISTANCE, -100);
         turn_angle(COMPASS_ALPHA);
         goal_justify();
     } else {
         while (light() >= LIGHT_LINE_LIMIT) {
-            go_angle(COMPASS_LEFT, 70);
+            go_angle(COMPASS_LEFT, 100);
         }
         stop();
-        go_enc(CENTER_DISTANCE, 70);
+        go_enc(CENTER_DISTANCE, 100);
         turn_angle(COMPASS_ALPHA);
         goal_justify();
     }
@@ -517,7 +553,7 @@ void check_wall {
     }
 
     stop();
-    go_enc(105, 65);
+    go_enc(105, 90);
 
     if (exit_check == 2) {
         return_goal();
@@ -528,13 +564,6 @@ void check_wall {
 act_count = 0;
 
 void watch {
-    kp_watch = 0.4;
-    kd_watch = 0;
-    ki_watch = 0.003;
-    error_watch = 0;
-    error_old_watch = 0;
-    i_watch = 0;
-    k_dir_watch = 0;
     watch_bool = 0;
     time_start_watch = time();
     check_wall_time = time();
@@ -568,34 +597,46 @@ void watch {
 
 void go_back {
     beta_err = deg(atan(odometry_y / abs(odometry_x)));
-    if (COMPASS_RIGHT < COMPASS_LEFT) {
-        if (odometry_x > 0) {
-            beta_res = rm(COMPASS_RIGHT + beta_err, 360);
-        } else {
-            beta_res = rm(COMPASS_LEFT - beta_err + 360, 360);
-        }
+
+    if (odometry_x > 0) {
+        beta_res = rm(COMPASS_RIGHT - beta_err + 360, 360);
     } else {
-        if (odometry_x > 0) {
-            beta_res = rm(COMPASS_RIGHT - beta_err + 360, 360);
-        } else {
-            beta_res = rm(COMPASS_LEFT + beta_err, 360);
-        }
+        beta_res = rm(COMPASS_LEFT + beta_err, 360);
     }
 
     turn_angle(beta_res);
 
     len_back = sqrt(odometry_x*odometry_x*1.085 + odometry_y*odometry_y);
-    go_enc(len_back, -85);
-    turn_angle(COMPASS_ALPHA);
+    go_enc(len_back, -95);
 
-    while (button_top() != 1 and button_bot() != 1) {
-        go_both(-85);
-    }
-
-    if (button_bot() == 1) {
-        return_goal();
+    if (irseeker_str(0) > STR_LIMIT) {
+        exit_go_back = 1;
     } else {
-        go_enc(55, 65);
+        turn_angle(COMPASS_ALPHA);
+
+        exit_back = 0;
+        while (exit_back == 0) {
+            if (button_top() == 1) {
+                exit_back = 1;
+            }
+            if (button_bot() == 1) {
+                exit_back = 2;
+            }
+
+            go_both(-95);
+        }
+
+        if (exit_back == 2) {
+            tone(100, 100, 100);
+            go_enc(115, 90);
+            delay(100);
+            return_goal();
+            act_count = 0;
+        } else {
+            go_enc(55, 90);
+        }
+
+        exit_go_back = 0;
     }
 }
 
@@ -660,12 +701,13 @@ void act_ball {
     }
     stop();
 
-    delay(2000);
+    delay(1000);
 
     m_m(0);
 }
 
 void act {
+    start:
     act_count = act_count + 1;
 
     if (watch_bool == 2) {
@@ -673,20 +715,79 @@ void act {
     } else {
         act_ball();
     }
+
+    go_back();
+
+    if (exit_go_back == 1) {
+        goto start;
+    }
 }
+
+// bluetooth and prints
+
+connect("BIBA");
+check.connect("BIBA");
+current_action = "watch";
+void parallel {
+    while (true) {
+        // ball zone
+
+        com_zone = compass();
+        phi_zone = compass_delta_two(COMPASS_RIGHT, com_zone);
+        r_zone = SEEKER_STR_MAX - irseeker_str(0);
+        x_zone = r_zone * cos(rad(phi_zone));
+        y_zone = r_zone * sin(rad(phi_zone));
+        res_zone = 3;
+        if (current_action == "watch") {
+            if (x_zone < -25) {
+                if (y_zone < 115) {
+                    res_zone = 1;
+                } else {
+                    res_zone = 2;
+                }
+            }
+            if (x_zone > 45) {
+                if (y_zone < 115) {
+                    res_zone = 5;
+                } else {
+                    res_zone = 4;
+                }
+            }
+        }
+
+        // bt
+
+        bt.send("BIBA", "attack_side", res_zone);
+
+        // prints
+
+        printupd();
+        print("btn", button_bot());
+        print("str", irseeker_str(0));
+        print("dir", irseeker_dir());
+        print("x", odometry_x);
+        print("y", odometry_y);
+        print("phi", phi_zone);
+        print("d", delta_com);
+        print("zx", x_zone);
+        print("zy", y_zone);
+        print("z", res_zone);
+
+        yield();
+        delay(200);
+    }
+}
+
+new.thread = parallel;
 
 // main part of the program
 
+delay(250);
 while (true) {
-    // prints
-    printupd();
-    print("btn", button_bot());
-    print("x", odometry_x);
-    print("y", odometry_y);
-    print("d", delta_com);
-
     // actions
+
+    current_action = "watch";
     watch();
+    current_action = "act";
     act();
-    go_back();
 }
