@@ -1,4 +1,4 @@
-main - allin
+main - allin (enc def + start + angles + BT)
 res1 - old backup
 res2 - allin without enc def
 res3 - old + angles
