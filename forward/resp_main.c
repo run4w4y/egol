@@ -538,6 +538,8 @@ if (btn.rn == "E") {
   }
 }
 
+flush()
+
 // Main
 while (true) {
   if (block == 1) {

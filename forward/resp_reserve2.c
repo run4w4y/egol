@@ -467,36 +467,29 @@ void Gastal {
   while (true) {
     com_state = compass
     str_state = strres
-    enc1_state = abs(e1)
-    enc2_state = abs(e2)
     t_block = time()
 
     while (time() - t_block < 1000) {
 
     }
 
-    if ((abs(abs(e1)-abs(enc1_state)) < 10 and abs(abs(e2)-abs(enc2_state)) < 10) and v > 20 and flag1 == 0) {
-      block = 1
-      flag_od = 0
-    } else {
-      if (abs(dir - 6) < 2) {
+    if (abs(dir - 6) < 2) {
         if (abs(compass - com_state) < 2 and abs(strres - str_state) < 3 and flag1 == 0) {
-          block = 1
-          flag_od = 0
+            block = 1
+            flag_od = 0
         } else {
-          block = 0
+            block = 0
         }
-      } else {     
+    } else {     
         if (abs(compass - com_state) < 2 and flag1 == 0) {
-          block = 1
-          flag_od = 0
+            block = 1
+            flag_od = 0
         } else {
-          block = 0
+            block = 0
         }
-      }
-      printupd()
-      print("Block", block)
     }
+    printupd()
+    print("Block", block)
   }
 }
 
@@ -537,6 +530,8 @@ if (btn.rn == "E") {
     }
   }
 }
+
+flush()
 
 // Main
 while (true) {

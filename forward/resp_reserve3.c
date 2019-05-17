@@ -1,21 +1,21 @@
 /*TODO:
-  Main: check new idea of definition side of orbit  
-  # mb padik
-  # starting strategy
+  Main: check new idea of definition side of orbit 
+  # block delay
+  # fast returnings 
+  # communication with goalkeeper
   # odometry side_check  
 */
 
 mt.spw("A", -50)
 check.ports("ABC 1234")
+mt.invert("ABC")
+mt.stop("BC", "false")
 
 //  BT
 connect("BOBA")
 check.connect("BOBA")
 
 id = new.mailbox("attack_side")
-
-mt.invert("ABC")
-mt.stop("BC", "false")
 
 //calibration
 handle = open.r("cal.txt")
@@ -73,6 +73,7 @@ block = 0
 //flags 
 flag1 = 0 //атака
 flag_bt = 1
+flag_od = 0
 //Subs
 
 void sensors {
@@ -119,33 +120,33 @@ void sensors {
     c = e2
 
     if (flag_bt == 1) {
-      if (bt.available(id) == true) {
-        side = tonum(bt.receive(id))
-      } else {
-        side = 3
-      }
-
-      if (side == 1) {
-        alpha_att = com_1
-      } else {
-        if (side == 2) {
-          alpha_att = com_2
+        if (bt.available(id) == true) {
+            side = tonum(bt.receive(id))
         } else {
-          if (side == 3) {
-            alpha_att = com_3
-          } else {
-            if (side == 4) {
-              alpha_att = com_4
-            } else {
-              if (side == 5) {
-                alpha_att = com_5
-              }
-            }
-          } 
+            side = 3
         }
-      }
+    
+        if (side == 1) {
+            alpha_att = com_1
+        } else {
+            if (side == 2) {
+                alpha_att = com_2
+            } else {
+                if (side == 3) {
+                    alpha_att = com_3
+                } else {
+                    if (side == 4) {
+                        alpha_att = com_4
+                    } else {
+                        if (side == 5) {
+                            alpha_att = com_5
+                        }
+                    }
+                } 
+            }
+        }
     } else {
-      alpha_att = com_3
+        alpha_att = com_3
     }
   }
 }
@@ -239,9 +240,9 @@ void orbit {
         t0 = time()
         Goto exit2
       } else {
-        if (time() - t0 > 500) {
-          if (strres < 80) {
-            spk.note(100, "C4", 100)
+        if (time() - t0 > 1500) {
+          if (strres < 70) {
+            play(100, "Kung Fu")
             Goto exit2
           }
         }
@@ -254,10 +255,10 @@ void orbit {
     //r3
     tone(100,100,100)
     if (err90 < 21) {
-      while (abs(err_com) > 20 /*and l1 + l2 < l1_cal + l2_cal*/ and block == 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and block == 0) {
       
-        v = 40 //48
-        u = -38  //-50
+        v = 40
+        u = -38
 
         if (dir < 7) {
           if (abs(err_com) < 69) { 
@@ -311,7 +312,7 @@ void orbit {
     dir2 = dir1
     dir3 = dir2
 
-    while (err90 < -8 and block == 0) {
+    while (err90 < -8) {
       if (dir > 5) {
         if (dir > 6) {
           err90 = rm(compass - com_l + 900, 360) - 180+40
@@ -340,9 +341,9 @@ void orbit {
         t0 = time()
         Goto exit2
       } else {
-        if (time() - t0 > 500) {
-          if (strres < 80) {
-            spk.note(100, "C4", 100)
+        if (time() - t0 > 1500) {
+          if (strres < 70) {
+            play(100, "Kung Fu")
             Goto exit2
           }
         }
@@ -354,10 +355,10 @@ void orbit {
     //l3
     tone(100,100,100)
     if (err90 > -22) {
-      while (abs(err_com) > 20 /*and l1 + l2 < l1_cal + l2_cal*/ and block == 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
 
-        v = 40 //48
-        u = 38  //50
+        v = 40
+        u = 38
 
         if (dir > 5) {
           if (abs(err_com) < 69) {
@@ -391,7 +392,7 @@ void padik {
       v = 50
     }
 
-    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.8*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
+    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.9*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -448,7 +449,7 @@ void fast_return {
 
   time_def = time()
   while (dir != 6 and time() - time_def < 1000) {
-    u=-(30*(6-dir)+0.15*(str3-str4))
+    u=-(30*(6-dir)+0.1*(str3-str4))
     v = 10
   }
 }
@@ -463,91 +464,51 @@ void stop_with_tone {
   btn.wait()
 }
 
-void Gastal {
+void block_check {
   while (true) {
     com_state = compass
     str_state = strres
-    enc1_state = abs(e1)
-    enc2_state = abs(e2)
     t_block = time()
 
     while (time() - t_block < 1000) {
 
     }
 
-    if ((abs(abs(e1)-abs(enc1_state)) < 10 and abs(abs(e2)-abs(enc2_state)) < 10) and v > 20 and flag1 == 0) {
-      block = 1
-      flag_od = 0
-    } else {
-      if (abs(dir - 6) < 2) {
-        if (abs(compass - com_state) < 2 and abs(strres - str_state) < 3 and flag1 == 0) {
-          block = 1
-          flag_od = 0
-        } else {
-          block = 0
-        }
-      } else {     
-        if (abs(compass - com_state) < 2 and flag1 == 0) {
-          block = 1
-          flag_od = 0
-        } else {
-          block = 0
-        }
+    if (abs(dir - 6) < 2) {
+      if (abs(compass - com_state) < 5 and abs(strres - str_state) < 3 and flag1 == 0) {
+        block = 1
+        flag_od = 0
+      } else {
+        block = 0
       }
-      printupd()
-      print("Block", block)
+    } else {     
+      if (abs(compass - com_state) < 5 and flag1 == 0) {
+        block = 1
+        flag_od = 0
+      } else {
+        block = 0
+      }
     }
+    printupd()
+    print("Block", block)
   }
 }
 
 //Threads
 new.thread = sensors
-new.thread = Gastal
+new.thread = block_check
 
 //tactics
 
-btn.wait()
-if (btn.rn == "E") {
-  tone(100,200,100)
-} else {
-  if (btn.rn == "U") {
-    while (abs(e1 + e2) < 200) {
-      v = 100
-      u = -(rm(compass - com_2 + 900, 360) - 180)
-    }
-
-    kicker()
-
-    while ((e1+e2)>0) {
-      v = -100
-      u = -(rm(compass - com_1 + 900, 360) - 180)
-    }
-
-    er1 = 999
-    while (abs(er1) > 5) {
-      v = 10
-      er1 = rm(compass - com_5 + 900, 360) - 180
-      u = -er1
-    }
-
-    while (strres < 120) {
-      v = 0
-      u = 0
-      mt.stop("BC", true)
-    }
-  }
-}
 
 // Main
 while (true) {
   if (block == 1) {
     led(1)
     t_exit = time()
-    k = 10
-    while (dir != 6 and time() - t_exit < 500) {
+    while (dir != 6 and time() - t_exit < 1000) {
       v = -100
-      u = (dir1-5) * k
-      k = k + 0.01
+      u = (dir1-5) * 40
     }
     block = 0
     
@@ -565,10 +526,11 @@ while (true) {
         orbit()
 
       } else {
-        while (strres > str_max and (l1 < l1_cal or l2 < l2_cal) and block == 0 and abs(err_com)<70) { //slow padik
+        while (strres > str_max and (l1 < l1_cal or l2 < l2_cal) and block == 0) { //slow padik
           kf_dir = 14
           padik()
         }
+
         attack()
       }
     } else {
