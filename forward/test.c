@@ -392,7 +392,7 @@ void padik {
       v = 50
     }
 
-    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.9*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
+    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.8*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -402,14 +402,13 @@ void kicker {
     mt.spw("A", -100)
   }
 
-  if (time() - t_attack > 700 and time() - time_def > 700) {
+  if (time() - t_attack > 700 and time() - time_def > 400) {
     mt.resetcount("A")
     while abs(mt.getcount("A")-270 < 0) {
       mt.spw("A", 100)
     }
     mt.stop("A", true)
 
-    t_attack = time()
     time_def = time()
     mt.spw("A", -50)
     fl_attack = 1
@@ -431,10 +430,10 @@ void attack {
     u = -err_attack * k
 
     if (k < 0.8) {
-      k = k + 0.0008
+      k = k + 0.0007
     }
 
-    if (abs(err_attack) < 10) { //attack_angle error
+    if (abs(err_attack) < 20 and v > 80) { //attack_angle error
       kicker()
     }
   }
