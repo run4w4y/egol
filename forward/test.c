@@ -1,13 +1,19 @@
 /*TODO:
-  Main: check new idea of definition side of orbit 
-  # blockcheck on encoders 
-  # BT
-  # attack_side orbit
+  Main: check new idea of definition side of orbit  
+  # mb padik
+  # starting strategy
   # odometry side_check  
 */
 
 mt.spw("A", -50)
 check.ports("ABC 1234")
+
+//  BT
+//check.connect("BOBA")
+//connect("BOBA")
+
+id = new.mailbox("attack_side")
+
 mt.invert("BC")
 mt.stop("BC", "false")
 
@@ -66,7 +72,7 @@ block = 0
 
 //flags 
 flag1 = 0 //атака
-
+flag_bt = 0
 //Subs
 
 void sensors {
@@ -113,6 +119,39 @@ void sensors {
     c = e2
   }
 }
+
+void BT {
+  while (true) {
+    if (flag_bt == 1) {
+      if (bt.available(id) == true) {
+        side = tonum(bt.receive(id))
+      }
+
+      if (side == 1) {
+        alpha_att = com_1
+      } else {
+        if (side == 2) {
+          alpha_att = com_2
+        } else {
+          if (side == 3) {
+            alpha_att = com_3
+          } else {
+            if (side == 4) {
+              alpha_att = com_4
+            } else {
+              if (side == 5) {
+                alpha_att = com_5
+              }
+            }
+          } 
+        }
+      }
+    } else {
+      alpha_att = com_3
+    }
+  }
+}
+
 
 void dir_orbit {
   if (dir > 4) {
@@ -219,8 +258,8 @@ void orbit {
     if (err90 < 21) {
       while (abs(err_com) > 20 /*and l1 + l2 < l1_cal + l2_cal*/ and block == 0) {
       
-        v = 48  //40
-        u = -50  //-38
+        v = 40 //48
+        u = -38  //-50
 
         if (dir < 7) {
           if (abs(err_com) < 69) { 
@@ -363,7 +402,7 @@ void kicker {
     mt.spw("A", -100)
   }
 
-  if (time() - t_attack > 700 and time() - time_def > 1000) {
+  if (time() - t_attack > 700 and time() - time_def > 700) {
     mt.resetcount("A")
     while abs(mt.getcount("A")-270 < 0) {
       mt.spw("A", 100)
@@ -382,17 +421,20 @@ void attack {
   v = 40
   k = 0.2
   while ((l1 > l1_cal - 5 or l2 > l2_cal - 5) and (abs(dir - 6) < 2 or dir == 8)) {
+    
+    err_attack = rm(compass - alpha_att + 900, 360) - 180
+
     led(5)  //tone(100,100,100)
     if (v < 100) {
-      v = v + 0.2
+      v = v + 0.3
     }
-    u = -err_com * k
+    u = -err_attack * k
 
     if (k < 0.8) {
       k = k + 0.0008
     }
 
-    if (abs(err_com) < 5 and v > 90) { //attack_angle error
+    if (abs(err_attack) < 10) { //attack_angle error
       kicker()
     }
   }
@@ -426,36 +468,43 @@ void block_check {
   while (true) {
     com_state = compass
     str_state = strres
+    enc1_state = abs(e1)
+    enc2_state = abs(e2)
     t_block = time()
 
     while (time() - t_block < 1000) {
 
     }
 
-    if (abs(dir - 6) < 2) {
-      if (abs(compass - com_state) < 2 and abs(strres - str_state) < 3 and flag1 == 0) {
-        block = 1
-        flag_od = 0
-      } else {
-        block = 0
+    if ((abs(e1-enc1_state) < 20 or abs(e2-enc2_state) < 20) and v > 20) {
+      block = 1
+      flag_od = 0
+    } else {
+      if (abs(dir - 6) < 2) {
+        if (abs(compass - com_state) < 2 and abs(strres - str_state) < 3 and flag1 == 0) {
+          block = 1
+          flag_od = 0
+        } else {
+          block = 0
+        }
+      } else {     
+        if (abs(compass - com_state) < 2 and flag1 == 0) {
+          block = 1
+          flag_od = 0
+        } else {
+          block = 0
+        }
       }
-    } else {     
-      if (abs(compass - com_state) < 2 and flag1 == 0) {
-        block = 1
-        flag_od = 0
-      } else {
-        block = 0
-      }
+      printupd()
+      print("Block", block)
     }
-    printupd()
-    print("Block", block)
   }
 }
 
 //Threads
 new.thread = sensors
 new.thread = block_check
-
+new.thread = BT
 //tactics
 
 
@@ -465,7 +514,7 @@ while (true) {
     led(1)
     t_exit = time()
     k = 10
-    while (dir != 6 and time() - t_exit < 1000) {
+    while (dir != 6 and time() - t_exit < 500) {
       v = -100
       u = (dir1-5) * k
       k = k + 0.01
