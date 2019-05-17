@@ -1,7 +1,7 @@
 mt.spw("A", -50)
 check.ports("ABC 1234")
-mt.invert("BC")
-mt.stop("BC", "false")
+mt.invert("ABC")
+mt.stop("ABC", "false")
 
 //calibration
 handle = open.r("cal.txt")
@@ -133,7 +133,7 @@ void padik {
   
     v=100
 
-    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.9*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
+    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.8*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -141,35 +141,32 @@ void padik {
 new.thread = sensors
 
 delay(1000)
-while (y < 10) {
-   v = 100
-   u = -(rm(compass - com_2 + 900, 360) - 180)
+
+while (abs(e1 + e2) < 200) {
+  v = 100
+  u = -(rm(compass - com_2 + 900, 360) - 180)
 }
+
 kicker()
 
-while (y > -5) {
-    v = -100
-    u = -err_com*0.5
+while ((e1+e2)>0) {
+  v = -100
+  u = -(rm(compass - com_1 + 900, 360) - 180)
 }
 
-e_mem = e2
-while (abs(e2 - e_mem) < 20) {
-    v = 10
-    u = -10
+er1 = 999
+while (abs(er1) > 5) {
+  v = 10
+  er1 = rm(compass - com_5 + 900, 360) - 180
+  u = -er1
 }
+
 while (strres < 120) {
-    v = 0
-    u = 0
-    mt.stop("BC", true)
-} 
-
-while (l1 < l1_cal or l2 < l2_cal) {
-    padik()
+  v = 0
+  u = 0
+  mt.stop("BC", true)
 }
-kicker()
 
-v = 0
-u = 0
-mt.stop("BC", true)
+delay(1000)
 btn.wait()
 

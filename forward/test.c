@@ -9,12 +9,12 @@ mt.spw("A", -50)
 check.ports("ABC 1234")
 
 //  BT
-//check.connect("BOBA")
-//connect("BOBA")
+connect("BOBA")
+check.connect("BOBA")
 
 id = new.mailbox("attack_side")
 
-mt.invert("BC")
+mt.invert("ABC")
 mt.stop("BC", "false")
 
 //calibration
@@ -72,7 +72,7 @@ block = 0
 
 //flags 
 flag1 = 0 //атака
-flag_bt = 0
+flag_bt = 1
 //Subs
 
 void sensors {
@@ -125,6 +125,8 @@ void BT {
     if (flag_bt == 1) {
       if (bt.available(id) == true) {
         side = tonum(bt.receive(id))
+      } else {
+        side = 3
       }
 
       if (side == 1) {
@@ -244,6 +246,7 @@ void orbit {
       } else {
         if (time() - t0 > 1500) {
           if (strres < 80) {
+            spk.note(100, "C4", 100)
             Goto exit2
           }
         }
@@ -344,6 +347,7 @@ void orbit {
       } else {
         if (time() - t0 > 1500) {
           if (strres < 80) {
+            spk.note(100, "C4", 100)
             Goto exit2
           }
         }
@@ -402,7 +406,7 @@ void kicker {
     mt.spw("A", -100)
   }
 
-  if (time() - t_attack > 700 and time() - time_def > 400) {
+  if (time() - t_attack > 700 and time() - time_def > 800) {
     mt.resetcount("A")
     while abs(mt.getcount("A")-270 < 0) {
       mt.spw("A", 100)
@@ -423,7 +427,8 @@ void attack {
     
     err_attack = rm(compass - alpha_att + 900, 360) - 180
 
-    led(5)  //tone(100,100,100)
+    led(5)
+    //tone(100,100,100)
     if (v < 100) {
       v = v + 0.3
     }
@@ -433,7 +438,7 @@ void attack {
       k = k + 0.0007
     }
 
-    if (abs(err_attack) < 20 and v > 80) { //attack_angle error
+    if (abs(err_attack) < 10 and v > 80) { //attack_angle error
       kicker()
     }
   }
@@ -475,7 +480,7 @@ void block_check {
 
     }
 
-    if ((abs(e1-enc1_state) < 20 or abs(e2-enc2_state) < 20) and v > 20) {
+    if ((abs(e1-enc1_state) < 20 and abs(e2-enc2_state) < 20) and v > 20) {
       block = 1
       flag_od = 0
     } else {
@@ -506,6 +511,37 @@ new.thread = block_check
 new.thread = BT
 //tactics
 
+btn.wait()
+if (btn.rn == "E") {
+  tone(100,200,100)
+} else {
+  if (btn.rn == "U") {
+    while (abs(e1 + e2) < 200) {
+      v = 100
+      u = -(rm(compass - com_2 + 900, 360) - 180)
+    }
+
+    kicker()
+
+    while ((e1+e2)>0) {
+      v = -100
+      u = -(rm(compass - com_1 + 900, 360) - 180)
+    }
+
+    er1 = 999
+    while (abs(er1) > 5) {
+      v = 10
+      er1 = rm(compass - com_5 + 900, 360) - 180
+      u = -er1
+    }
+
+    while (strres < 120) {
+      v = 0
+      u = 0
+      mt.stop("BC", true)
+    }
+  }
+}
 
 // Main
 while (true) {
@@ -529,7 +565,7 @@ while (true) {
     }
 
     if (strres > str_max) {
-      if (abs(err_com)>70) {
+      if (abs(err_com)>80) {
         tone(100,100,100)
         orbit()
 
