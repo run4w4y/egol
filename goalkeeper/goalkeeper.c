@@ -487,21 +487,21 @@ void justify {
         if (button_bot() == 1) {
             exit_justify = 2;
         }
-        go_angle(COMPASS_LEFT, -100);
+        go_angle(COMPASS_LEFT, -80);
     }
 
     if (exit_justify == 1) {
         stop();
         delay(100);
-        go_enc(CENTER_DISTANCE_BIG, 100);
+        go_enc(CENTER_DISTANCE_BIG, 80);
         turn_angle(COMPASS_ALPHA);
         goal_justify();
     } else {
         while (light() >= LIGHT_LINE_LIMIT) {
-            go_angle(COMPASS_LEFT, 100);
+            go_angle(COMPASS_LEFT, 80);
         }
         stop();
-        go_enc(CENTER_DISTANCE_BIG, 100);
+        go_enc(CENTER_DISTANCE_BIG, 80);
         turn_angle(COMPASS_ALPHA);
         goal_justify();
     }
@@ -535,6 +535,8 @@ void return_goal {
         turn_angle(COMPASS_ALPHA);
         goal_justify();
     }
+
+    reset_odometry();
 }
 
 void check_wall {
@@ -557,7 +559,6 @@ void check_wall {
 
     if (exit_check == 2) {
         return_goal();
-        reset_odometry();
     }
 }
 
