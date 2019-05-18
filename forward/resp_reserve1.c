@@ -345,17 +345,17 @@ void padik {
     v=100-30*abs(dir1-5)
   } else {
   
-    v = (225 - 1.25*strres)
+    v = 100//(225 - 1.25*strres)
 
     if (v > 100) {
       v = 100
     }
 
-    if (v < 50) {
-      v = 50
+    if (v < 70) {
+      v = 70
     }
 
-    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.9*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
+    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+1.1*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }

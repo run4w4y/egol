@@ -9,8 +9,8 @@ mt.spw("A", -50)
 check.ports("ABC 1234")
 
 //  BT
-connect("BOBA")
-check.connect("BOBA")
+// connect("BOBA")
+// check.connect("BOBA")
 
 id = new.mailbox("attack_side")
 
@@ -117,36 +117,6 @@ void sensors {
     y = y - dy
     b = e1
     c = e2
-
-    if (flag_bt == 1) {
-      if (bt.available(id) == true) {
-        side = tonum(bt.receive(id))
-      } else {
-        side = 3
-      }
-
-      if (side == 1) {
-        alpha_att = com_1
-      } else {
-        if (side == 2) {
-          alpha_att = com_2
-        } else {
-          if (side == 3) {
-            alpha_att = com_3
-          } else {
-            if (side == 4) {
-              alpha_att = com_4
-            } else {
-              if (side == 5) {
-                alpha_att = com_5
-              }
-            }
-          } 
-        }
-      }
-    } else {
-      alpha_att = com_3
-    }
   }
 }
 
@@ -167,7 +137,6 @@ void dir_orbit {
 }
 
 void orbit {
-
   err_real = (rm(abs(err_com+(dir-6)*30) + 900, 360)-180)*(err_com+(dir-6)*30)/abs(err_com+(dir-6)*30)
 
   fl_attack = 0
@@ -239,9 +208,9 @@ void orbit {
         t0 = time()
         Goto exit2
       } else {
-        if (time() - t0 > 500) {
-          if (strres < 80) {
-            spk.note(100, "C4", 100)
+        if (time() - t0 > 1500) {
+          if (strres < 70) {
+            play(100, "Kung Fu")
             Goto exit2
           }
         }
@@ -254,10 +223,10 @@ void orbit {
     //r3
     tone(100,100,100)
     if (err90 < 21) {
-      while (abs(err_com) > 20 /*and l1 + l2 < l1_cal + l2_cal*/ and block == 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal and block == 0) {
       
-        v = 40 //48
-        u = -38  //-50
+        v = 40
+        u = -38
 
         if (dir < 7) {
           if (abs(err_com) < 69) { 
@@ -311,7 +280,7 @@ void orbit {
     dir2 = dir1
     dir3 = dir2
 
-    while (err90 < -8 and block == 0) {
+    while (err90 < -8) {
       if (dir > 5) {
         if (dir > 6) {
           err90 = rm(compass - com_l + 900, 360) - 180+40
@@ -340,9 +309,9 @@ void orbit {
         t0 = time()
         Goto exit2
       } else {
-        if (time() - t0 > 500) {
-          if (strres < 80) {
-            spk.note(100, "C4", 100)
+        if (time() - t0 > 1500) {
+          if (strres < 70) {
+            play(100, "Kung Fu")
             Goto exit2
           }
         }
@@ -354,10 +323,10 @@ void orbit {
     //l3
     tone(100,100,100)
     if (err90 > -22) {
-      while (abs(err_com) > 20 /*and l1 + l2 < l1_cal + l2_cal*/ and block == 0) {
+      while (abs(err_com) > 20 and l1 + l2 < l1_cal + l2_cal) {
 
-        v = 40 //48
-        u = 38  //50
+        v = 40
+        u = 38
 
         if (dir > 5) {
           if (abs(err_com) < 69) {
@@ -375,6 +344,7 @@ void orbit {
 }
 
 
+
 void padik {
   if (dir < 3) {
     u=28*(dir1-5)
@@ -387,11 +357,11 @@ void padik {
       v = 100
     }
 
-    if (v < 50) {
-      v = 50
+    if (v < 70) {
+      v = 70
     }
 
-    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.8*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
+    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.9*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -414,7 +384,42 @@ void kicker {
   }
 }
 
+void BT {
+  if (flag_bt == 1) {
+    if (bt.available(id) == true) {
+      side = tonum(bt.receive(id))
+    } else {
+      side = 3
+    }
+
+    if (side == 1) {
+      alpha_att = com_1
+    } else {
+      if (side == 2) {
+        alpha_att = com_2
+      } else {
+        if (side == 3) {
+          alpha_att = com_3
+        } else {
+          if (side == 4) {
+            alpha_att = com_4
+          } else {
+            if (side == 5) {
+              alpha_att = com_5
+            }
+          }
+        } 
+      }
+    }
+  } else {
+    alpha_att = com_3
+  }
+}
+
 void attack {
+
+  BT()
+
   t_attack = time()
   v = 40
   k = 0.2

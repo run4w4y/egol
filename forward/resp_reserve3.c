@@ -12,8 +12,8 @@ mt.invert("ABC")
 mt.stop("BC", "false")
 
 //  BT
-connect("BOBA")
-check.connect("BOBA")
+//connect("BOBA")
+//check.connect("BOBA")
 
 id = new.mailbox("attack_side")
 
