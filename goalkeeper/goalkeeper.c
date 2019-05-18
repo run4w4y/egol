@@ -535,6 +535,8 @@ void return_goal {
         turn_angle(COMPASS_ALPHA);
         goal_justify();
     }
+
+    reset_odometry();
 }
 
 void check_wall {
@@ -557,7 +559,6 @@ void check_wall {
 
     if (exit_check == 2) {
         return_goal();
-        reset_odometry();
     }
 }
 
