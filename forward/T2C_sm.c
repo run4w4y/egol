@@ -340,6 +340,11 @@ void orbit {
       }
     }
   }
+
+  while (dir > 2) {
+    u=30*(dir-6)+0.08*(str4-str3)
+    v=40
+  }
   exit2:
 }
 
