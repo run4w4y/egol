@@ -341,7 +341,7 @@ void orbit {
     }
   }
 
-  while (dir > 2) {
+  while (dir < 2) {
     u=30*(dir-6)+0.08*(str4-str3)
     v=40
   }
@@ -356,7 +356,7 @@ void padik {
     v=100-30*abs(dir1-5)
   } else {
   
-    v = 100-0.25*strres //or 0.34   //(225 - 1.25*strres)
+    v = 100-0.34*strres //or 0.2   //(225 - 1.25*strres)
 
     if (v > 100) {
       v = 100
@@ -366,7 +366,7 @@ void padik {
       v = 50
     }
 
-    u_1=kf_dir*(6-dir)+0.045*(str4-str3)    //kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.9*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
+    u_1=kf_dir*(dir-6)+0.02*(str4-str3)    //kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.9*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -457,8 +457,8 @@ void fast_return {
   }
 
   time_def = time()
-  while (dir != 6 and time() - time_def < 1000) {
-    u=-(30*(6-dir)+0.15*(str3-str4))
+  while (dir != 6 and time() - time_def < 500) {
+    u=-(30*(6-dir)+0.18*(str3-str4))
     v = 10
   }
 }
