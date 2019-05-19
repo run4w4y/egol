@@ -326,7 +326,7 @@ void odometry {
 
 new.thread = odometry;
 
-void reset_odometry {
+func num reset_odometry() {
     reset_flag = 1;
     new.thread = odometry;
 }
@@ -391,17 +391,70 @@ func num go_enc(distance, speed) {
     stop();
 }
 
-void goal_justify {
-    exit_goal = 0;
-    while (exit_goal == 0) {
+func num go_back_goal() {
+    local res = 0;
+    while (res == 0) {
         if (button_top() == 1) {
-            exit_goal = 1;
+            res = 1;
         }
-        if (button_bot() == 2) {
-            exit_goal = 2;
+        if (button_bot() == 1) {
+            res = 2;
         }
         go_both(-85);
     }
+    return res;
+}
+
+func num return_goal() {
+    turn_angle(COMPASS_LEFT);
+
+    exit_return = 0;
+    while (exit_return == 0) {
+        if (light() < LIGHT_LINE_LIMIT) {
+            exit_return = 1;
+        }
+        if (button_bot() == 1) {
+            exit_return = 2;
+        }
+        go_angle(COMPASS_LEFT, -100);
+    }
+    stop();
+
+    if (exit_return == 1) {
+        go_enc(CENTER_DISTANCE, -100);
+        turn_angle(COMPASS_ALPHA);
+        exit_goal = go_back_goal();
+        if (exit_goal == 2) {
+            go_enc(115, 90);
+            delay(100);
+            return_goal();
+            act_count = 0;
+        } else {
+            go_enc(55, 65);
+        }
+    } else {
+        while (light() >= LIGHT_LINE_LIMIT) {
+            go_angle(COMPASS_LEFT, 100);
+        }
+        stop();
+        go_enc(CENTER_DISTANCE, 100);
+        turn_angle(COMPASS_ALPHA);
+        exit_goal = go_back_goal();
+        if (exit_goal == 2) {
+            go_enc(115, 90);
+            delay(100);
+            return_goal();
+            act_count = 0;
+        } else {
+            go_enc(55, 65);
+        }
+    }
+
+    reset_odometry();
+}
+
+func num goal_justify() {
+    exit_goal = go_back_goal();
     if (exit_goal == 2) {
         go_enc(115, 90);
         delay(100);
@@ -477,7 +530,7 @@ func num go_ball(speed) {
 
 // other functions
 
-void justify {
+func num justify() {
     turn_angle(COMPASS_LEFT);
     exit_justify = 0;
     while (exit_justify == 0) {
@@ -507,64 +560,23 @@ void justify {
     }
 }
 
-void return_goal {
-    turn_angle(COMPASS_LEFT);
-
-    exit_return = 0;
-    while (exit_return == 0) {
-        if (light() < LIGHT_LINE_LIMIT) {
-            exit_return = 1;
-        }
-        if (button_bot() == 1) {
-            exit_return = 2;
-        }
-        go_angle(COMPASS_LEFT, -100);
-    }
-    stop();
-
-    if (exit_return == 1) {
-        go_enc(CENTER_DISTANCE, -100);
-        turn_angle(COMPASS_ALPHA);
-        goal_justify();
-    } else {
-        while (light() >= LIGHT_LINE_LIMIT) {
-            go_angle(COMPASS_LEFT, 100);
-        }
-        stop();
-        go_enc(CENTER_DISTANCE, 100);
-        turn_angle(COMPASS_ALPHA);
-        goal_justify();
-    }
-
-    reset_odometry();
-}
-
-void check_wall {
+func num check_wall() {
     turn_angle(COMPASS_ALPHA);
 
-    exit_check = 0;
-    while (exit_check == 0) {
-        if (button_top() == 1) {
-            exit_check = 1;
-        }
-        if (button_bot() == 1) {
-            exit_check = 2;
-        } 
-
-        go_both(-85);
-    }
-
+    exit_check = go_back_goal();
     stop();
-    go_enc(105, 90);
 
     if (exit_check == 2) {
+        go_enc(115, 90);
         return_goal();
+    } else {
+        go_enc(55, 90);
     }
 }
 
 act_count = 0;
 
-void watch {
+func num watch() {
     watch_bool = 0;
     time_start_watch = time();
     check_wall_time = time();
@@ -596,7 +608,7 @@ void watch {
     }
 }
 
-void go_back {
+func num go_back() {
     beta_err = deg(atan(odometry_y / abs(odometry_x)));
 
     if (odometry_x > 0) {
@@ -615,17 +627,7 @@ void go_back {
     } else {
         turn_angle(COMPASS_ALPHA);
 
-        exit_back = 0;
-        while (exit_back == 0) {
-            if (button_top() == 1) {
-                exit_back = 1;
-            }
-            if (button_bot() == 1) {
-                exit_back = 2;
-            }
-
-            go_both(-95);
-        }
+        exit_back = go_back_goal();
 
         if (exit_back == 2) {
             tone(100, 100, 100);
@@ -641,7 +643,7 @@ void go_back {
     }
 }
 
-void act_side {
+func num act_side() {
     left_lim_back = compass_delta(COMPASS_LEFT_ANGLE);
     right_lim_back = compass_delta(COMPASS_RIGHT_ANGLE);
 
@@ -695,7 +697,7 @@ void act_side {
     m_m(0);
 }
 
-void act_ball {
+func num act_ball() {
     m_m(100);
     while (light() >= LIGHT_LINE_LIMIT) {
         go_ball(100);
@@ -707,7 +709,7 @@ void act_ball {
     m_m(0);
 }
 
-void act {
+func num act() {
     start:
     act_count = act_count + 1;
 
