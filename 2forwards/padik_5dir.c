@@ -45,7 +45,7 @@ mailbox_mode = new.mailbox("mailbox_mode")
 
 // light sensor front start
 
-sen.setmode(PORT_LIGHT_FRONT, 4);
+sen.setmode(PORT_LIGHT_FRONT, 1);
 
 light_front_prev_time = time();
 light_front_prev_value = 0;
@@ -67,7 +67,7 @@ func num light_front() { // get current value of the selected color based on the
 
 // light sensor back start
 
-sen.setmode(PORT_LIGHT_BACK, 4);
+sen.setmode(PORT_LIGHT_BACK, 1);
 
 light_back_prev_time = time();
 light_back_prev_value = 0;
@@ -76,7 +76,7 @@ func num light_back() { // get current value of the selected color based on the 
     if (time() - light_back_prev_time >= LIGHT_DELAY) {
         light_back_prev_time = time();
         local light_val = 0;
-        light_val = sen.read.rawval(PORT_LIGHT_BACK, LIGHT_BACK_COLOR);
+        light_val = sen.percent(PORT_LIGHT_BACK);
 
         light_back_prev_value = light_val;
         return light_val;
@@ -149,17 +149,11 @@ func num irseeker_dir() { // get seeker current dir
         str5 = irseeker_array[5];
         seeker_prev_str1 = str5;
 
-        // if (rm(dir,2) == 0) {
-        //     strres = (str1 + str2 + str3 + str4 + str5) / SEEKER_DIV;
-        // } else {
-        //     strres = str1 + str2 + str3 + str4 + str5;
-        // }
-
-        strres = irseeker_array[1]
-        for (i_dx = 2; i_dx < 6; i_dx++) {
-            strres = max(strres, irseeker_array[i_dx])
-        } 
-        
+        if (rm(dir,2) == 0) {
+            strres = (str1 + str2 + str3 + str4 + str5) / SEEKER_DIV;
+        } else {
+            strres = str1 + str2 + str3 + str4 + str5;
+        }
         seeker_prev_str = strres;
 
         return dir;
@@ -239,39 +233,130 @@ func num irseeker_str(strnum) { // get seeker current str
 // kinematics start 
 
 func num move(x1, y1) {
-    x_gl = x1;
-    y_gl = y1;
+    if (y1 > 0 and x1 > 0) {
+        x_gl = 0.8*x1;
+        y_gl = y1;
+    } else {
+        x_gl = x1*1.7;
+        y_gl = y1*1.7;
+    }
     t_gl = compass_delta(compass());
     r_base = pi;
+    kp_gl = KP_MOVE;
+    k_side = 0;
+    if (y_gl > 0 and x_gl > 0) {
+        kp_gl = KP_MOVE * 1.3;
+    } else {
+        kp_gl = KP_MOVE;
+    }
 
-    v1 = -sin(pi/3)*x_gl + cos(pi/3)*y_gl + r_base*t_gl*KP_MOVE;
-    v2 = sin(pi/3)*x_gl + cos(pi/3)*y_gl - r_base*t_gl*KP_MOVE;
-    v3 = -x_gl + r_base*t_gl*KP_MOVE;
+    v1 = -sin(pi/3)*x_gl + cos(pi/3)*y_gl + r_base*t_gl*kp_gl;
+    v2 = sin(pi/3)*x_gl + cos(pi/3)*y_gl - r_base*t_gl*kp_gl;
+    v3 = x_gl + r_base*t_gl*kp_gl;
 
     mt.spw(PORT_FIRST_MOTOR, v1);
     mt.spw(PORT_SECOND_MOTOR, v2);
     mt.spw(PORT_THIRD_MOTOR, v3);
 }
 
+// kinematics end
+
+// odometry start
+
+// odometry end
+
+// bluetooth start
+
+// void bt {
+// 	while (true) {
+// 		if (who_am_i == "BIBA") {
+// 			mybtstr = attack + " " + mfreeze
+// 		} else {
+// 			mybtstr = strres + " " + dir + " " + attack + " " + mfreeze2
+// 		}
+		
+// 		if (who_am_i == "BIBA") {
+// 			bt.send(who_aint_me, "mailbox_biba", mybtstr)
+
+// 			btstr2old = btstr2
+// 			btstr2 = bt.last(mailbox_boba)
+// 			res = parse(4, btstr2)
+
+// 			strres2 = res[0]
+// 			dir2 = res[1]
+// 			attack2 = res[2]
+// 			local_temp3_2 = res[3]
+// 		} else {
+// 			bt.send(who_aint_me, "mailbox_boba", mybtstr)
+
+// 			btstr2old = btstr2
+// 			btstr2 = bt.last(mailbox_biba)
+// 			res = parse(2, btstr2)
+
+// 			attack2 = res[0]
+// 			mfreeze2 = res[1]
+
+// 			mode = tonum(bt.last(mailbox_mode))
+// 		}
+		
+// 		//////////////////////////////////////////////////////////////////////
+		
+// 		if (who_am_i == "BIBA") {
+//             if (abs(strres - strres2) < 30) {
+//                 if (abs(dir - 5) == abs(dir2 - 5)) {
+//                     if (strres > strres2) {
+//                         mode = 1
+//                     } else {
+//                         mode = 0
+//                     }
+//                 } else {
+//                     if (abs(dir - 5) > abs(dir2 - 5)) {
+//                         mode = 0
+//                     } else {
+//                         mode = 1
+//                     }
+//                 }
+//             } else {
+//                 if (strres > strres2) {
+//                     mode = 1
+//                 } else {
+//                     mode = 0
+//                 }
+//             }
+// 			bt.send(who_aint_me, "mailbox_mode", abs(mode-1))
+// 		}
+		
+// 		////////////////////////////////////////////////////////////////////////
+		
+// 		// buttons will be here
+// 	}
+// }
+
+// new.thread = bt
+
+// bluetooth end
+
+
 while (true) {
-    
-    //  padik
-//    while (strres < 150) {
-        if (dir == 5) {
-            move(0, 100);
+    //  мяч не в захвате
+    dir = irseeker_dir();
+    if (dir == 5) {
+        move(0, 100);
+    } else {
+        if (abs(dir - 5) < 3) {
+            v = (dir - 5)*40
+            move(v, 0);
         } else {
-            if (abs(dir - 5) < 3) {
-                move((dir - 5)*40, 0);
-            } else {
-                move(0, -100);
+            move(0, -100);
+            if (light_back() > 10) {    //caliber
+                t = time();
+                while (time() - t < 500) {
+                    move(100,0)
+                }
             }
         }
-//    }
+    }
 
-//  attack
-    // while (str > 150) {
-    //     attack()
-    // }
-
+    //  мяч в захвате, атака
+    
 }
-
