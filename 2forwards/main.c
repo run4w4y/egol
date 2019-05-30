@@ -233,26 +233,40 @@ func num irseeker_str(strnum) { // get seeker current str
 // kinematics start 
 
 func num move(x1, y1) {
-    if (y1 > 0 and x1 > 0) {
-        x_gl = 0.8*x1;
-        y_gl = y1;
-    } else {
-        x_gl = x1*1.95;
-        y_gl = y1*1.95;
-    }
+    // if (y1 > 0 and x1 > 0) {
+    //     x_gl = 0.8*x1;
+    //     y_gl = y1;
+    // } else {
+    //     x_gl = x1*1.95;
+    //     y_gl = y1*1.95;
+    // }
+    x_gl = x1;
+    y_gl = -y1;
     t_gl = compass_delta(compass());
     r_base = pi;
     kp_gl = KP_MOVE;
-    k_side = 0;
-    if (y_gl > 0 and x_gl > 0) {
-        kp_gl = KP_MOVE * 1.7;
-    } else {
-        kp_gl = KP_MOVE;
-    }
+    // k_side = 0;
+    // if (y_gl > 0 and x_gl > 0) {
+    //     kp_gl = KP_MOVE * 1.7;
+    // } else {
+    //     kp_gl = KP_MOVE;
+    // }
 
-    v1 = -sin(pi/3)*x_gl + cos(pi/3)*y_gl + r_base*t_gl*kp_gl;
-    v2 = sin(pi/3)*x_gl + cos(pi/3)*y_gl - r_base*t_gl*kp_gl;
-    v3 = x_gl + r_base*t_gl*kp_gl;
+    // v1 = -sin(pi/3)*x_gl + cos(pi/3)*y_gl + r_base*t_gl*kp_gl;
+    // v2 = sin(pi/3)*x_gl + cos(pi/3)*y_gl - r_base*t_gl*kp_gl;
+    // v3 = x_gl + r_base*t_gl*kp_gl;
+
+    thetta = 3*pi/2;
+    v1 = 1.5*(-x_gl + r_base*t_gl*kp_gl);
+    v2 = sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl;
+    v3 = sin(pi/3 + thetta)*x_gl + cos(pi/3 + thetta)*y_gl + r_base*t_gl*kp_gl;
+
+    if (abs(v1) > 115) {
+        tone(100, 100, 100);
+        v1 = v1 / 1.5;
+        v2 = v2 / 1.5;
+        v3 = v3 / 1.5;
+    }
 
     mt.spw(PORT_FIRST_MOTOR, v1);
     mt.spw(PORT_SECOND_MOTOR, v2);
@@ -337,7 +351,7 @@ func num move(x1, y1) {
 // bluetooth end
 
 while (true) {
-    move(0, 100);
+    move(0, -100);
     printupd();
     print("v1", v1);
     print("v2", v2);
