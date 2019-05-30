@@ -13,13 +13,35 @@ COMPASS_DELAY = tonum(readline(handle));
 LIGHT_DELAY = tonum(readline(handle));
 COMPASS_ALPHA = tonum(readline(handle));
 SEEKER_DIV = tonum(readline(handle)) / 100;
-LIGHT_FRONT_COLOR = tonum(readline(handle));
-LIGHT_BACK_COLOR = tonum(readline(handle));
-PORT_FIRST_MOTOR = "B";
-PORT_SECOND_MOTOR = "A";
-PORT_THIRD_MOTOR = "C";
+PORT_FIRST_MOTOR = tohex(tonum(readline(handle)) + 9);
+PORT_SECOND_MOTOR = tohex(tonum(readline(handle)) + 9);
+PORT_THIRD_MOTOR = tohex(tonum(readline(handle)) + 9);
+PORT_KICKER = tohex(tonum(readline(handle)) + 9);
+KP_MOVE = tonum(readline(handle))/100;
+LIGHT_FRONT_COLOR = 1;
+LIGHT_BACK_COLOR = 1;
 
 // reading from sensors start
+
+// setting up bt start
+
+who_am_i = getname() 
+
+if (who_am_i == "BOBA") {
+	who_aint_me = "BIBA"
+} else {
+	who_aint_me = "BOBA"
+}
+
+mode = 1
+
+connect(who_aint_me)
+
+mailbox_biba = new.mailbox("mailbox_biba")
+mailbox_boba = new.mailbox("mailbox_boba")
+mailbox_mode = new.mailbox("mailbox_mode")
+
+// setting up bt end
 
 // light sensor front start
 
@@ -210,16 +232,16 @@ func num irseeker_str(strnum) { // get seeker current str
 
 // kinematics start 
 
-func num move(x, y) {
-    theta = 0;
-    x_gl = -x;
-    y_gl = -y;
-    t_gl = -theta;
-    delta = compass_delta(compass());
-    l_base = 1;
-    v1 = -sin(rad(delta))*x_gl + cos(rad(delta))*y_gl + theta;
-    v2 = -sin(pi/3 - rad(delta))*x_gl - cos(pi/3 - rad(delta))*y_gl + theta;
-    v3 = sin(pi/3 + rad(delta))*x_gl + cos(pi/3 + rad(delta))*y_gl + theta;
+func num move(x1, y1) {
+    x_gl = x1;
+    y_gl = y1;
+    t_gl = compass_delta(compass());
+    r_base = pi;
+
+    v1 = -sin(pi/3)*x_gl + cos(pi/3)*y_gl + r_base*t_gl*KP_MOVE;
+    v2 = sin(pi/3)*x_gl + cos(pi/3)*y_gl - r_base*t_gl*KP_MOVE;
+    v3 = -x_gl + r_base*t_gl*KP_MOVE;
+
     mt.spw(PORT_FIRST_MOTOR, v1);
     mt.spw(PORT_SECOND_MOTOR, v2);
     mt.spw(PORT_THIRD_MOTOR, v3);
@@ -231,7 +253,82 @@ func num move(x, y) {
 
 // odometry end
 
+// bluetooth start
+
+// void bt {
+// 	while (true) {
+// 		if (who_am_i == "BIBA") {
+// 			mybtstr = attack + " " + mfreeze
+// 		} else {
+// 			mybtstr = strres + " " + dir + " " + attack + " " + mfreeze2
+// 		}
+		
+// 		if (who_am_i == "BIBA") {
+// 			bt.send(who_aint_me, "mailbox_biba", mybtstr)
+
+// 			btstr2old = btstr2
+// 			btstr2 = bt.last(mailbox_boba)
+// 			res = parse(4, btstr2)
+
+// 			strres2 = res[0]
+// 			dir2 = res[1]
+// 			attack2 = res[2]
+// 			local_temp3_2 = res[3]
+// 		} else {
+// 			bt.send(who_aint_me, "mailbox_boba", mybtstr)
+
+// 			btstr2old = btstr2
+// 			btstr2 = bt.last(mailbox_biba)
+// 			res = parse(2, btstr2)
+
+// 			attack2 = res[0]
+// 			mfreeze2 = res[1]
+
+// 			mode = tonum(bt.last(mailbox_mode))
+// 		}
+		
+// 		//////////////////////////////////////////////////////////////////////
+		
+// 		if (who_am_i == "BIBA") {
+//             if (abs(strres - strres2) < 30) {
+//                 if (abs(dir - 5) == abs(dir2 - 5)) {
+//                     if (strres > strres2) {
+//                         mode = 1
+//                     } else {
+//                         mode = 0
+//                     }
+//                 } else {
+//                     if (abs(dir - 5) > abs(dir2 - 5)) {
+//                         mode = 0
+//                     } else {
+//                         mode = 1
+//                     }
+//                 }
+//             } else {
+//                 if (strres > strres2) {
+//                     mode = 1
+//                 } else {
+//                     mode = 0
+//                 }
+//             }
+// 			bt.send(who_aint_me, "mailbox_mode", abs(mode-1))
+// 		}
+		
+// 		////////////////////////////////////////////////////////////////////////
+		
+// 		// buttons will be here
+// 	}
+// }
+
+// new.thread = bt
+
+// bluetooth end
+
 while (true) {
-    move(100, 0);
+    move(0, 190);
     delay(50);
+    printupd();
+    print("v1", v1);
+    print("v2", v2);
+    print("v3", v3);
 }

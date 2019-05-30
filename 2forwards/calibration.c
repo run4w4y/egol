@@ -2,7 +2,7 @@
 
 handle = open.r("cal.txt");
 
-values_len = 9;
+values_len = 14;
 values = new.vector(values_len, 0);
 
 names[0] = "p_seek";
@@ -14,6 +14,11 @@ names[5] = "com_del";
 names[6] = "lt_del";
 names[7] = "alpha";
 names[8] = "seek_div";
+names[9] = "p_mt_1";
+names[10] = "p_mt_2";
+names[11] = "p_mt_3";
+names[12] = "p_kick";
+names[13] = "kp_com";
 
 if (handle == 0) {
 	PORT_SEEKER = 4;
@@ -34,6 +39,16 @@ if (handle == 0) {
 	values[7] = COMPASS_ALPHA;
 	SEEKER_DIV = 100;
 	values[8] = SEEKER_DIV;
+    PORT_FIRST_MOTOR = 1;
+    values[9] = PORT_FIRST_MOTOR;
+    PORT_SECOND_MOTOR = 1;
+    values[10] = PORT_SECOND_MOTOR;
+    PORT_THIRD_MOTOR = 1;
+    values[11] = PORT_THIRD_MOTOR;
+	PORT_KICKER = 1;
+	values[12] = PORT_KICKER;
+	KP_COM = 75;
+	values[13] = KP_COM;
 } else {
 	PORT_SEEKER = tonum(readline(handle));
 	values[0] = PORT_SEEKER;
@@ -53,6 +68,16 @@ if (handle == 0) {
 	values[7] = COMPASS_ALPHA;
 	SEEKER_DIV = tonum(readline(handle));
 	values[8] = SEEKER_DIV;
+    PORT_FIRST_MOTOR = tonum(readline(handle));
+    values[9] = PORT_FIRST_MOTOR;
+    PORT_SECOND_MOTOR = tonum(readline(handle));
+    values[10] = PORT_SECOND_MOTOR;
+    PORT_THIRD_MOTOR = tonum(readline(handle));
+    values[11] = PORT_THIRD_MOTOR;
+	PORT_KICKER = tonum(readline(handle));
+	values[12] = PORT_KICKER;
+	KP_COM = tonum(readline(handle));
+	values[13] = KP_COM;
 }
 
 closef(handle);
