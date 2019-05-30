@@ -240,7 +240,7 @@ func num move(x1, y1) {
 
     v1 = -sin(pi/3)*x_gl + cos(pi/3)*y_gl + r_base*t_gl*KP_MOVE;
     v2 = sin(pi/3)*x_gl + cos(pi/3)*y_gl - r_base*t_gl*KP_MOVE;
-    v3 = -x_gl + r_base*t_gl*KP_MOVE;
+    v3 = (-sin(pi/6)*x_gl + cos(pi/6)*y_gl + r_base*t_gl*KP_MOVE)*1.5;
 
     mt.spw(PORT_FIRST_MOTOR, v1);
     mt.spw(PORT_SECOND_MOTOR, v2);
@@ -325,7 +325,7 @@ func num move(x1, y1) {
 // bluetooth end
 
 while (true) {
-    move(0, 190);
+    move(100, 120);
     delay(50);
     printupd();
     print("v1", v1);
