@@ -9,8 +9,8 @@ mt.spw("A", -50)
 check.ports("ABC 1234") 
 
 //  BT
-// connect("BOBA")
-// check.connect("BOBA")
+connect("BOBA")
+check.connect("BOBA")
 
 id = new.mailbox("attack_side")
 
@@ -194,13 +194,13 @@ void orbit {
       }
 
       if (dir1 == 3) {
-        v=90
+        v=80
         d=145
         l=r+30
         u=-((1*(d*90)/(2*l))+(0.45*(r-strres)))
       } else {
         u=-((20*((3-dir1))-((3-dir1)/5*10))+(0.4*(r-strres)))
-        v=80
+        v=70
       }
 
 
@@ -209,10 +209,7 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 70) {
-            play(100, "Kung Fu")
             Goto exit2
-          }
         }
       }
     }
@@ -295,14 +292,14 @@ void orbit {
       dir_orbit()
 
       if (dir == 8) {
-        v=90
+        v=80
         d=145
         l=r+30
         u=-((-1*(d*90)/(2*l))+(0.4*(strres - r)))
       } else {
         u=-((20*((7-dir2))-((7-dir2)/5*10))+(0.45*(strres - r)))
         dir3 = dir2
-        v=80
+        v=70
       }
 
       if (time() - t0 > 4500) {
@@ -310,10 +307,7 @@ void orbit {
         Goto exit2
       } else {
         if (time() - t0 > 1500) {
-          if (strres < 70) {
-            play(100, "Kung Fu")
             Goto exit2
-          }
         }
       }
     }
@@ -366,7 +360,7 @@ void padik {
       v = 50
     }
 
-    u_1=kf_dir*(dir-6)+0.02*(str4-str3)    //kf_dir*(dir-6)+0.065*(2*(str5-str2)+0.9*(str4-str3))//20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
+    u_1=kf_dir*(dir-6)+0.065*(2*(str5-str2)+1*(str4-str3))//kf_dir*(dir-6)+0.02*(str4-str3)    //20*(dir-6)+1*(str5-str2)+0.04*(str4-str3)
     u = u_1 * v * 0.01
   } 
 }
@@ -521,30 +515,14 @@ if (btn.rn == "E") {
   tone(100,200,100)
 } else {
   if (btn.rn == "U") {
-    while (abs(e1 + e2) < 200) {
-      v = 100
-      u = -(rm(compass - com_2 + 900, 360) - 180)
-    }
+      while (abs(dir - 6) < 2 and l1 < l1_cal - 5 and l2 < l2_cal - 5) {
+        v = 100
+        u = -err_com
+      }
 
-    kicker()
-
-    while ((e1+e2)>0) {
-      v = -100
-      u = -(rm(compass - com_1 + 900, 360) - 180)
-    }
-
-    er1 = 999
-    while (abs(er1) > 5) {
-      v = 10
-      er1 = rm(compass - com_5 + 900, 360) - 180
-      u = -er1
-    }
-
-    while (strres < 120) {
-      v = 0
-      u = 0
-      mt.stop("BC", true)
-    }
+      if (l1 < l1_cal - 5 and l2 < l2_cal - 5) {
+          kicker()
+      }
   }
 }
 
