@@ -336,9 +336,6 @@ func num move(x1, y1) {
 
 // bluetooth end
 
-h = open.w("speed.txt");
-writeline(h, "[");
-
 while (true) {
     move(0, 100);
     printupd();
