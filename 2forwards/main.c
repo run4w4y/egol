@@ -237,8 +237,8 @@ func num move(x1, y1) {
         x_gl = 0.8*x1;
         y_gl = y1;
     } else {
-        x_gl = x1*1.7;
-        y_gl = y1*1.7;
+        x_gl = x1*1.95;
+        y_gl = y1*1.95;
     }
     t_gl = compass_delta(compass());
     r_base = pi;
@@ -340,11 +340,9 @@ h = open.w("speed.txt");
 writeline(h, "[");
 
 while (true) {
-    move(0, 170);
-    delay(50);
+    move(0, 100);
     printupd();
     print("v1", v1);
     print("v2", v2);
     print("v3", v3);
-    writeline(h, "(" + v1 + "," + v2 + "," + v3 + "),");
 }
