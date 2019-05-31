@@ -1,72 +1,76 @@
-// ports
-handle = open.r("ports.txt"); // open the file with values
-
-PORT_SEEKER = tonum(readline(handle));
-PORT_COMPASS = tonum(readline(handle));
-PORT_LIGHT_FRONT = tonum(readline(handle));
-PORT_LIGHT_BACK = tonum(readline(handle));
-SEEKER_DELAY = tonum(readline(handle));
-COMPASS_DELAY = tonum(readline(handle));
-LIGHT_DELAY = tonum(readline(handle));
-PORT_FIRST_MOTOR = tohex(tonum(readline(handle)) + 9);
-PORT_SECOND_MOTOR = tohex(tonum(readline(handle)) + 9);
-PORT_THIRD_MOTOR = tohex(tonum(readline(handle)) + 9);
-PORT_KICKER = tohex(tonum(readline(handle)) + 9);
-
-closef(handle);
-
 // reading from file
 
-handle = open.r("cal.txt");
+handle = open.r("ports.txt");
 
-values_len = 7;
+values_len = 11;
 values = new.vector(values_len, 0);
 
-names[0] = "alpha";
-names[1] = "seek_div";
-names[2] = "kp_com";
-names[3] = "strmax";
-names[4] = "back_lt";
-names[5] = "str2";
-names[6] = "str4";
+names[0] = "p_seek";
+names[1] = "p_com";
+names[2] = "p_lt_f";
+names[3] = "p_lt_b";
+names[4] = "seek_del";
+names[5] = "com_del";
+names[6] = "lt_del";
+names[7] = "p_mt_1";
+names[8] = "p_mt_2";
+names[9] = "p_mt_3";
+names[10] = "p_kick";
 
 if (handle == 0) {
-	COMPASS_ALPHA = 0;
-	values[0] = COMPASS_ALPHA;
-	SEEKER_DIV = 100;
-	values[1] = SEEKER_DIV;
-	KP_COM = 75;
-	values[2] = KP_COM;
-	STR_MAX = 0;
-	values[3] = STR_MAX;
-	BACK_LIGHT_VALUE = 0;
-	values[4] = BACK_LIGHT_VALUE;
-	STR_VALUE_2 = 0;
-	values[5] = STR_VALUE_2;
-	STR_VALUE_4 = 0;
-	values[6] = STR_VALUE_4;
+	PORT_SEEKER = 4;
+	values[0] = PORT_SEEKER;
+	PORT_COMPASS = 2;
+	values[1] = PORT_COMPASS;
+	PORT_LIGHT_FRONT = 1;
+	values[2] = PORT_LIGHT_FRONT;
+	PORT_LIGHT_BACK = 3;
+	values[3] = PORT_LIGHT_BACK;
+	SEEKER_DELAY = 50;
+	values[4] = SEEKER_DELAY;
+	COMPASS_DELAY = 50;
+	values[5] = COMPASS_DELAY;
+	LIGHT_DELAY = 50;
+	values[6] = LIGHT_DELAY;
+    PORT_FIRST_MOTOR = 1;
+    values[7] = PORT_FIRST_MOTOR;
+    PORT_SECOND_MOTOR = 1;
+    values[8] = PORT_SECOND_MOTOR;
+    PORT_THIRD_MOTOR = 1;
+    values[9] = PORT_THIRD_MOTOR;
+	PORT_KICKER = 1;
+	values[10] = PORT_KICKER;
 } else {
-	COMPASS_ALPHA = tonum(readline(handle));
-	values[0] = COMPASS_ALPHA;
-	SEEKER_DIV = tonum(readline(handle));
-	values[1] = SEEKER_DIV;
-	KP_COM = tonum(readline(handle));
-	values[2] = KP_COM;
-	STR_MAX = tonum(readline(handle));
-	values[3] = STR_MAX;
-	BACK_LIGHT_VALUE = tonum(readline(handle));
-	values[4] = BACK_LIGHT_VALUE;
-	STR_VALUE_2 = tonum(readline(handle));
-	values[5] = STR_VALUE_2;
-	STR_VALUE_4 = tonum(readline(handle));
-	values[6] = STR_VALUE_4;
+	PORT_SEEKER = tonum(readline(handle));
+	values[0] = PORT_SEEKER;
+	PORT_COMPASS = tonum(readline(handle));
+	values[1] = PORT_COMPASS;
+	PORT_LIGHT_FRONT = tonum(readline(handle));
+	values[2] = PORT_LIGHT_FRONT;
+	PORT_LIGHT_BACK = tonum(readline(handle));
+	values[3] = PORT_LIGHT_BACK;
+	SEEKER_DELAY = tonum(readline(handle));
+	values[4] = SEEKER_DELAY;
+	COMPASS_DELAY = tonum(readline(handle));
+	values[5] = COMPASS_DELAY;
+	LIGHT_DELAY = tonum(readline(handle));
+	values[6] = LIGHT_DELAY;
+    PORT_FIRST_MOTOR = tonum(readline(handle));
+    values[7] = PORT_FIRST_MOTOR;
+    PORT_SECOND_MOTOR = tonum(readline(handle));
+    values[8] = PORT_SECOND_MOTOR;
+    PORT_THIRD_MOTOR = tonum(readline(handle));
+    values[9] = PORT_THIRD_MOTOR;
+	PORT_KICKER = tonum(readline(handle));
+	values[10] = PORT_KICKER;
 }
 
 closef(handle);
 
 // sensors
 
-sen.setmode(PORT_LIGHT_BACK, 1);
+sen.setmode(1, 1);
+sen.setmode(3, 4);
 
 name = getname();
 
@@ -225,74 +229,6 @@ while (true) {
 		if (btn != "E") {
 			goto start;
 		}
-		
-		if (i == 0) {
-			compass_array = i2c.readregs(PORT_COMPASS, 1, 66, 4);
-        	compass = compass_array[0] * 2 + compass_array[1];
-			values[i] = compass;
-		}
-
-		if (i == 3) {
-			strmax = 0;
-			for (j = 0; j < 600; ++j) { // progress bar
-				if (ispressed(6) == true) { // exit button
-					goto end;
-				}
-				
-				irseeker_array = i2c.readregs(PORT_SEEKER, 8, 73, 6);
-
-				strnow = irseeker_array[3];
-				if (strnow > strmax) {
-					strmax = strnow;
-				}
-
-				p = floor(j/6);
-				scr.clear();
-				scr.rect(1, 37, 48, 105, 10);
-				line(1, 39, 50, 39+p, 50);
-				line(1, 39, 51, 39+p, 51);
-				line(1, 39, 52, 39+p, 52);
-				line(1, 39, 53, 39+p, 53);
-				line(1, 39, 54, 39+p, 54);
-				line(1, 39, 55, 39+p, 55);
-				txt(1, 89-len(p)*4, 30, 1, p+"%");
-				delay(5);
-			}
-			values[i] = strmax;
-		}
-
-		if (i == 4) {
-			senball_calib1 = 0
-			for (j = 0; j < 600; ++j) { // progress bar
-				if (ispressed(6) == true) { // exit button
-					goto end
-				}
-				senball_calib1 = senball_calib1 + sen.percent(PORT_LIGHT_BACK);
-				p = floor(j/6)
-				scr.clear()
-				scr.rect(1, 37, 48, 105, 10)
-				line(1, 39, 50, 39+p, 50)
-				line(1, 39, 51, 39+p, 51)
-				line(1, 39, 52, 39+p, 52)
-				line(1, 39, 53, 39+p, 53)
-				line(1, 39, 54, 39+p, 54)
-				line(1, 39, 55, 39+p, 55)
-				txt(1, 89-len(p)*4, 30, 1, p+"%")
-				delay(5)
-			}
-			senball_calib1 = senball_calib1 / 600
-			values[i] = senball_calib1
-		}
-
-		if (i == 5) {
-			irseeker_array = i2c.readregs(PORT_SEEKER, 8, 73, 6);
-			values[i] = irseeker_array[2];
-		}
-
-		if (i == 6) {
-			irseeker_array = i2c.readregs(PORT_SEEKER, 8, 73, 6);
-			values[i] = irseeker_array[4];
-		}
 	}
 	
 	prev_button = btn;
@@ -303,7 +239,7 @@ while (true) {
 end: // instead of operator break
 
 scr.clear();
-handle = open.w("cal.txt"); // writing to the file
+handle = open.w("ports.txt"); // writing to the file
 for (i = 0; i < values_len; ++i) {
 	writeline(handle, values[i]);
 }

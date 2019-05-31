@@ -2,7 +2,8 @@
 
 // const values from calibration
 
-handle = open.r("cal.txt"); // open the file with values
+// ports
+handle = open.r("ports.txt"); // open the file with values
 
 PORT_SEEKER = tonum(readline(handle));
 PORT_COMPASS = tonum(readline(handle));
@@ -11,17 +12,25 @@ PORT_LIGHT_BACK = tonum(readline(handle));
 SEEKER_DELAY = tonum(readline(handle));
 COMPASS_DELAY = tonum(readline(handle));
 LIGHT_DELAY = tonum(readline(handle));
-COMPASS_ALPHA = tonum(readline(handle));
-SEEKER_DIV = tonum(readline(handle)) / 100;
 PORT_FIRST_MOTOR = tohex(tonum(readline(handle)) + 9);
 PORT_SECOND_MOTOR = tohex(tonum(readline(handle)) + 9);
 PORT_THIRD_MOTOR = tohex(tonum(readline(handle)) + 9);
 PORT_KICKER = tohex(tonum(readline(handle)) + 9);
-KP_MOVE = tonum(readline(handle))/100;
-LIGHT_FRONT_COLOR = 1;
-LIGHT_BACK_COLOR = 1;
 
-// reading from sensors start
+closef(handle);
+
+// values
+handle = open.r("cal.txt");
+
+COMPASS_ALPHA = tonum(readline(handle));
+SEEKER_DIV = tonum(readline(handle)) / 100;
+KP_MOVE = tonum(readline(handle))/100;
+STR_MAX = tonum(readline(handle));
+BACK_LIGHT_VALUE = tonum(readline(handle));
+STR_VALUE_2 = tonum(readline(handle));
+STR_VALUE_4 = tonum(readline(handle));
+
+closef(handle);
 
 // setting up bt start
 
@@ -44,31 +53,11 @@ mailbox_mode = new.mailbox("mailbox_mode");
 
 // setting up bt end
 
-// light sensor front start
-
-sen.setmode(PORT_LIGHT_FRONT, 4);
-
-light_front_prev_time = time();
-light_front_prev_value = 0;
-
-func num light_front() { // get current value of the selected color based on the light sens
-    if (time() - light_front_prev_time >= LIGHT_DELAY) {
-        light_front_prev_time = time();
-        local light_val = 0;
-        light_val = sen.read.rawval(PORT_LIGHT_FRONT, LIGHT_FRONT_COLOR);
-
-        light_front_prev_value = light_val;
-        return light_val;
-    } else {
-       return light_front_prev_value;
-    }
-}
-
-// light sensor front end 
+// reading from sensors start
 
 // light sensor back start
 
-sen.setmode(PORT_LIGHT_BACK, 4);
+sen.setmode(PORT_LIGHT_BACK, 1);
 
 light_back_prev_time = time();
 light_back_prev_value = 0;
@@ -77,7 +66,7 @@ func num light_back() { // get current value of the selected color based on the 
     if (time() - light_back_prev_time >= LIGHT_DELAY) {
         light_back_prev_time = time();
         local light_val = 0;
-        light_val = sen.read.rawval(PORT_LIGHT_BACK, LIGHT_BACK_COLOR);
+        light_val = sen.percent(PORT_LIGHT_BACK);
 
         light_back_prev_value = light_val;
         return light_val;
@@ -97,7 +86,7 @@ func num compass() { // get compass current azimut
     local compass;
     if (time() - compass_prev_time >= COMPASS_DELAY) {
         compass_prev_time = time();
-        compass_array = i2c.readregs(2, 1, 66, 4);
+        compass_array = i2c.readregs(PORT_COMPASS, 1, 66, 4);
         compass_val = compass_array[0] * 2 + compass_array[1];
         compass_prev_value = compass_val;
         return compass_val;
@@ -134,7 +123,7 @@ seeker_prev_str5 = 0;
 func num irseeker_dir() { // get seeker current dir
     if (time() - seeker_prev_time >= SEEKER_DELAY) {
         seeker_prev_time = time();
-        irseeker_array = i2c.readregs(4, 8, 73, 6);
+        irseeker_array = i2c.readregs(PORT_SEEKER, 8, 73, 6);
         
         dir = irseeker_array[0];
         seeker_prev_dir = dir;
@@ -235,7 +224,7 @@ func num irseeker_str(strnum) { // get seeker current str
 
 func num move(x1, y1) {
     x_gl = -1.05*x1;
-    y_gl = 1.05*y1;
+    y_gl = 0.9*y1;
     t_gl = compass_delta(compass());
     r_base = pi;
     kp_gl = KP_MOVE;
@@ -243,7 +232,7 @@ func num move(x1, y1) {
     thetta = 3*pi/2;
     v1 = 1.5*(-x_gl + r_base*t_gl*kp_gl);
     max_speed = abs(v1);
-    v2 = sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl;
+    v2 = (sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl)*0.97;
     if (abs(v2) > max_speed) {
         max_speed = abs(v2);
     }
@@ -258,12 +247,6 @@ func num move(x1, y1) {
         v3 = v3 * 100 / max_speed;
         tone(100, 100, 100);
     }
-    // if (abs(v1) > 115) {
-    //     tone(100, 100, 100);
-    //     v1 = v1 / 1.5;
-    //     v2 = v2 / 1.5;
-    //     v3 = v3 / 1.5;
-    // }
 
     mt.spw(PORT_FIRST_MOTOR, v1);
     mt.spw(PORT_SECOND_MOTOR, v2);
@@ -357,5 +340,5 @@ new.thread = bt;
 // bluetooth end
 
 while (true) {
-    move(100, 100);
+    move(-100, 0);
 }
