@@ -241,8 +241,8 @@ func num move(x1, y1) {
 
     thetta = 3*pi/2;
     v1 = 1.5*(-x_gl + r_base*t_gl*kp_gl);
-    v2 = sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl - r_base*t_gl*kp_gl;
-    v3 = sin(pi/3 + thetta)*x_gl + cos(pi/3 + thetta)*y_gl + r_base*t_gl*kp_gl;
+    v2 = sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl*0.35;
+    v3 = sin(pi/3 + thetta)*x_gl + cos(pi/3 + thetta)*y_gl + r_base*t_gl*kp_gl*0.35;
 
     if (abs(v1) > 115) {
         tone(100, 100, 100);
