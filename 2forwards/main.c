@@ -25,21 +25,22 @@ LIGHT_BACK_COLOR = 1;
 
 // setting up bt start
 
-who_am_i = getname() 
+who_am_i = getname();
 
 if (who_am_i == "BOBA") {
-	who_aint_me = "BIBA"
+	who_aint_me = "BIBA";
 } else {
-	who_aint_me = "BOBA"
+	who_aint_me = "BOBA";
 }
 
-mode = 1
+mode = 1;
+attack = 0;
 
-connect(who_aint_me)
+connect(who_aint_me);
 
-mailbox_biba = new.mailbox("mailbox_biba")
-mailbox_boba = new.mailbox("mailbox_boba")
-mailbox_mode = new.mailbox("mailbox_mode")
+mailbox_biba = new.mailbox("mailbox_biba");
+mailbox_boba = new.mailbox("mailbox_boba");
+mailbox_mode = new.mailbox("mailbox_mode");
 
 // setting up bt end
 
@@ -233,16 +234,16 @@ func num irseeker_str(strnum) { // get seeker current str
 // kinematics start 
 
 func num move(x1, y1) {
-    x_gl = 1.15*x1;
-    y_gl = -1.15*y1;
+    x_gl = -1.05*x1;
+    y_gl = 1.05*y1;
     t_gl = compass_delta(compass());
     r_base = pi;
     kp_gl = KP_MOVE;
 
     thetta = 3*pi/2;
     v1 = 1.5*(-x_gl + r_base*t_gl*kp_gl);
-    v2 = sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl*0.35;
-    v3 = sin(pi/3 + thetta)*x_gl + cos(pi/3 + thetta)*y_gl + r_base*t_gl*kp_gl*0.35;
+    v2 = sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl;
+    v3 = sin(pi/3 + thetta)*x_gl + cos(pi/3 + thetta)*y_gl + r_base*t_gl*kp_gl;
 
     if (abs(v1) > 115) {
         tone(100, 100, 100);
@@ -273,29 +274,29 @@ void bt {
         ///////////////////////////////////////////////////////////////////////
 
 		if (who_am_i == "BIBA") {
-			mybtstr = attack 
+			mybtstr = attack + "";
 		} else {
-			mybtstr = strres + " " + dir + " " + attack 
+			mybtstr = strres + " " + dir + " " + attack;
 		}
 		
 		if (who_am_i == "BIBA") {
-			bt.send(who_aint_me, "mailbox_biba", mybtstr)
+			bt.send(who_aint_me, "mailbox_biba", mybtstr);
 
-			btstr2 = bt.last(mailbox_boba)
-			res = parse(4, btstr2)
+			btstr2 = bt.last(mailbox_boba);
+			res = parse(4, btstr2);
 
-			str_res2 = res[0]
-			dir2 = res[1]
-			attack2 = res[2]
+			str_res2 = res[0];
+			dir2 = res[1];
+			attack2 = res[2];
 		} else {
-			bt.send(who_aint_me, "mailbox_boba", mybtstr)
+			bt.send(who_aint_me, "mailbox_boba", mybtstr);
 
-			btstr2 = bt.last(mailbox_biba)
-			res = parse(2, btstr2)
+			btstr2 = bt.last(mailbox_biba);
+			res = parse(2, btstr2);
 
-			attack2 = res[0]
+			attack2 = res[0];
 
-			mode = tonum(bt.last(mailbox_mode))
+			mode = tonum(bt.last(mailbox_mode));
 		}
 		
 		//////////////////////////////////////////////////////////////////////
@@ -304,25 +305,25 @@ void bt {
             if (abs(str_res - str_res2) < 30) {
                 if (abs(dir_res - 5) == abs(dir2 - 5)) {
                     if (str_res > str_res2) {
-                        mode = 1
+                        mode = 1;
                     } else {
-                        mode = 0
+                        mode = 0;
                     }
                 } else {
                     if (abs(dir_res - 5) > abs(dir2 - 5)) {
-                        mode = 0
+                        mode = 0;
                     } else {
-                        mode = 1
+                        mode = 1;
                     }
                 }
             } else {
                 if (str_res > str_res2) {
-                    mode = 1
+                    mode = 1;
                 } else {
-                    mode = 0
+                    mode = 0;
                 }
             }
-			bt.send(who_aint_me, "mailbox_mode", abs(mode-1))
+			bt.send(who_aint_me, "mailbox_mode", abs(mode-1));
 		}
 		
 		////////////////////////////////////////////////////////////////////////
@@ -338,10 +339,10 @@ void bt {
 	}
 }
 
-new.thread = bt
+new.thread = bt;
 
 // bluetooth end
 
 while (true) {
-    move(0, -100);
+    move(100, 100);
 }
