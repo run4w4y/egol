@@ -242,13 +242,20 @@ func num move(x1, y1) {
 
     thetta = 3*pi/2;
     v1 = 1.5*(-x_gl + r_base*t_gl*kp_gl);
+    max_speed = abs(v1);
     v2 = sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl;
+    if (abs(v2) > max_speed) {
+        max_speed = abs(v2);
+    }
     v3 = sin(pi/3 + thetta)*x_gl + cos(pi/3 + thetta)*y_gl + r_base*t_gl*kp_gl;
+    if (abs(v3) > max_speed) {
+        max_speed = abs(v3);
+    }
 
-    if (abs(v3) > 115) {
-        v1 = v1 * 100 / v3;
-        v2 = v2 * 100 / v3;
-        v3 = 100;
+    if (max_speed > 115) {
+        v1 = v1 * 100 / max_speed;
+        v2 = v2 * 100 / max_speed;
+        v3 = v3 * 100 / max_speed;
         tone(100, 100, 100);
     }
     // if (abs(v1) > 115) {
