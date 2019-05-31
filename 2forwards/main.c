@@ -245,12 +245,18 @@ func num move(x1, y1) {
     v2 = sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl;
     v3 = sin(pi/3 + thetta)*x_gl + cos(pi/3 + thetta)*y_gl + r_base*t_gl*kp_gl;
 
-    if (abs(v1) > 115) {
+    if (abs(v3) > 115) {
+        v1 = v1 * 100 / v3;
+        v2 = v2 * 100 / v3;
+        v3 = 100;
         tone(100, 100, 100);
-        v1 = v1 / 1.5;
-        v2 = v2 / 1.5;
-        v3 = v3 / 1.5;
     }
+    // if (abs(v1) > 115) {
+    //     tone(100, 100, 100);
+    //     v1 = v1 / 1.5;
+    //     v2 = v2 / 1.5;
+    //     v3 = v3 / 1.5;
+    // }
 
     mt.spw(PORT_FIRST_MOTOR, v1);
     mt.spw(PORT_SECOND_MOTOR, v2);
