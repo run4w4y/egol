@@ -237,11 +237,11 @@ func num move(x1, y1) {
     y_gl = -1.15*y1;
     t_gl = compass_delta(compass());
     r_base = pi;
-    kp_gl = KP_MOVE*max(x_gl, y_gl)/115;
+    kp_gl = KP_MOVE;
 
     thetta = 3*pi/2;
     v1 = 1.5*(-x_gl + r_base*t_gl*kp_gl);
-    v2 = sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl;
+    v2 = sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl - r_base*t_gl*kp_gl;
     v3 = sin(pi/3 + thetta)*x_gl + cos(pi/3 + thetta)*y_gl + r_base*t_gl*kp_gl;
 
     if (abs(v1) > 115) {
