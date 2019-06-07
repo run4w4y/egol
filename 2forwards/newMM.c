@@ -1,4 +1,4 @@
-//check.ports("ABC 1234")
+check.ports("ABCD 234")
 
 //  BT
 
@@ -18,7 +18,7 @@ mailbox_mode = new.mailbox("mailbox_mode");
 
 
 sen.setmode(3, 1)
-mt.stop("ABC", "false")
+mt.stop("ABCD", "false")
 mt.spw("a", 50)
 //calibration
 handle = open.r("cal.txt");
@@ -145,7 +145,7 @@ while (true) {
       b_power = 0
       while (abs(err_com) < 25 and abs(dir - 5) > 3) {
         if (pw < 100) {
-          pw = pw + 1
+          pw = pw + 3
         }
         // if (time() - t > 1700 and time() - t < 1900) {
         //   mt.spw("a", -100)
@@ -183,55 +183,67 @@ while (true) {
       }
     }
 
-    //  slowing
-    if (fl1 == 1) { 
-      while (pw > 33) {
-        if (pw > 33) {
-          pw = pw - 3
-        }
-        // if (time() - t > 1700 and time() - t < 1900) {
-        //   mt.spw("a", -100)
-        // } else {
-        //   mt.stop("a", true)
-        // }
-        b_power = 1 * err_com + err_com*pw*0.01;
-        if (abs(err_com) < 5) {
-          b_power = 0;
-        } else {
-          if (abs(b_power) < 10) {
-            if (b_power > 0) {
-              b_power = 10;
-            } else {
-              b_power = -10;
-            }
-          }
-        }
+    // //  slowing
+    // if (fl1 == 1) { 
+    //   while (pw > 33) {
+    //     if (pw > 33) {
+    //       pw = pw - 3
+    //     }
+    //     // if (time() - t > 1700 and time() - t < 1900) {
+    //     //   mt.spw("a", -100)
+    //     // } else {
+    //     //   mt.stop("a", true)
+    //     // }
+    //     b_power = 1 * err_com + err_com*pw*0.01;
+    //     if (abs(err_com) < 5) {
+    //       b_power = 0;
+    //     } else {
+    //       if (abs(b_power) < 10) {
+    //         if (b_power > 0) {
+    //           b_power = 10;
+    //         } else {
+    //           b_power = -10;
+    //         }
+    //       }
+    //     }
 
-        u = err_com * 0.008
-        mt.spw("C", -pw)
-        mt.spw("D", -pw)
-        mt.spw("B", b_power)
-        delay(5)
-      }
+    //     u = err_com * 0.008
+    //     mt.spw("C", -pw)
+    //     mt.spw("D", -pw)
+    //     mt.spw("B", b_power)
+    //     delay(5)
+    //   }
 
-      fl1 = 0
-    }
+    //   fl1 = 0
+    // }
 
     while (dir != 5 and abs(dir - 5) < 3) {
       if (dir > 5) {
-        mt.spw("C", 50)
-        mt.spw("D", -33 + err_com)
-        mt.spw("B", 100)
+        if (str4 > STR_VALUE_4) { 
+          mt.spw("C", 41)
+          mt.spw("D", -27 + err_com)
+          mt.spw("B", 83)
+        } else {
+          mt.spw("C", 50)
+          mt.spw("D", -33 + err_com)
+          mt.spw("B", 100)
+        }
       } else {
-        mt.spw("C", -33 - err_com)
-        mt.spw("D", 50)
-        mt.spw("B", -100)
+        if (str2 > STR_VALUE_2) {
+          mt.spw("C", -27 - err_com)
+          mt.spw("D", 41)
+          mt.spw("B", -83)
+        } else {
+          mt.spw("C", -33 - err_com)
+          mt.spw("D", 50)
+          mt.spw("B", -100)
+        }
       }
     }
 
     while (dir == 5 and attack == 0) {
       if (pw < 100) {
-        pw = pw + 1
+        pw = pw + 2
       }
       // if (time() - t > 1700 and time() - t < 1900) {
       //   mt.spw("a", -100)
@@ -257,7 +269,7 @@ while (true) {
       mt.spw("B", b_power)
       delay(5)
 
-      if (str3 > 200) {
+      if (str3 > STR_MAX - 5) {
         attack = 1
       }
     }
@@ -266,13 +278,13 @@ while (true) {
       pw = 50
       b_power = 0
       t = time()
-      while (strres > 150) {
+      while (strres > 130) {
         tone(100,100,100)
         if (pw < 100) {
-          pw = pw + 1
+          pw = pw + 2
         }
 
-        if (time() - t > 1000 and time() - t < 1200) {
+        if (time() - t > 700 and time() - t < 900) {
           mt.spw("a", -100)
         } else {
           mt.shd.pw("a", 50, 0, 300, 0, "false")
@@ -294,8 +306,8 @@ while (true) {
         }
 
         u = err_com * 0.008
-        mt.spw("C", pw)
-        mt.spw("D", pw)
+        mt.spw("C", pw-u)
+        mt.spw("D", pw+u)
         mt.spw("B", b_power)
         delay(5)
       }
@@ -306,16 +318,16 @@ while (true) {
   while (mode == 0) {
     led(1)
     if (abs(dir - 5) < 3) {
-      mt.spw("C", -err_com * 0.008)
-      mt.spw("D", err_com * 0.008)
-      mt.spw("B", err_com * 0.01)
+      mt.spw("C", -err_com * 0.67)
+      mt.spw("D", err_com * 0.67)
+      mt.spw("B", err_com * 1)
     } else {
       if (abs(err_com) < 25 and abs(dir - 5) > 3) {
         pw = 50
         b_power = 0
         while (abs(err_com) < 25 and abs(dir - 5) > 3) {
           if (pw < 100) {
-            pw = pw + 1
+            pw = pw + 3
           }
           // if (time() - t > 1700 and time() - t < 1900) {
           //   mt.spw("a", -100)
@@ -353,39 +365,39 @@ while (true) {
         }
       }
 
-      //  slowing
-      if (fl2 == 1) { 
-        while (pw > 33) {
-          if (pw > 33) {
-            pw = pw - 3
-          }
-          // if (time() - t > 1700 and time() - t < 1900) {
-          //   mt.spw("a", -100)
-          // } else {
-          //   mt.stop("a", true)
-          // }
-          b_power = 1 * err_com + err_com*pw*0.01;
-          if (abs(err_com) < 5) {
-            b_power = 0;
-          } else {
-            if (abs(b_power) < 10) {
-              if (b_power > 0) {
-                b_power = 10;
-              } else {
-                b_power = -10;
-              }
-            }
-          }
+      // //  slowing
+      // if (fl2 == 1) { 
+      //   while (pw > 33) {
+      //     if (pw > 33) {
+      //       pw = pw - 3
+      //     }
+      //     // if (time() - t > 1700 and time() - t < 1900) {
+      //     //   mt.spw("a", -100)
+      //     // } else {
+      //     //   mt.stop("a", true)
+      //     // }
+      //     b_power = 1 * err_com + err_com*pw*0.01;
+      //     if (abs(err_com) < 5) {
+      //       b_power = 0;
+      //     } else {
+      //       if (abs(b_power) < 10) {
+      //         if (b_power > 0) {
+      //           b_power = 10;
+      //         } else {
+      //           b_power = -10;
+      //         }
+      //       }
+      //     }
 
-          u = err_com * 0.008
-          mt.spw("C", -pw)
-          mt.spw("D", -pw)
-          mt.spw("B", b_power)
-          delay(5)
-        }
+      //     u = err_com * 0.008
+      //     mt.spw("C", -pw)
+      //     mt.spw("D", -pw)
+      //     mt.spw("B", b_power)
+      //     delay(5)
+      //   }
 
-        fl2 = 0
-      }
+      //   fl2 = 0
+      // }
     }
   }
 }
