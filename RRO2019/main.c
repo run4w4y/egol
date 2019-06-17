@@ -1,4 +1,13 @@
-//check.ports("ABCD 234")
+/*TODO:
+    +1. attack
+    2. modes
+    3. если робот один на поле - 1 мод
+    3. odometry
+    4. attack angles
+    5. starts 
+*/
+
+check.ports("ABCD 234")
 
 //  BT
 
@@ -10,7 +19,8 @@ if (who_am_i == "BOBA") {
 	who_aint_me = "BOBA";
 }
 
-//connect(who_aint_me);
+connect(who_aint_me)
+check.connect(who_aint_me)
 
 mailbox_biba = new.mailbox("mailbox_biba");
 mailbox_boba = new.mailbox("mailbox_boba");
@@ -40,8 +50,9 @@ side = 0
 v = 50
 f = 0
 s = 0
-close = 1 
+close = 0 
 /*  
+    close = 0 stop
     close = 1 ball is behind
     close = 2 ball is in side
     close = 3 ball is in front
@@ -52,7 +63,7 @@ close = 1
 
 //flags 
 attack = 0
-
+mode = 1
 //Subs
 
 void sensors {
@@ -84,25 +95,27 @@ void sensors {
         l_b = sen.percent(3)
 
         // FSM
+
         if (dir == 5) {
             close = 3
             if (str3 > STR_MAX - 5) {
                 close = 4
             }
         } else {
-            if (abs(dir - 5) < 3 and (str2 > 30 or str4 > 30)) {
+            if (abs(dir - 5) < 3 and strres > 30) {
                 close = 2
+                if (str3 > STR_MAX - 5) {
+                    close = 4
+                }
             } else {
-                if (dir == 1 or dir == 2 or dir == 8 or (dir == 7 and str4 < 40)) {
-                    close = 6
-                } else {
-                    close = 1
-                    if (l_b > BACK_LIGHT_VALUE) {
-                        close = 5
-                    }
+                close = 1
+                if (l_b > BACK_LIGHT_VALUE) {
+                    close = 5
                 }
             }
         }
+        printupd()
+        print("state", close)
     }
 }
 
@@ -133,79 +146,144 @@ void MM {
         }
     }
 }
+
+void bt {
+	while (true) {
+		if (who_am_i == "BIBA") {
+			mybtstr = attack + "";
+		} else {
+			mybtstr = strres + " " + dir + " " + attack;
+		}
+		
+		if (who_am_i == "BIBA") {
+			bt.send(who_aint_me, "mailbox_biba", mybtstr);
+
+			btstr2 = bt.last(mailbox_boba);
+			res = parse(4, btstr2);
+
+			str_res2 = res[0];
+			dir2 = res[1];
+			attack2 = res[2];
+		} else {
+			bt.send(who_aint_me, "mailbox_boba", mybtstr);
+
+			btstr2 = bt.last(mailbox_biba);
+			res = parse(2, btstr2);
+
+			attack2 = res[0];
+
+			mode = tonum(bt.last(mailbox_mode));
+		}
+		
+		//////////////////////////////////////////////////////////////////////
+		
+		if (who_am_i == "BIBA") {
+            if (abs(strres - str_res2) < 30) {
+                if (abs(dir - 5) == abs(dir2 - 5)) {
+                    if (strres > str_res2) {
+                        mode = 1;
+                    } else {
+                        mode = 0;
+                    }
+                } else {
+                    if (abs(dir - 5) > abs(dir2 - 5)) {
+                        mode = 0;
+                    } else {
+                        mode = 1;
+                    }
+                }
+            } else {
+                if (strres > str_res2) {
+                    mode = 1;
+                } else {
+                    mode = 0;
+                }
+            }
+			bt.send(who_aint_me, "mailbox_mode", abs(mode-1));
+		}
+
+		// buttons will be here
+	}
+}
+
 new.thread = sensors
 new.thread = MM
+new.thread = bt
 
+//main
 while (true) {
+    while (mode == 1) {
+        led(2)
+        mt.spw("A", 50)
 
-    printupd()
-    print("state", close)
-    mt.spw("A", 50)
-
-    while (close == 1) {    //ball is behind
-        forward = -100
-        side = 0
-    }
-
-    while (close == 2) {    //ball is in side
-        forward = 0
-        side = (dir - 5) * 50
-    }
-
-    while (close == 3) {    //ball is in front
-        forward = STR_MAX - str3 + 40
-        side = 0
-    }
-
-    t = time()
-    v = 50
-
-    while (close == 4 or str3 > 180) {    //attack
-        attack = 1
-        forward = 0
-        side = 0
-
-        b_power = 1.5 * err_com + err_com*v*0.01;
-
-        tone(100,100,100)
-        if (v < 100) {
-          v = v + 2
+        while (close == 1) {    //ball is behind
+            forward = -100
+            side = 0
         }
 
-        if (abs(err_com) < 5) {
-          b_power = 0;
-        } else {
-          if (abs(b_power) < 10) {
-            if (b_power > 0) {
-              b_power = 10;
-            } else {
-              b_power = -10;
+        while (close == 2) {    //ball is in side
+            forward = 0
+            side = (dir - 5) * 100
+        }
+
+        v = 40
+        while (close == 3) {    //ball is in front
+            forward = v//STR_MAX - str3 + 40
+            side = 0
+            if (v < 100) {
+                v = v + 0.02
             }
-          }
         }
 
-        u = err_com * 0.008
-        mt.spw("C", v-u)
-        mt.spw("D", v+u)
-        mt.spw("B", -b_power)
+        t = time()
+        v = 40
+        k = 2
+        while (close == 4 or str3 > STR_MAX - 20) {    //attack
+            attack = 1
+            v = v + 0.3
 
-        if (time() - t > 1200 and time() - t < 1400) {
-          mt.spw("a", -100)
-        } else {
-          mt.spw("a", 50)
+            v_b = -err_com * k
+            if (k < 4) { 
+                k = k + 0.005
+            } else {
+                tone(100,100,1)
+            }
+
+            mt.spw("B", v_b)
+            mt.spw("C", v)
+            mt.spw("D", v)
+
+            if (time() - t > 1500 and time() - t < 1700) {
+                mt.spw("A", -100)
+            } else {
+                mt.spw("A", 50)
+            }
+        }
+        attack = 0
+
+        while (close == 5) {    //avoid ball
+            forward = 0
+            side = 100
+            tone(100,1000,1)
         }
     }
-    attack = 0
 
-    t_avoid = time()
-    while (close == 5 or time() - t_avoid < 500) {    //avoid ball
-        forward = 0
-        side = 100
-    }
+    while (mode == 0) {
+        led(1)
+        while (close == 1) {
+            forward = -100
+            side = 0
+        }
 
-    while (close == 6) {
-        tone(100, 1000, 100)
-        forward = -100
-        side = (dir - 5) * 100
+        while (close == 5) {
+            forward = 0
+            side = 0
+            tone(100,1000,100)
+        }
+
+        while (close > 1 and close < 5) {
+            forward = 0
+            side = 0
+        }
     }
 }
