@@ -241,7 +241,7 @@ base_length = 1;
 motor_koefficients = new.vector(3, 0);
 motor_koefficients[0] = 1;
 motor_koefficients[1] = 1.5;
-motor_koefficients[2] = 1.5;
+motor_koefficients[2] = -1.5;
 
 // define previous motor values for first odometry iteration
 
@@ -270,17 +270,17 @@ void odometry {
         motor_angles0 = new.vector(3, 0);
         motor_angles1 = new.vector(3, 0);
         motor_angles2 = new.vector(3, 0);
-        // first motor
+        
         motor_angles0[0] = -2 * sin(thetta) / 3;
-        motor_angles0[1] = -2 * sin(pi / 3 - thetta) / 3;
-        motor_angles0[2] = -2 * sin(pi / 3 + thetta) / 3;
-        // second motor
-        motor_angles1[0] = 2 * cos(thetta) / 3;
+        motor_angles1[0] = -2 * sin(pi / 3 - thetta) / 3;
+        motor_angles2[0] = -2 * sin(pi / 3 + thetta) / 3;
+        
+        motor_angles0[1] = 2 * cos(thetta) / 3;
         motor_angles1[1] = -2 * cos(pi / 3 - thetta) / 3;
-        motor_angles1[2] = -2 * cos(pi / 3 + thetta) / 3;
-        // third motor
-        motor_angles2[0] = 1 / 3 / base_length;
-        motor_angles2[1] = 1 / 3 / base_length;
+        motor_angles2[1] = -2 * cos(pi / 3 + thetta) / 3;
+        
+        motor_angles0[2] = 1 / 3 / base_length;
+        motor_angles1[2] = 1 / 3 / base_length;
         motor_angles2[2] = 1 / 3 / base_length;
 
         // read encoders
@@ -295,30 +295,20 @@ void odometry {
 
         encoders_delta = new.vector(3, 0);
         for (i = 0; i < 3; i = i + 1) {
-            encoders_delta[i] = encoders_current[i] - encoders_prev[i];
+            encoders_delta[i] = (encoders_current[i] - encoders_prev[i]) * motor_koefficients[i];
         }
 
         // now get the x and y vectors
 
         result_matrix = new.vector(3, 0);
 
-        current_val = 0;
-        for (j = 0; j < 3; j = j + 1) {
-            current_val = current_val + motor_angles0[j]*encoders_delta[j];
+        for (i = 0; i < 3; i = i + 1) {
+            current_line_value = 0;
+            current_line_value = current_line_value + motor_angles0[i]*encoders_delta[0]; 
+            current_line_value = current_line_value + motor_angles1[i]*encoders_delta[1]; 
+            current_line_value = current_line_value + motor_angles2[i]*encoders_delta[2]; 
+            result_matrix[i] = current_line_value;
         }
-        result_matrix[0] = current_val;
-
-        current_val = 0;
-        for (j = 0; j < 3; j = j + 1) {
-            current_val = current_val + motor_angles1[j]*encoders_delta[j];
-        }
-        result_matrix[1] = current_val;
-
-        current_val = 0;
-        for (j = 0; j < 3; j = j + 1) {
-            current_val = current_val + motor_angles2[j]*encoders_delta[j];
-        }
-        result_matrix[2] = current_val;
         
         x_res = x_res + result_matrix[0];
         y_res = y_res + result_matrix[1];
