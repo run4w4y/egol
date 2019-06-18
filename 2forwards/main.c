@@ -49,6 +49,8 @@ connect(who_aint_me);
 
 mailbox_biba = new.mailbox("mailbox_biba");
 mailbox_boba = new.mailbox("mailbox_boba");
+mailbox_biba_strmax = new.mailbox("mailbox_biba_strmax");
+mailbox_boba_strmax = new.mailbox("mailbox_boba_strmax");
 mailbox_mode = new.mailbox("mailbox_mode");
 
 // setting up bt end
@@ -265,19 +267,21 @@ void odometry {
 
         // define matrix with angles
 
-        motor_angles = new.vector(3, new.vector(3, 0));
+        motor_angles0 = new.vector(3, 0);
+        motor_angles1 = new.vector(3, 0);
+        motor_angles2 = new.vector(3, 0);
         // first motor
-        motor_angles[0][0] = -2 * sin(thetta) / 3;
-        motor_angles[0][1] = -2 * sin(pi / 3 - thetta) / 3;
-        motor_angles[0][2] = -2 * sin(pi / 3 + thetta) / 3;
+        motor_angles0[0] = -2 * sin(thetta) / 3;
+        motor_angles0[1] = -2 * sin(pi / 3 - thetta) / 3;
+        motor_angles0[2] = -2 * sin(pi / 3 + thetta) / 3;
         // second motor
-        motor_angles[1][0] = 2 * cos(thetta) / 3;
-        motor_angles[1][1] = -2 * cos(pi / 3 - thetta) / 3;
-        motor_angles[1][2] = -2 * cos(pi / 3 + thetta) / 3;
+        motor_angles1[0] = 2 * cos(thetta) / 3;
+        motor_angles1[1] = -2 * cos(pi / 3 - thetta) / 3;
+        motor_angles1[2] = -2 * cos(pi / 3 + thetta) / 3;
         // third motor
-        motor_angles[2][0] = 1 / 3 / base_length;
-        motor_angles[2][1] = 1 / 3 / base_length;
-        motor_angles[2][2] = 1 / 3 / base_length;
+        motor_angles2[0] = 1 / 3 / base_length;
+        motor_angles2[1] = 1 / 3 / base_length;
+        motor_angles2[2] = 1 / 3 / base_length;
 
         // read encoders
 
@@ -297,14 +301,25 @@ void odometry {
         // now get the x and y vectors
 
         result_matrix = new.vector(3, 0);
-        for (i = 0; i < 3; i = i + 1) {
-            current_val = 0;
-            for (j = 0; j < 3; j = j + 1) {
-                current_val = current_val + encoders_current[i][j]*encoders_delta[j];
-            }
-            result_matrix[i] = current_val;
-        }
 
+        current_val = 0;
+        for (j = 0; j < 3; j = j + 1) {
+            current_val = current_val + motor_angles0[j]*encoders_delta[j];
+        }
+        result_matrix[0] = current_val;
+
+        current_val = 0;
+        for (j = 0; j < 3; j = j + 1) {
+            current_val = current_val + motor_angles1[j]*encoders_delta[j];
+        }
+        result_matrix[1] = current_val;
+
+        current_val = 0;
+        for (j = 0; j < 3; j = j + 1) {
+            current_val = current_val + motor_angles2[j]*encoders_delta[j];
+        }
+        result_matrix[2] = current_val;
+        
         x_res = x_res + result_matrix[0];
         y_res = y_res + result_matrix[1];
 
@@ -325,6 +340,8 @@ void odometry {
 // bluetooth start
 
 void bt {
+    // do shit with strmax here
+
 	while (true) {
         str_res = irseeker_str(0);
         dir_res = irseeker_dir();
