@@ -10,7 +10,6 @@
 check.ports("ABCD 234")
 
 //  BT
-
 who_am_i = getname();
 
 if (who_am_i == "BOBA") {
@@ -19,18 +18,17 @@ if (who_am_i == "BOBA") {
 	who_aint_me = "BOBA";
 }
 
-connect(who_aint_me)
-check.connect(who_aint_me)
+connect(who_aint_me);
 
 mailbox_biba = new.mailbox("mailbox_biba");
 mailbox_boba = new.mailbox("mailbox_boba");
 mailbox_mode = new.mailbox("mailbox_mode");
 
-
 sen.setmode(3, 1)
 mt.stop("ABCD", "false")
 mt.spw("a", 50)
-//calibration
+
+//  calibration
 handle = open.r("cal.txt");
 
 COMPASS_ALPHA = tonum(readline(handle));
@@ -43,7 +41,7 @@ STR_VALUE_4 = tonum(readline(handle));
 
 closef(handle);
 
-//variables
+//  variables
 alpha = COMPASS_ALPHA
 forward = 0
 side = 0
@@ -51,6 +49,9 @@ v = 50
 f = 0
 s = 0
 close = 0 
+attack = 0
+mode = 1
+
 /*  
     close = 0 stop
     close = 1 ball is behind
@@ -61,11 +62,9 @@ close = 0
     close = 6 diagonal
 */
 
-//flags 
-attack = 0
-mode = 1
-//Subs
+//  voids
 
+//  sensors + closes
 void sensors {
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
@@ -96,29 +95,38 @@ void sensors {
 
         // FSM
 
-        if (dir == 5) {
-            close = 3
-            if (str3 > STR_MAX - 5) {
-                close = 4
-            }
-        } else {
-            if (abs(dir - 5) < 3 and strres > 30) {
-                close = 2
+        if (mode == 1) {
+            led(2)
+            if (dir == 5) {
+                close = 3
                 if (str3 > STR_MAX - 5) {
                     close = 4
                 }
             } else {
-                close = 1
-                if (l_b > BACK_LIGHT_VALUE) {
-                    close = 5
+                if (abs(dir - 5) < 3 and strres > 30) {
+                    close = 2
+                    if (str3 > STR_MAX - 5) {
+                        close = 4
+                    }
+                } else {
+                    close = 1
+                    if (l_b > BACK_LIGHT_VALUE) {
+                        close = 5
+                    }
                 }
             }
+        } else {
+            led(1)
+            if (abs(dir - 5) < 3 and (str4 > 30 or str2 > 30)) {
+                close = 0
+            } else {
+                close = 1
+            }
         }
-        printupd()
-        print("state", close)
     }
 }
 
+//  Motor manager
 void MM {
     while (true) {
         while (attack == 0) {
@@ -147,6 +155,7 @@ void MM {
     }
 }
 
+//  bluetooth
 void bt {
 	while (true) {
 		if (who_am_i == "BIBA") {
@@ -203,87 +212,72 @@ void bt {
 		}
 
 		// buttons will be here
+        printupd()
+        print("mode", mode)
 	}
 }
 
+//  threads
 new.thread = sensors
 new.thread = MM
 new.thread = bt
 
-//main
+//  main
 while (true) {
-    while (mode == 1) {
-        led(2)
-        mt.spw("A", 50)
+    mt.spw("A", 50)
+    while (close == 0) {
+        forward = 0
+        side = 0
+    }
 
-        while (close == 1) {    //ball is behind
-            forward = -100
-            side = 0
-        }
+    while (close == 1) {    //ball is behind
+        forward = -100
+        side = 0
+    }
 
-        while (close == 2) {    //ball is in side
-            forward = 0
-            side = (dir - 5) * 100
-        }
+    while (close == 2) {    //ball is in side
+        forward = 0
+        side = (dir - 5) * 100
+    }
 
-        v = 40
-        while (close == 3) {    //ball is in front
-            forward = v//STR_MAX - str3 + 40
-            side = 0
-            if (v < 100) {
-                v = v + 0.02
-            }
-        }
-
-        t = time()
-        v = 40
-        k = 2
-        while (close == 4 or str3 > STR_MAX - 20) {    //attack
-            attack = 1
-            v = v + 0.3
-
-            v_b = -err_com * k
-            if (k < 4) { 
-                k = k + 0.005
-            } else {
-                tone(100,100,1)
-            }
-
-            mt.spw("B", v_b)
-            mt.spw("C", v)
-            mt.spw("D", v)
-
-            if (time() - t > 1500 and time() - t < 1700) {
-                mt.spw("A", -100)
-            } else {
-                mt.spw("A", 50)
-            }
-        }
-        attack = 0
-
-        while (close == 5) {    //avoid ball
-            forward = 0
-            side = 100
-            tone(100,1000,1)
+    v = 40
+    while (close == 3) {    //ball is in front
+        forward = v//STR_MAX - str3 + 40
+        side = 0
+        if (v < 100) {
+            v = v + 0.5
         }
     }
 
-    while (mode == 0) {
-        led(1)
-        while (close == 1) {
-            forward = -100
-            side = 0
+    t = time()
+    v = 40
+    k = 2
+    while (close == 4 or str3 > STR_MAX - 20) {    //attack
+        attack = 1
+        v = v + 1
+
+        v_b = -err_com * k
+        if (k < 4) { 
+            k = k + 0.005
+        } else {
+            tone(100,100,1)
         }
 
-        while (close == 5) {
-            forward = 0
-            side = 0
-            tone(100,1000,100)
-        }
+        mt.spw("B", v_b)
+        mt.spw("C", v)
+        mt.spw("D", v)
 
-        while (close > 1 and close < 5) {
-            forward = 0
-            side = 0
+        if (time() - t > 1500 and time() - t < 1700) {  //kicker
+            mt.spw("A", -100)
+        } else {
+            mt.spw("A", 50)
         }
+    }
+    attack = 0
+
+    while (close == 5) {    //avoid ball
+        forward = 0
+        side = 100
+        tone(100,1000,1)
     }
 }
