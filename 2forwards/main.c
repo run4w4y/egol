@@ -227,9 +227,9 @@ func num irseeker_str(strnum) { // get seeker current str
 // first we state the motor ports
 
 motor_ports = new.vector(3, 0);
-motor_ports[0] = "B";
-motor_ports[1] = "D";
-motor_ports[2] = "C";
+motor_ports[0] = todec(PORT_FIRST_MOTOR);
+motor_ports[1] = todec(PORT_SECOND_MOTOR);
+motor_ports[2] = todec(PORT_THIRD_MOTOR);
 
 // then we define the thetta and robot base
 
@@ -287,7 +287,7 @@ void odometry {
 
         encoders_current = new.vector(3, 0);
         for (i = 0; i < 3; i = i + 1) {
-            motor_letter = motor_ports[i];
+            motor_letter = tohex(motor_ports[i]);
             encoders_current[i] = mt.getcount(motor_letter);
         }
 
