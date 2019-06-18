@@ -242,6 +242,7 @@ while (true) {
 				irseeker_array = i2c.readregs(PORT_SEEKER, 8, 73, 6);
 
 				strnow = irseeker_array[3];
+				
 				if (strnow > strmax) {
 					strmax = strnow;
 				}

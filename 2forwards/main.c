@@ -220,44 +220,107 @@ func num irseeker_str(strnum) { // get seeker current str
 
 // irseeker end
 
-// kinematics start 
+// odometry start -----------
 
-func num move(x1, y1) {
-    x_gl = -1.05*x1;
-    y_gl = 0.9*y1;
-    t_gl = compass_delta(compass());
-    r_base = pi;
-    kp_gl = KP_MOVE;
+// first we state the motor ports
 
-    thetta = 3*pi/2;
-    v1 = 1.5*(-x_gl + r_base*t_gl*kp_gl);
-    max_speed = abs(v1);
-    v2 = (sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl)*0.97;
-    if (abs(v2) > max_speed) {
-        max_speed = abs(v2);
+motor_ports = new.vector(3, 0);
+motor_ports[0] = "B";
+motor_ports[1] = "D";
+motor_ports[2] = "C";
+
+// then we define the thetta and robot base
+
+thetta_base = -3*pi/2;
+base_length = 1;
+
+// then we define motor koefficients
+
+motor_koefficients = new.vector(3, 0);
+motor_koefficients[0] = 1;
+motor_koefficients[1] = 1.5;
+motor_koefficients[2] = 1.5;
+
+// define previous motor values for first odometry iteration
+
+encoders_prev = new.vector(3, 0);
+
+// define how frequently we check new values for odometry
+
+odometry_frequency = 50;
+
+// define x_res and y_res variables 
+
+x_res = 0;
+y_res = 0;
+
+// main odometry thread
+
+void odometry {
+    while (true) {
+        // define current thetta
+
+        current_angle_delta = compass_delta(compass());
+        thetta = rad(current_angle_delta) + thetta_base;
+
+        // define matrix with angles
+
+        motor_angles = new.vector(3, new.vector(3, 0));
+        // first motor
+        motor_angles[0][0] = -2 * sin(thetta) / 3;
+        motor_angles[0][1] = -2 * sin(pi / 3 - thetta) / 3;
+        motor_angles[0][2] = -2 * sin(pi / 3 + thetta) / 3;
+        // second motor
+        motor_angles[1][0] = 2 * cos(thetta) / 3;
+        motor_angles[1][1] = -2 * cos(pi / 3 - thetta) / 3;
+        motor_angles[1][2] = -2 * cos(pi / 3 + thetta) / 3;
+        // third motor
+        motor_angles[2][0] = 1 / 3 / base_length;
+        motor_angles[2][1] = 1 / 3 / base_length;
+        motor_angles[2][2] = 1 / 3 / base_length;
+
+        // read encoders
+
+        encoders_current = new.vector(3, 0);
+        for (i = 0; i < 3; i = i + 1) {
+            motor_letter = motor_ports[i];
+            encoders_current[i] = mt.getcount(motor_letter);
+        }
+
+        // calculate encoders delta
+
+        encoders_delta = new.vector(3, 0);
+        for (i = 0; i < 3; i = i + 1) {
+            encoders_delta[i] = encoders_current[i] - encoders_prev[i];
+        }
+
+        // now get the x and y vectors
+
+        result_matrix = new.vector(3, 0);
+        for (i = 0; i < 3; i = i + 1) {
+            current_val = 0;
+            for (j = 0; j < 3; j = j + 1) {
+                current_val = current_val + encoders_current[i][j]*encoders_delta[j];
+            }
+            result_matrix[i] = current_val;
+        }
+
+        x_res = x_res + result_matrix[0];
+        y_res = y_res + result_matrix[1];
+
+        // save current encoder values for future
+
+        for (i = 0; i < 3; i = i + 1) {
+            encoders_prev[i] = encoders_current[i];
+        }
+
+        // wait for new encoder values
+
+        delay(odometry_frequency);
     }
-    v3 = sin(pi/3 + thetta)*x_gl + cos(pi/3 + thetta)*y_gl + r_base*t_gl*kp_gl;
-    if (abs(v3) > max_speed) {
-        max_speed = abs(v3);
-    }
-
-    if (max_speed > 115) {
-        v1 = v1 * 100 / max_speed;
-        v2 = v2 * 100 / max_speed;
-        v3 = v3 * 100 / max_speed;
-        tone(100, 100, 100);
-    }
-
-    mt.spw(PORT_FIRST_MOTOR, v1);
-    mt.spw(PORT_SECOND_MOTOR, v2);
-    mt.spw(PORT_THIRD_MOTOR, v3);
 }
 
-// kinematics end
-
-// odometry start
-
-// odometry end
+// odometry end ----------------
 
 // bluetooth start
 
