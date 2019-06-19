@@ -268,10 +268,9 @@ void odometry {
         // read encoders
 
         encoders_current = new.vector(3, 0);
-        for (i = 0; i < 3; i = i + 1) {
-            motor_letter = tohex(motor_ports[i]);
-            encoders_current[i] = mt.getcount(motor_letter);
-        }
+        encoders_current[0] = mt.getcount(PORT_FIRST_MOTOR);
+        encoders_current[1] = mt.getcount(PORT_SECOND_MOTOR);
+        encoders_current[2] = mt.getcount(PORT_THIRD_MOTOR);
 
         // calculate encoders delta
 
