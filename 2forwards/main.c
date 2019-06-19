@@ -265,24 +265,6 @@ void odometry {
         current_angle_delta = compass_delta(compass());
         thetta = rad(current_angle_delta) + thetta_base;
 
-        // define matrix with angles
-
-        motor_angles0 = new.vector(3, 0);
-        motor_angles1 = new.vector(3, 0);
-        motor_angles2 = new.vector(3, 0);
-        
-        motor_angles0[0] = -2 * sin(thetta) / 3;
-        motor_angles1[0] = -2 * sin(pi / 3 - thetta) / 3;
-        motor_angles2[0] = -2 * sin(pi / 3 + thetta) / 3;
-        
-        motor_angles0[1] = 2 * cos(thetta) / 3;
-        motor_angles1[1] = -2 * cos(pi / 3 - thetta) / 3;
-        motor_angles2[1] = -2 * cos(pi / 3 + thetta) / 3;
-        
-        motor_angles0[2] = 1 / 3 / base_length;
-        motor_angles1[2] = 1 / 3 / base_length;
-        motor_angles2[2] = 1 / 3 / base_length;
-
         // read encoders
 
         encoders_current = new.vector(3, 0);
@@ -300,18 +282,11 @@ void odometry {
 
         // now get the x and y vectors
 
-        result_matrix = new.vector(3, 0);
-
-        for (i = 0; i < 3; i = i + 1) {
-            current_line_value = 0;
-            current_line_value = current_line_value + motor_angles0[i]*encoders_delta[0]; 
-            current_line_value = current_line_value + motor_angles1[i]*encoders_delta[1]; 
-            current_line_value = current_line_value + motor_angles2[i]*encoders_delta[2]; 
-            result_matrix[i] = current_line_value;
-        }
+        x_delta = (-2 * sin(thetta) / 3) * encoders_delta[0] + (-2 * sin(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
+        y_delta = (2 * cos(thetta) / 3) * encoders_delta[0] + (-2 * cos(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
         
-        x_res = x_res + result_matrix[0];
-        y_res = y_res + result_matrix[1];
+        x_res = x_res + x_delta;
+        y_res = y_res + y_delta;
 
         // save current encoder values for future
 
