@@ -49,8 +49,6 @@ connect(who_aint_me);
 
 mailbox_biba = new.mailbox("mailbox_biba");
 mailbox_boba = new.mailbox("mailbox_boba");
-mailbox_biba_strmax = new.mailbox("mailbox_biba_strmax");
-mailbox_boba_strmax = new.mailbox("mailbox_boba_strmax");
 mailbox_mode = new.mailbox("mailbox_mode");
 
 // setting up bt end
@@ -304,19 +302,15 @@ void odometry {
 // bluetooth start
 
 void bt {
-    // do shit with strmax here
+    // scale str to 100
+
+    str_scaled = round(str_res * 100 / STR_MAX);
 
 	while (true) {
-        str_res = irseeker_str(0);
-        dir_res = irseeker_dir();
-        back_lt = light_back();
-
-        ///////////////////////////////////////////////////////////////////////
-
 		if (who_am_i == "BIBA") {
 			mybtstr = attack + "";
 		} else {
-			mybtstr = strres + " " + dir + " " + attack;
+			mybtstr = str_scaled + " " + dir + " " + attack;
 		}
 		
 		if (who_am_i == "BIBA") {
@@ -342,9 +336,9 @@ void bt {
 		//////////////////////////////////////////////////////////////////////
 		
 		if (who_am_i == "BIBA") {
-            if (abs(str_res - str_res2) < 30) {
+            if (abs(str_scaled - str_res2) < 30) {
                 if (abs(dir_res - 5) == abs(dir2 - 5)) {
-                    if (str_res > str_res2) {
+                    if (str_scaled > str_res2) {
                         mode = 1;
                     } else {
                         mode = 0;
@@ -357,7 +351,7 @@ void bt {
                     }
                 }
             } else {
-                if (str_res > str_res2) {
+                if (str_scaled > str_res2) {
                     mode = 1;
                 } else {
                     mode = 0;
@@ -367,13 +361,6 @@ void bt {
 		}
 		
 		////////////////////////////////////////////////////////////////////////
-		
-        printupd();
-        print("v1", v1);
-        print("v2", v2);
-        print("v3", v3);
-
-        ////////////////////////////////////////////////////////////////////////
 
 		// buttons will be here
 	}
