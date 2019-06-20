@@ -219,7 +219,22 @@ void bt {
 			bt.send(who_aint_me, "mailbox_mode", abs(mode-1));
 		}
 
-		// buttons will be here
+		// buttons
+
+        if (btn.rn == "E") {
+            if (mode != 3) {
+                prev_mode = mode; 
+                mode = 3;
+                mt.stop("B");
+                mt.stop("C");
+                mt.stop("D");
+                reset_odometry();
+                led(0);
+            } else {
+                mode = prev_mode;
+            }
+            delay(100);
+        }
 	}
 }
 
@@ -306,6 +321,14 @@ void odometry {
         print("x", x_res)
         print("y", y_res)
     }
+}
+
+func num reset_odometry() {
+    mt.resetcount("B");
+    mt.resetcount("C");
+    mt.resetcount("D");
+   x_res = 0;
+   y_res = 0;
 }
 
 // odometry end ----------------
