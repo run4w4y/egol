@@ -220,59 +220,97 @@ func num irseeker_str(strnum) { // get seeker current str
 
 // irseeker end
 
-// kinematics start 
+// odometry start -----------
 
-func num move(x1, y1) {
-    x_gl = -1.05*x1;
-    y_gl = 0.9*y1;
-    t_gl = compass_delta(compass());
-    r_base = pi;
-    kp_gl = KP_MOVE;
+// first we state the motor ports
 
-    thetta = 3*pi/2;
-    v1 = 1.5*(-x_gl + r_base*t_gl*kp_gl);
-    max_speed = abs(v1);
-    v2 = (sin(pi/3 - thetta)*x_gl - cos(pi/3 - thetta)*y_gl + r_base*t_gl*kp_gl)*0.97;
-    if (abs(v2) > max_speed) {
-        max_speed = abs(v2);
+motor_ports = new.vector(3, 0);
+motor_ports[0] = todec(PORT_FIRST_MOTOR);
+motor_ports[1] = todec(PORT_SECOND_MOTOR);
+motor_ports[2] = todec(PORT_THIRD_MOTOR);
+
+// then we define the thetta and robot base
+
+thetta_base = -3*pi/2;
+base_length = 1;
+
+// then we define motor koefficients
+
+motor_koefficients = new.vector(3, 0);
+motor_koefficients[0] = 1;
+motor_koefficients[1] = 1.5;
+motor_koefficients[2] = -1.5;
+
+// define previous motor values for first odometry iteration
+
+encoders_prev = new.vector(3, 0);
+
+// define how frequently we check new values for odometry
+
+odometry_frequency = 50;
+
+// define x_res and y_res variables 
+
+x_res = 0;
+y_res = 0;
+
+// main odometry thread
+
+void odometry {
+    while (true) {
+        // define current thetta
+
+        current_angle_delta = compass_delta(compass());
+        thetta = rad(current_angle_delta) + thetta_base;
+
+        // read encoders
+
+        encoders_current = new.vector(3, 0);
+        encoders_current[0] = mt.getcount(PORT_FIRST_MOTOR);
+        encoders_current[1] = mt.getcount(PORT_SECOND_MOTOR);
+        encoders_current[2] = mt.getcount(PORT_THIRD_MOTOR);
+
+        // calculate encoders delta
+
+        encoders_delta = new.vector(3, 0);
+        for (i = 0; i < 3; i = i + 1) {
+            encoders_delta[i] = (encoders_current[i] - encoders_prev[i]) * motor_koefficients[i];
+        }
+
+        // now get the x and y vectors
+
+        x_delta = (-2 * sin(thetta) / 3) * encoders_delta[0] + (-2 * sin(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
+        y_delta = (2 * cos(thetta) / 3) * encoders_delta[0] + (-2 * cos(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
+        
+        x_res = x_res + x_delta;
+        y_res = y_res + y_delta;
+
+        // save current encoder values for future
+
+        for (i = 0; i < 3; i = i + 1) {
+            encoders_prev[i] = encoders_current[i];
+        }
+
+        // wait for new encoder values
+
+        delay(odometry_frequency);
     }
-    v3 = sin(pi/3 + thetta)*x_gl + cos(pi/3 + thetta)*y_gl + r_base*t_gl*kp_gl;
-    if (abs(v3) > max_speed) {
-        max_speed = abs(v3);
-    }
-
-    if (max_speed > 115) {
-        v1 = v1 * 100 / max_speed;
-        v2 = v2 * 100 / max_speed;
-        v3 = v3 * 100 / max_speed;
-        tone(100, 100, 100);
-    }
-
-    mt.spw(PORT_FIRST_MOTOR, v1);
-    mt.spw(PORT_SECOND_MOTOR, v2);
-    mt.spw(PORT_THIRD_MOTOR, v3);
 }
 
-// kinematics end
-
-// odometry start
-
-// odometry end
+// odometry end ----------------
 
 // bluetooth start
 
 void bt {
+    // scale str to 100
+
+    str_scaled = round(str_res * 100 / STR_MAX);
+
 	while (true) {
-        str_res = irseeker_str(0);
-        dir_res = irseeker_dir();
-        back_lt = light_back();
-
-        ///////////////////////////////////////////////////////////////////////
-
 		if (who_am_i == "BIBA") {
 			mybtstr = attack + "";
 		} else {
-			mybtstr = strres + " " + dir + " " + attack;
+			mybtstr = str_scaled + " " + dir + " " + attack;
 		}
 		
 		if (who_am_i == "BIBA") {
@@ -298,9 +336,9 @@ void bt {
 		//////////////////////////////////////////////////////////////////////
 		
 		if (who_am_i == "BIBA") {
-            if (abs(str_res - str_res2) < 30) {
+            if (abs(str_scaled - str_res2) < 30) {
                 if (abs(dir_res - 5) == abs(dir2 - 5)) {
-                    if (str_res > str_res2) {
+                    if (str_scaled > str_res2) {
                         mode = 1;
                     } else {
                         mode = 0;
@@ -313,7 +351,7 @@ void bt {
                     }
                 }
             } else {
-                if (str_res > str_res2) {
+                if (str_scaled > str_res2) {
                     mode = 1;
                 } else {
                     mode = 0;
@@ -323,13 +361,6 @@ void bt {
 		}
 		
 		////////////////////////////////////////////////////////////////////////
-		
-        printupd();
-        print("v1", v1);
-        print("v2", v2);
-        print("v3", v3);
-
-        ////////////////////////////////////////////////////////////////////////
 
 		// buttons will be here
 	}

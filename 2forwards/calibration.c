@@ -23,8 +23,8 @@ values_len = 7;
 values = new.vector(values_len, 0);
 
 names[0] = "alpha";
-names[1] = "seek_div";
-names[2] = "kp_com";
+names[1] = "a_left"
+names[2] = "a_right"
 names[3] = "strmax";
 names[4] = "back_lt";
 names[5] = "str2";
@@ -33,9 +33,9 @@ names[6] = "str4";
 if (handle == 0) {
 	COMPASS_ALPHA = 0;
 	values[0] = COMPASS_ALPHA;
-	SEEKER_DIV = 100;
+	ALPHA_LEFT = 0;
 	values[1] = SEEKER_DIV;
-	KP_COM = 75;
+	ALPHA_RIGHT = 0;
 	values[2] = KP_COM;
 	STR_MAX = 0;
 	values[3] = STR_MAX;
@@ -48,10 +48,10 @@ if (handle == 0) {
 } else {
 	COMPASS_ALPHA = tonum(readline(handle));
 	values[0] = COMPASS_ALPHA;
-	SEEKER_DIV = tonum(readline(handle));
-	values[1] = SEEKER_DIV;
-	KP_COM = tonum(readline(handle));
-	values[2] = KP_COM;
+	ALPHA_LEFT = tonum(readline(handle));
+	values[1] = ALPHA_LEFT;
+	ALPHA_RIGHT = tonum(readline(handle));
+	values[2] = ALPHA_RIGHT;
 	STR_MAX = tonum(readline(handle));
 	values[3] = STR_MAX;
 	BACK_LIGHT_VALUE = tonum(readline(handle));
@@ -232,6 +232,18 @@ while (true) {
 			values[i] = compass;
 		}
 
+		if (i == 1) {
+			compass_array = i2c.readregs(PORT_COMPASS, 1, 66, 4);
+        	compass = compass_array[0] * 2 + compass_array[1];
+			values[i] = compass;
+		}
+
+		if (i == 2) {
+			compass_array = i2c.readregs(PORT_COMPASS, 1, 66, 4);
+        	compass = compass_array[0] * 2 + compass_array[1];
+			values[i] = compass;
+		}
+
 		if (i == 3) {
 			strmax = 0;
 			for (j = 0; j < 600; ++j) { // progress bar
@@ -242,6 +254,7 @@ while (true) {
 				irseeker_array = i2c.readregs(PORT_SEEKER, 8, 73, 6);
 
 				strnow = irseeker_array[3];
+				
 				if (strnow > strmax) {
 					strmax = strnow;
 				}
