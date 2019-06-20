@@ -232,6 +232,18 @@ while (true) {
 			values[i] = compass;
 		}
 
+		if (i == 1) {
+			compass_array = i2c.readregs(PORT_COMPASS, 1, 66, 4);
+        	compass = compass_array[0] * 2 + compass_array[1];
+			values[i] = compass;
+		}
+
+		if (i == 2) {
+			compass_array = i2c.readregs(PORT_COMPASS, 1, 66, 4);
+        	compass = compass_array[0] * 2 + compass_array[1];
+			values[i] = compass;
+		}
+
 		if (i == 3) {
 			strmax = 0;
 			for (j = 0; j < 600; ++j) { // progress bar
