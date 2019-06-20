@@ -1,7 +1,7 @@
 /*TODO:
     +1. attack
     +2. modes
-    +3. odometry
+    3. odometry
     4. attack angles
     5. starts 
 */
@@ -13,10 +13,8 @@ who_am_i = getname();
 
 if (who_am_i == "BOBA") {
 	who_aint_me = "BIBA";
-    mode = 1
 } else {
 	who_aint_me = "BOBA";
-    mode = 0
 }
 
 connect(who_aint_me);
@@ -28,13 +26,13 @@ mailbox_mode = new.mailbox("mailbox_mode");
 sen.setmode(3, 1)
 mt.stop("ABCD", "false")
 mt.spw("a", 50)
-mt.resetcount("ABCD")
+
 //  calibration
 handle = open.r("cal.txt");
 
 COMPASS_ALPHA = tonum(readline(handle));
-ALPHA_LEFT = tonum(readline(handle));
-ALPHA_RIGHT = tonum(readline(handle));
+SEEKER_DIV = tonum(readline(handle)) / 100;
+KP_MOVE = tonum(readline(handle))/100;
 STR_MAX = tonum(readline(handle));
 BACK_LIGHT_VALUE = tonum(readline(handle));
 STR_VALUE_2 = tonum(readline(handle));
@@ -54,9 +52,8 @@ f = 0
 s = 0
 close = 0 
 attack = 0
-attack2 = 0
-x_res = 0
-y_res = 0
+mode = 1
+
 /*  
     close = 0 stop
     close = 1 ball is behind
@@ -64,7 +61,7 @@ y_res = 0
     close = 3 ball is in front
     close = 4 attack
     close = 5 avoid ball
-    close = 6 go to middle(odometry)
+    close = 6 diagonal
 */
 
 //  voids
@@ -121,12 +118,8 @@ void sensors {
             }
         } else {
             led(1)
-            if ((abs(dir - 5) < 3 and strres > 30) or attack2 == 1) {
-                if (abs(x_res) > 50) {
-                    close = 6
-                } else {
-                    close = 0
-                }
+            if (abs(dir - 5) < 3 and (str4 > 30 or str2 > 30)) {
+                close = 0
             } else {
                 close = 1
                 if (l_b > BACK_LIGHT_VALUE) {
@@ -138,89 +131,32 @@ void sensors {
 }
 
 //  Motor manager
-func num move(forward, side) {
-    if (abs(forward) > 100) {
-        f = 100 * forward / abs(forward)
-    } else {
-        f = forward
-    }
-
-    if (abs(side) > 100) {
-        s = 100 * side / abs(side)
-    } else {
-        s = side
-    }
-    
-    v_b = 1.2*(-0.67*s)
-    v_c = 0.58*f + 0.33*s 
-    v_d = 0.58*f - 0.33*s
-
-    k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-
-    mt.spw("B", v_b*k_m-err_com*1.5)
-    mt.spw("C", v_c*k_m-err_com*0.8)
-    mt.spw("D", v_d*k_m+err_com*0.8)
-}
-
-//  bluetooth
-void bt {
-    str_scaled = round(strres * 100 / STR_MAX);
-	while (true) {
-		if (who_am_i == "BIBA") {
-			mybtstr = attack + "";
-		} else {
-			mybtstr = str_scaled + " " + dir + " " + attack;
-		}
-		
-		if (who_am_i == "BIBA") {
-			bt.send(who_aint_me, "mailbox_biba", mybtstr);
-
-			btstr2 = bt.last(mailbox_boba);
-			res = parse(4, btstr2);
-
-			str_res2 = res[0];
-			dir2 = res[1];
-			attack2 = res[2];
-		} else {
-			bt.send(who_aint_me, "mailbox_boba", mybtstr);
-
-			btstr2 = bt.last(mailbox_biba);
-			res = parse(2, btstr2);
-
-			attack2 = res[0];
-
-			mode = tonum(bt.last(mailbox_mode));
-		}
-		
-		//////////////////////////////////////////////////////////////////////
-		
-		if (who_am_i == "BIBA") {
-            if (abs(str_scaled - str_res2) < 30) {
-                if (abs(dir - 5) == abs(dir2 - 5)) {
-                    if (str_scaled > str_res2) {
-                        mode = 1;
-                    } else {
-                        mode = 0;
-                    }
-                } else {
-                    if (abs(dir - 5) > abs(dir2 - 5)) {
-                        mode = 0;
-                    } else {
-                        mode = 1;
-                    }
-                }
+void MM {
+    while (true) {
+        while (attack == 0) {
+            if (abs(forward) > 100) {
+                f = 100 * forward / abs(forward)
             } else {
-                if (str_scaled > str_res2) {
-                    mode = 1;
-                } else {
-                    mode = 0;
-                }
+                f = forward
             }
-			bt.send(who_aint_me, "mailbox_mode", abs(mode-1));
-		}
 
-		// buttons will be here
-	}
+            if (abs(side) > 100) {
+                s = 100 * side / abs(side)
+            } else {
+                s = side
+            }
+            
+            v_b = 1.2*(-0.67*s)
+            v_c = 0.58*f + 0.33*s 
+            v_d = 0.58*f - 0.33*s
+
+            k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
+
+            mt.spw("B", v_b*k_m-err_com*1.5)
+            mt.spw("C", v_c*k_m-err_com*0.8)
+            mt.spw("D", v_d*k_m+err_com*0.8)
+        }
+    }
 }
 
 // odometry start -----------
@@ -252,6 +188,11 @@ encoders_prev = new.vector(3, 0);
 
 odometry_frequency = 50;
 
+// define x_res and y_res variables 
+
+x_res = 0;
+y_res = 0;
+
 // main odometry thread
 
 void odometry {
@@ -281,8 +222,8 @@ void odometry {
         x_delta = (-2 * sin(thetta) / 3) * encoders_delta[0] + (-2 * sin(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
         y_delta = (2 * cos(thetta) / 3) * encoders_delta[0] + (-2 * cos(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
 
-        x_res = (x_res + x_delta);
-        y_res = (y_res + y_delta);
+        x_res = x_res + x_delta;
+        y_res = y_res + y_delta;
 
         // save current encoder values for future
 
@@ -291,9 +232,8 @@ void odometry {
         }
 
         // wait for new encoder values
-
         delay(odometry_frequency);
-        
+
         if (x_res > 1100) {
             x = 1100
         } else {
@@ -301,85 +241,20 @@ void odometry {
                 x = -1100
             }
         }
-
-        printupd()
-        print("x", x_res)
-        print("y", y_res)
+        
     }
 }
 
 // odometry end ----------------
 
-//  threads
+// odometry end ----------------
+
+
 new.thread = sensors
-new.thread = bt
 new.thread = odometry
 
-//  main
 while (true) {
-    mt.spw("A", 50)
-    while (close == 0) {
-        move(0, 0)
-    }
-
-    while (close == 1) {    //ball is behind
-        move(-100, 0)
-    }
-
-    while (close == 2) {    //ball is in side
-        move(0, (dir - 5) * 100)
-    }
-
-    v = 40
-    while (close == 3) {    //ball is in front
-        move(v, 0)
-        if (v < 100) {
-            v = v + 1
-        }
-    }
-
-    t = time()
-    v = 40
-    k = 2
-    while (close == 4 or str3 > STR_MAX - 20) {    //attack
-        attack = 1
-        v = v + 1
-
-        if (x_res > 500) {
-            alpha_att = rm(compass - ALPHA_RIGHT + 900, 360) - 180
-        } else {
-            if (x_res < -500) {
-                alpha_att = rm(compass - ALPHA_LEFT + 900, 360) - 180
-            } else {
-                alpha_att = err_com
-            }
-        }
-
-        v_b = -alpha_att * k    
-        if (k < 4) { 
-            k = k + 0.005
-        } else {
-            tone(100,100,1)
-        }
-
-        mt.spw("B", v_b)
-        mt.spw("C", v)
-        mt.spw("D", v)
-
-        if (time() - t > 1300 and time() - t < 1500) {  //kicker
-            mt.spw("A", -100)
-        } else {
-            mt.spw("A", 50)
-        }
-    }
-    attack = 0
-
-    while (close == 5) {    //avoid ball
-        move(0, 100)
-        tone(100,1000,1)
-    }
-
-    while (close == 6) {
-        move(0, -x_res * 2)
-    }
+    printupd()
+    print("x", x_res)
+    print("y", y_res)
 }
