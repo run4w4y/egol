@@ -258,6 +258,7 @@ void bt {
             }
             reset_odometry();
             mode = prev_mode;
+            btn.wait.release();
         }
 
         bt_iteration = bt_iteration + 1;
@@ -347,6 +348,8 @@ void odometry {
         printupd()
         print("x", x_res)
         print("y", y_res)
+        print("mode", mode)
+        print("close", close)
     }
 }
 
