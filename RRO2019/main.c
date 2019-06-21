@@ -24,6 +24,7 @@ connect(who_aint_me);
 mailbox_biba = new.mailbox("mailbox_biba");
 mailbox_boba = new.mailbox("mailbox_boba");
 mailbox_mode = new.mailbox("mailbox_mode");
+connection_status = 1;
 
 sen.setmode(3, 1)
 mt.stop("ABCD", "false")
@@ -57,6 +58,7 @@ attack = 0
 attack2 = 0
 x_res = 0
 y_res = 0
+time_odometry = time()
 /*  
     close = 0 stop
     close = 1 ball is behind
@@ -120,18 +122,23 @@ void sensors {
                 }
             }
         } else {
-            led(1)
-            if ((abs(dir - 5) < 3 and strres > 30) or attack2 == 1) {
-                if (abs(x_res) > 50) {
-                    close = 6
+            if (mode == 0) {
+                led(1)
+                if ((abs(dir - 5) < 3 and strres > 30) or attack2 == 1) {
+                    if (abs(x_res) > 50) {
+                        close = 6
+                    } else {
+                        close = 0
+                    }
                 } else {
-                    close = 0
+                    close = 1
+                    if (l_b > BACK_LIGHT_VALUE) {
+                        close = 5
+                    }
                 }
             } else {
-                close = 1
-                if (l_b > BACK_LIGHT_VALUE) {
-                    close = 5
-                }
+                led(0);
+                close = 7;
             }
         }
     }
@@ -160,67 +167,6 @@ func num move(forward, side) {
     mt.spw("B", v_b*k_m-err_com*1.5)
     mt.spw("C", v_c*k_m-err_com*0.8)
     mt.spw("D", v_d*k_m+err_com*0.8)
-}
-
-//  bluetooth
-void bt {
-    str_scaled = round(strres * 100 / STR_MAX);
-	while (true) {
-		if (who_am_i == "BIBA") {
-			mybtstr = attack + "";
-		} else {
-			mybtstr = str_scaled + " " + dir + " " + attack;
-		}
-		
-		if (who_am_i == "BIBA") {
-			bt.send(who_aint_me, "mailbox_biba", mybtstr);
-
-			btstr2 = bt.last(mailbox_boba);
-			res = parse(4, btstr2);
-
-			str_res2 = res[0];
-			dir2 = res[1];
-			attack2 = res[2];
-		} else {
-			bt.send(who_aint_me, "mailbox_boba", mybtstr);
-
-			btstr2 = bt.last(mailbox_biba);
-			res = parse(2, btstr2);
-
-			attack2 = res[0];
-
-			mode = tonum(bt.last(mailbox_mode));
-		}
-		
-		//////////////////////////////////////////////////////////////////////
-		
-		if (who_am_i == "BIBA") {
-            if (abs(str_scaled - str_res2) < 30) {
-                if (abs(dir - 5) == abs(dir2 - 5)) {
-                    if (str_scaled > str_res2) {
-                        mode = 1;
-                    } else {
-                        mode = 0;
-                    }
-                } else {
-                    if (abs(dir - 5) > abs(dir2 - 5)) {
-                        mode = 0;
-                    } else {
-                        mode = 1;
-                    }
-                }
-            } else {
-                if (str_scaled > str_res2) {
-                    mode = 1;
-                } else {
-                    mode = 0;
-                }
-            }
-			bt.send(who_aint_me, "mailbox_mode", abs(mode-1));
-		}
-
-		// buttons will be here
-	}
 }
 
 // odometry start -----------
@@ -305,10 +251,126 @@ void odometry {
         printupd()
         print("x", x_res)
         print("y", y_res)
+        print("mode", mode)
+        print("close", close)
+    }
+}
+
+func num reset_odometry() {
+    mt.resetcount("B");
+    mt.resetcount("C");
+    mt.resetcount("D");
+    x_res = 0;
+    y_res = 0;
+    time_odometry = time()
+
+    for (i = 0; i < 3; i = i + 1) {
+        encoders_prev[i] = 0;
     }
 }
 
 // odometry end ----------------
+
+//  bluetooth
+void bt {
+    str_scaled = round(strres * 100 / STR_MAX);
+    bt_iteration = 0;
+    bt_iteration2 = -1;
+    bt_loss_count = 0;
+	while (true) {
+		if (who_am_i == "BIBA") {
+			mybtstr = attack + " " + bt_iteration;
+		} else {
+			mybtstr = str_scaled + " " + dir + " " + attack + " " + bt_iteration;
+		}
+		
+		if (who_am_i == "BIBA") {
+			bt.send(who_aint_me, "mailbox_biba", mybtstr);
+
+			btstr2 = bt.last(mailbox_boba);
+			res = parse(4, btstr2);
+
+			str_res2 = res[0];
+			dir2 = res[1];
+			attack2 = res[2];
+            prev_bt2 = bt_iteration2;
+            bt_iteration2 = res[3];
+		} else {
+			bt.send(who_aint_me, "mailbox_boba", mybtstr);
+
+			btstr2 = bt.last(mailbox_biba);
+			res = parse(2, btstr2);
+
+			attack2 = res[0];
+            prev_bt2 = bt_iteration2;
+            bt_iteration2 = res[1];
+
+			mode = tonum(bt.last(mailbox_mode));
+		}
+        
+        if (bt_iteration2 == prev_bt2) {
+            if (bt_loss_count < 50) {
+                bt_loss_count = bt_loss_count + 1;
+            } else {
+                connection_status = 0;
+            }
+        } else {
+            bt_loss_count = 0;
+            connection_status = 1;
+        }
+
+        if (connection_status == 0) {
+            tone(100, 100, 100);
+            mode = 1;
+        }
+		
+		//////////////////////////////////////////////////////////////////////
+		
+		if (who_am_i == "BIBA") {
+            if (abs(str_scaled - str_res2) < 30) {
+                if (abs(dir - 5) == abs(dir2 - 5)) {
+                    if (str_scaled > str_res2) {
+                        mode = 1;
+                    } else {
+                        mode = 0;
+                    }
+                } else {
+                    if (abs(dir - 5) > abs(dir2 - 5)) {
+                        mode = 0;
+                    } else {
+                        mode = 1;
+                    }
+                }
+            } else {
+                if (str_scaled > str_res2) {
+                    mode = 1;
+                } else {
+                    mode = 0;
+                }
+            }
+			bt.send(who_aint_me, "mailbox_mode", abs(mode-1));
+		}
+
+		// buttons
+
+        // if (btn.rn == "E") {
+        //     prev_mode = mode; 
+        //     mode = 3;
+        //     btn.wait.release();
+        //     while (btn.rn != "E") {
+        //         thread.yield(); // do nothing
+        //     }
+        //     reset_odometry();
+        //     mode = prev_mode;
+        //     btn.wait.release();
+        // }
+
+        bt_iteration = bt_iteration + 1;
+        bt_iteration = rm(bt_iteration, 100);
+	}
+}
+
+btn.wait.release();
 
 //  threads
 new.thread = sensors
@@ -345,10 +407,10 @@ while (true) {
         attack = 1
         v = v + 1
 
-        if (x_res > 500) {
+        if (x_res > 500 and time() - time_odometry < 10000) {
             alpha_att = rm(compass - ALPHA_RIGHT + 900, 360) - 180
         } else {
-            if (x_res < -500) {
+            if (x_res < -500 and time() - time_odometry < 10000) {
                 alpha_att = rm(compass - ALPHA_LEFT + 900, 360) - 180
             } else {
                 alpha_att = err_com
@@ -357,7 +419,7 @@ while (true) {
 
         v_b = -alpha_att * k    
         if (k < 4) { 
-            k = k + 0.005
+            k = k + 0.002
         } else {
             tone(100,100,1)
         }
@@ -366,7 +428,7 @@ while (true) {
         mt.spw("C", v)
         mt.spw("D", v)
 
-        if (time() - t > 1300 and time() - t < 1500) {  //kicker
+        if (time() - t > 1100 and time() - t < 1300) {  //kicker
             mt.spw("A", -100)
         } else {
             mt.spw("A", 50)
@@ -381,5 +443,12 @@ while (true) {
 
     while (close == 6) {
         move(0, -x_res * 2)
+    }
+
+    while (close == 7) {
+        mt.spw("B", 0);
+        mt.spw("C", 0);
+        mt.spw("D", 0);
+        thread.yield(); // do nothing
     }
 }
