@@ -1,4 +1,3 @@
-Егорка, [21.06.19 23:33]
 /*TODO:
     +1. attack
     +2. modes
@@ -174,9 +173,6 @@ func num move(forward, side) {
 
 // first we state the motor ports
 
-Егорка, [21.06.19 23:33]
-
-
 motor_ports = new.vector(3, 0);
 motor_ports[0] = todec(tohex(tonum("B") + 9));
 motor_ports[1] = todec(tohex(tonum("D") + 9));
@@ -281,37 +277,37 @@ void bt {
     bt_iteration = 0;
     bt_iteration2 = -1;
     bt_loss_count = 0;
-  while (true) {
-    if (who_am_i == "BIBA") {
-      mybtstr = attack + " " + bt_iteration;
-    } else {
-      mybtstr = str_scaled + " " + dir + " " + attack + " " + bt_iteration;
-    }
-    
-    if (who_am_i == "BIBA") {
-      bt.send(who_aint_me, "mailbox_biba", mybtstr);
-
-      btstr2 = bt.last(mailbox_boba);
-      res = parse(4, btstr2);
-
-      str_res2 = res[0];
-      dir2 = res[1];
-      attack2 = res[2];
-            prev_bt2 = bt_iteration2;
-            bt_iteration2 = res[3];
-    } else {
-      bt.send(who_aint_me, "mailbox_boba", mybtstr);
-
-      btstr2 = bt.last(mailbox_biba);
-      res = parse(2, btstr2);
-
-      attack2 = res[0];
-            prev_bt2 = bt_iteration2;
-            bt_iteration2 = res[1];
-
-      mode = tonum(bt.last(mailbox_mode));
-    }
+    while (true) {
+        if (who_am_i == "BIBA") {
+        mybtstr = attack + " " + bt_iteration;
+        } else {
+        mybtstr = str_scaled + " " + dir + " " + attack + " " + bt_iteration;
+        }
         
+        if (who_am_i == "BIBA") {
+        bt.send(who_aint_me, "mailbox_biba", mybtstr);
+
+        btstr2 = bt.last(mailbox_boba);
+        res = parse(4, btstr2);
+
+        str_res2 = res[0];
+        dir2 = res[1];
+        attack2 = res[2];
+                prev_bt2 = bt_iteration2;
+                bt_iteration2 = res[3];
+        } else {
+        bt.send(who_aint_me, "mailbox_boba", mybtstr);
+
+        btstr2 = bt.last(mailbox_biba);
+        res = parse(2, btstr2);
+
+        attack2 = res[0];
+                prev_bt2 = bt_iteration2;
+                bt_iteration2 = res[1];
+
+        mode = tonum(bt.last(mailbox_mode));
+        }
+            
         if (bt_iteration2 == prev_bt2) {
             if (bt_loss_count < 50) {
                 bt_loss_count = bt_loss_count + 1;
@@ -323,17 +319,14 @@ void bt {
             connection_status = 1;
         }
 
-Егорка, [21.06.19 23:33]
-
-
         if (connection_status == 0) {
             tone(100, 100, 100);
             mode = 1;
         }
-    
-    //////////////////////////////////////////////////////////////////////
-    
-    if (who_am_i == "BIBA") {
+        
+        //////////////////////////////////////////////////////////////////////
+        
+        if (who_am_i == "BIBA") {
             if (abs(str_scaled - str_res2) < 30) {
                 if (abs(dir - 5) == abs(dir2 - 5)) {
                     if (str_scaled > str_res2) {
@@ -355,31 +348,48 @@ void bt {
                     mode = 0;
                 }
             }
-      bt.send(who_aint_me, "mailbox_mode", abs(mode-1));
-    }
+            bt.send(who_aint_me, "mailbox_mode", abs(mode-1));
+        }
 
-    // buttons
-
-        // if (btn.rn == "E") {
-        //     prev_mode = mode; 
-        //     mode = 3;
-        //     btn.wait.release();
-        //     while (btn.rn != "E") {
-        //         thread.yield(); // do nothing
-        //     }
-        //     reset_odometry();
-        //     mode = prev_mode;
-        //     btn.wait.release();
-        // }
+        while (stop_modes == 1) {
+            mode = 3;
+            thread.yield();
+        }
 
         bt_iteration = bt_iteration + 1;
         bt_iteration = rm(bt_iteration, 100);
-  }
+    }
+}
+
+// buttons
+void buttons_thread {
+    stop_modes = 0;
+    while (true) {
+        if (btn.rn == "E") {
+            stop_modes = 1;
+            prev_mode = mode; 
+            mode = 3;
+            btn.wait.release();
+            while (btn.rn != "E") {
+                thread.yield(); // do nothing
+            }
+            stop_modes = 0;
+            reset_odometry();
+            mode = prev_mode;
+            btn.wait.release();
+        }
+
+        time_buttons = time();
+        while (time() - time_buttons < 50) {
+            thread.yield();
+        }
+    }
 }
 
 btn.wait.release();
 
 //  threads
+new.thread = buttons_thread
 new.thread = sensors
 new.thread = bt
 new.thread = odometry
