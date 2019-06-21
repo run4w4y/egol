@@ -24,6 +24,7 @@ connect(who_aint_me);
 mailbox_biba = new.mailbox("mailbox_biba");
 mailbox_boba = new.mailbox("mailbox_boba");
 mailbox_mode = new.mailbox("mailbox_mode");
+connection_status = 1;
 
 sen.setmode(3, 1)
 mt.stop("ABCD", "false")
@@ -170,11 +171,14 @@ func num move(forward, side) {
 //  bluetooth
 void bt {
     str_scaled = round(strres * 100 / STR_MAX);
+    bt_iteration = 0;
+    bt_iteration2 = -1;
+    bt_loss_count = 0;
 	while (true) {
 		if (who_am_i == "BIBA") {
-			mybtstr = attack + "";
+			mybtstr = attack + " " + bt_iteration;
 		} else {
-			mybtstr = str_scaled + " " + dir + " " + attack;
+			mybtstr = str_scaled + " " + dir + " " + attack + " " + bt_iteration;
 		}
 		
 		if (who_am_i == "BIBA") {
@@ -186,6 +190,8 @@ void bt {
 			str_res2 = res[0];
 			dir2 = res[1];
 			attack2 = res[2];
+            prev_bt2 = bt_iteration2;
+            bt_iteration2 = res[3];
 		} else {
 			bt.send(who_aint_me, "mailbox_boba", mybtstr);
 
@@ -193,9 +199,26 @@ void bt {
 			res = parse(2, btstr2);
 
 			attack2 = res[0];
+            prev_bt2 = bt_iteration2;
+            bt_iteration2 = res[1];
 
 			mode = tonum(bt.last(mailbox_mode));
 		}
+        
+        if (bt_iteration2 == prev_bt2) {
+            if (bt_loss_count < 10) {
+                bt_loss_count = bt_loss_count + 1;
+            } else {
+                connection_status = 0;
+            }
+        } else {
+            bt_loss_count = 0;
+            connection_status = 1;
+        }
+
+        if (connection_status == 0) {
+            mode = 1;
+        }
 		
 		//////////////////////////////////////////////////////////////////////
 		
@@ -236,6 +259,9 @@ void bt {
             reset_odometry();
             mode = prev_mode;
         }
+
+        bt_iteration = bt_iteration + 1;
+        bt_iteration = rm(bt_iteration, 100);
 	}
 }
 
