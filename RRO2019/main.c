@@ -168,6 +168,106 @@ func num move(forward, side) {
     mt.spw("D", v_d*k_m+err_com*0.8)
 }
 
+// odometry start -----------
+
+// first we state the motor ports
+
+motor_ports = new.vector(3, 0);
+motor_ports[0] = todec(tohex(tonum("B") + 9));
+motor_ports[1] = todec(tohex(tonum("D") + 9));
+motor_ports[2] = todec(tohex(tonum("C") + 9));
+
+// then we define the thetta and robot base
+
+thetta_base = -3*pi/2;
+base_length = 1;
+
+// then we define motor koefficients
+
+motor_koefficients = new.vector(3, 0);
+motor_koefficients[0] = 1;
+motor_koefficients[1] = -1.5;
+motor_koefficients[2] = 1.5;
+
+// define previous motor values for first odometry iteration
+
+encoders_prev = new.vector(3, 0);
+
+// define how frequently we check new values for odometry
+
+odometry_frequency = 50;
+
+// main odometry thread
+
+void odometry {
+    while (true) {
+        // define current thetta
+
+        current_angle_delta = err_com;
+        thetta = rad(current_angle_delta) + thetta_base;
+
+        // read encoders
+
+        encoders_current = new.vector(3, 0);
+
+        encoders_current[0] = mt.getcount(PORT_FIRST_MOTOR);
+        encoders_current[1] = mt.getcount(PORT_SECOND_MOTOR);
+        encoders_current[2] = mt.getcount(PORT_THIRD_MOTOR);
+
+        // calculate encoders delta
+
+        encoders_delta = new.vector(3, 0);
+        for (i = 0; i < 3; i = i + 1) {
+            encoders_delta[i] = (encoders_current[i] - encoders_prev[i]) * motor_koefficients[i];
+        }
+
+        // now get the x and y vectors
+
+        x_delta = (-2 * sin(thetta) / 3) * encoders_delta[0] + (-2 * sin(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
+        y_delta = (2 * cos(thetta) / 3) * encoders_delta[0] + (-2 * cos(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
+
+        x_res = (x_res + x_delta);
+        y_res = (y_res + y_delta);
+
+        // save current encoder values for future
+
+        for (i = 0; i < 3; i = i + 1) {
+            encoders_prev[i] = encoders_current[i];
+        }
+
+        // wait for new encoder values
+
+        delay(odometry_frequency);
+        
+        if (x_res > 1100) {
+            x = 1100
+        } else {
+            if (x_res < -1100) {
+                x = -1100
+            }
+        }
+
+        printupd()
+        print("x", x_res)
+        print("y", y_res)in
+        print("mode", mode)
+        print("close", close)
+    }
+}
+
+func num reset_odometry() {
+    mt.resetcount("B");
+    mt.resetcount("C");
+    mt.resetcount("D");
+    x_res = 0;
+    y_res = 0;
+    for (i = 0; i < 3; i = i + 1) {
+        encoders_prev[i] = 0;
+    }
+}
+
+// odometry end ----------------
+
 //  bluetooth
 void bt {
     str_scaled = round(strres * 100 / STR_MAX);
@@ -266,103 +366,6 @@ void bt {
 	}
 }
 
-// odometry start -----------
-
-// first we state the motor ports
-
-motor_ports = new.vector(3, 0);
-motor_ports[0] = todec(tohex(tonum("B") + 9));
-motor_ports[1] = todec(tohex(tonum("D") + 9));
-motor_ports[2] = todec(tohex(tonum("C") + 9));
-
-// then we define the thetta and robot base
-
-thetta_base = -3*pi/2;
-base_length = 1;
-
-// then we define motor koefficients
-
-motor_koefficients = new.vector(3, 0);
-motor_koefficients[0] = 1;
-motor_koefficients[1] = -1.5;
-motor_koefficients[2] = 1.5;
-
-// define previous motor values for first odometry iteration
-
-encoders_prev = new.vector(3, 0);
-
-// define how frequently we check new values for odometry
-
-odometry_frequency = 50;
-
-// main odometry thread
-
-void odometry {
-    while (true) {
-        // define current thetta
-
-        current_angle_delta = err_com;
-        thetta = rad(current_angle_delta) + thetta_base;
-
-        // read encoders
-
-        encoders_current = new.vector(3, 0);
-
-        encoders_current[0] = mt.getcount(PORT_FIRST_MOTOR);
-        encoders_current[1] = mt.getcount(PORT_SECOND_MOTOR);
-        encoders_current[2] = mt.getcount(PORT_THIRD_MOTOR);
-
-        // calculate encoders delta
-
-        encoders_delta = new.vector(3, 0);
-        for (i = 0; i < 3; i = i + 1) {
-            encoders_delta[i] = (encoders_current[i] - encoders_prev[i]) * motor_koefficients[i];
-        }
-
-        // now get the x and y vectors
-
-        x_delta = (-2 * sin(thetta) / 3) * encoders_delta[0] + (-2 * sin(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
-        y_delta = (2 * cos(thetta) / 3) * encoders_delta[0] + (-2 * cos(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
-
-        x_res = (x_res + x_delta);
-        y_res = (y_res + y_delta);
-
-        // save current encoder values for future
-
-        for (i = 0; i < 3; i = i + 1) {
-            encoders_prev[i] = encoders_current[i];
-        }
-
-        // wait for new encoder values
-
-        delay(odometry_frequency);
-        
-        if (x_res > 1100) {
-            x = 1100
-        } else {
-            if (x_res < -1100) {
-                x = -1100
-            }
-        }
-
-        printupd()
-        print("x", x_res)
-        print("y", y_res)
-        print("mode", mode)
-        print("close", close)
-    }
-}
-
-func num reset_odometry() {
-    mt.resetcount("B");
-    mt.resetcount("C");
-    mt.resetcount("D");
-   x_res = 0;
-   y_res = 0;
-}
-
-// odometry end ----------------
-
 //  threads
 new.thread = sensors
 new.thread = bt
@@ -437,6 +440,9 @@ while (true) {
     }
 
     while (close == 7) {
+        mt.spw("B", 0);
+        mt.spw("C", 0);
+        mt.spw("D", 0);
         thread.yield(); // do nothing
     }
 }
