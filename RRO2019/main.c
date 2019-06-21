@@ -120,18 +120,23 @@ void sensors {
                 }
             }
         } else {
-            led(1)
-            if ((abs(dir - 5) < 3 and strres > 30) or attack2 == 1) {
-                if (abs(x_res) > 50) {
-                    close = 6
+            if (mode == 2) {
+                led(1)
+                if ((abs(dir - 5) < 3 and strres > 30) or attack2 == 1) {
+                    if (abs(x_res) > 50) {
+                        close = 6
+                    } else {
+                        close = 0
+                    }
                 } else {
-                    close = 0
+                    close = 1
+                    if (l_b > BACK_LIGHT_VALUE) {
+                        close = 5
+                    }
                 }
             } else {
-                close = 1
-                if (l_b > BACK_LIGHT_VALUE) {
-                    close = 5
-                }
+                led(0);
+                close = 7;
             }
         }
     }
@@ -222,18 +227,14 @@ void bt {
 		// buttons
 
         if (btn.rn == "E") {
-            if (mode != 3) {
-                prev_mode = mode; 
-                mode = 3;
-                mt.stop("B");
-                mt.stop("C");
-                mt.stop("D");
-                reset_odometry();
-                led(0);
-            } else {
-                mode = prev_mode;
+            prev_mode = mode; 
+            mode = 3;
+            btn.wait.release();
+            while (btn.rn != "E") {
+                thread.yield(); // do nothing
             }
-            delay(100);
+            reset_odometry();
+            mode = prev_mode;
         }
 	}
 }
@@ -404,5 +405,9 @@ while (true) {
 
     while (close == 6) {
         move(0, -x_res * 2)
+    }
+
+    while (close == 7) {
+        thread.yield(); // do nothing
     }
 }
