@@ -97,48 +97,32 @@ void sensors {
 }
 
 //  Motor manager
-void MM {
-    while (true) {
-        while (attack == 0) {
-            if (abs(forward) > 100) {
-                f = 100 * forward / abs(forward)
-            } else {
-                f = forward
-            }
-
-            if (abs(side) > 100) {
-                s = 100 * side / abs(side)
-            } else {
-                s = side
-            }
-            
-            v_b = 1.2*(-0.67*s)
-            v_c = 0.58*f + 0.33*s 
-            v_d = 0.58*f - 0.33*s
-
-            k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-
-            if (close == 2) {
-                if (dir > 5) {
-                    turn = rm(alpha - 30 + 360, 360)
-                } else {
-                    turn = rm(alpha + 30, 360)
-                }
-            } else {
-                turn = err_com
-            }
-
-            mt.spw("B", v_b*k_m-turn*1.5)
-            mt.spw("C", v_c*k_m-turn*0.8)
-            mt.spw("D", v_d*k_m+turn*0.8)
-        }
+func num move(forward, side) {
+    if (abs(forward) > 100) {
+        f = 100 * forward / abs(forward)
+    } else {
+        f = forward
     }
+
+    if (abs(side) > 100) {
+        s = 100 * side / abs(side)
+    } else {
+        s = side
+    }
+    
+    v_b = 1.2*(-0.67*s)
+    v_c = 0.58*f + 0.33*s 
+    v_d = 0.58*f - 0.33*s
+
+    k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
+
+    mt.spw("B", v_b*k_m)
+    mt.spw("C", v_c*k_m)
+    mt.spw("D", v_d*k_m)
 }
 
 new.thread = sensors
-new.thread = MM
 
 while (true) {
-    forward = 0
-    side = 100
+    move(50, 100)
 }
