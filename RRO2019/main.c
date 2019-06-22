@@ -1,4 +1,4 @@
-/*`ODO:
+/*TODO:
     +1. attack
     +2. modes
     +3. odometry
@@ -79,6 +79,7 @@ stop_modes = 0
 void sensors {
     attacks_count = 0;
     str_res2 = 0;
+    dir_res2 = 0;
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
         dir = irseeker_array[0]
@@ -126,9 +127,14 @@ void sensors {
                         close = 4
                     }
                 } else {
-                    close = 1
-                    if (l_b > BACK_LIGHT_VALUE) {
-                        close = 5
+                    if (abs(dir2 - 5) < 3 and str_res2 > 30 and connection_status == 1) {
+                        close = 3;
+                        tone(100, 100, 100);
+                    } else {
+                        close = 1
+                        if (l_b > BACK_LIGHT_VALUE) {
+                            close = 5
+                        }
                     }
                 }
             }
@@ -302,7 +308,7 @@ void bt {
         str_scaled = round(strres * 100 / STR_MAX);
 
         if (who_am_i == "BIBA") {
-            mybtstr = attack + " " + bt_iteration + " " + str_scaled;
+            mybtstr = attack + " " + bt_iteration + " " + str_scaled + " " + dir;
         } else {
             mybtstr = str_scaled + " " + dir + " " + attack + " " + bt_iteration;
         }
