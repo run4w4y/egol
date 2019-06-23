@@ -60,6 +60,7 @@ x_res = 0
 y_res = 0
 time_odometry = time()
 stop_modes = 0
+move_lock = 0
 
 /*  
     close = 0 stop
@@ -71,6 +72,7 @@ stop_modes = 0
     close = 6 go to middle(odometry)
     close = 7 nixua 
     close = 8 fast side
+    close = 9 slow side
 */
 
 //  voids
@@ -79,7 +81,8 @@ stop_modes = 0
 void sensors {
     attacks_count = 0;
     str_res2 = 0;
-    dir_res2 = 0;
+    dir2 = 0;
+
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
         dir = irseeker_array[0]
@@ -144,17 +147,22 @@ void sensors {
                     attacks_count = 1;
                 }
                 led(1)
-                if ((abs(dir - 5) < 3) or (attacks_count == 1 and abs(str_res2 - 100) < 20)) {
-                // if ((abs(dir - 5) < 3) or abs(str_res2 - 100) < 20) {
-                    if (abs(x_res) > 50) {
-                        close = 6
-                    } else {
-                        close = 0
-                    }
+
+                if (dir == 5) {
+                    close = 0
                 } else {
-                    close = 1
-                    if (l_b > BACK_LIGHT_VALUE) {
-                        close = 5
+                    if ((abs(dir - 5) < 3) or (attacks_count == 1 and abs(str_res2 - 100) < 20)) {
+                    // if ((abs(dir - 5) < 3) or abs(str_res2 - 100) < 20) {
+                        if (strres < 130) {
+                            close = 9
+                        } else {
+                            close = 2
+                        }
+                    } else {
+                        close = 1
+                        if (l_b > BACK_LIGHT_VALUE) {
+                            close = 5
+                        }
                     }
                 }
             } else {
@@ -449,7 +457,7 @@ btn.wait.release();
 //  threads
 // new.thread = buttons_thread
 new.thread = sensors
-new.thread = bt
+//new.thread = bt
 new.thread = odometry
 
 //  main
@@ -459,16 +467,44 @@ while (true) {
         move(0, 0)
     }
 
-    while (close == 1) {    //ball is behind
+    t_def = time()
+    while (close == 1 and move_lock == 0) {    //ball is behind
         move(-100, 0)
+
+        if (time() - t_def > 3000 and mode == 0) {
+            t_h = time()
+            while (time() - t_h < 500) {
+                move(100, 0)
+            }
+            t_def = time()
+            move_lock = 1
+        }
+    }
+    
+    while (move_lock == 1) {
+        mt.spw("B", 0);
+        mt.spw("C", 0);
+        mt.spw("D", 0);
+        thread.yield(); // do nothing
     }
 
+    t_def = time()
     while (close == 2) {    //ball is in side
-        move(-40, (dir - 5) * 100)
+        move_lock = 0
+        move(-30, (dir - 5) * 100)
+
+        if (time() - t_def > 2000) {
+            t_h = time()
+            while (time() - t_h < 350) {
+                move(100, 0)
+            }
+            t_def = time()
+        }
     }
 
     v = 40
     while (close == 3) {    //ball is in front
+        move_lock = 0
         move(v, 0)
         if (v < 100) {
             v = v + 1.5
@@ -479,6 +515,7 @@ while (true) {
     v = 40
     k = 2
     while (close == 4 or str3 > STR_MAX - 30) {    //attack
+        move_lock = 0
         attack = 1
         v = v + 1.5
         if (x_res > 500 and time() - time_odometry < 20000) {
@@ -512,6 +549,7 @@ while (true) {
     attack = 0
 
     while (close == 5) {    //avoid ball
+        move_lock = 0
         move(0, 100)
         tone(100,1000,1)
     }
@@ -527,7 +565,31 @@ while (true) {
         thread.yield(); // do nothing
     }
 
+    t_def = time()
     while (close == 8) {
-        move(50, (dir - 5) * 100)
+        move_lock = 0
+        move(30, (dir - 5) * 100)
+
+        if (time() - t_def > 2000) {
+            t_h = time()
+            while (time() - t_h < 350) {
+                move(100, 0)
+            }
+            t_def = time()
+        }
+    }
+
+    t_def = time()
+    while (close == 9) {
+        move_lock = 0
+        move(0, (dir - 5) * 100)
+
+        if (time() - t_def > 2000) {
+            t_h = time()
+            while (time() - t_h < 350) {
+                move(100, 0)
+            }
+            t_def = time()
+        }
     }
 }
