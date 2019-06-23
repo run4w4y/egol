@@ -130,7 +130,7 @@ void sensors {
                         close = 4
                     }
                 } else {
-                    if (abs(dir2 - 5) < 3 and str_res2 > 30 and connection_status == 1) {
+                    if (dir == 0 and dir2 == 0 and connection_status == 1) {
                         close = 3;
                         tone(100, 100, 100);
                     } else {
