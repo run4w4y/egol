@@ -19,7 +19,7 @@ if (who_am_i == "BOBA") {
     mode = 0
 }
 
-connect(who_aint_me);
+//connect(who_aint_me);
 
 mailbox_biba = new.mailbox("mailbox_biba");
 mailbox_boba = new.mailbox("mailbox_boba");
@@ -120,8 +120,8 @@ void sensors {
                     close = 4
                 }
             } else {
-                if (abs(dir - 5) < 3 and strres > 30) {
-                    if (strres < 130) {
+                if (abs(dir - 5) < 3) {
+                    if (strres < 100) {
                         close = 8
                     } else {
                         close = 2
@@ -153,7 +153,7 @@ void sensors {
                 } else {
                     if ((abs(dir - 5) < 3) or (attacks_count == 1 and abs(str_res2 - 100) < 20)) {
                     // if ((abs(dir - 5) < 3) or abs(str_res2 - 100) < 20) {
-                        if (strres < 130) {
+                        if (strres < 100) {
                             close = 9
                         } else {
                             close = 2
@@ -175,7 +175,7 @@ void sensors {
 }
 
 //  Motor manager
-func num move(forward, side) {
+func num alga(forward, side) {
     if (abs(forward) > 100) {
         f = 100 * forward / abs(forward)
     } else {
@@ -194,9 +194,9 @@ func num move(forward, side) {
 
     k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
 
-    mt.spw("B", v_b*k_m-err_com*1.6)
-    mt.spw("C", v_c*k_m-err_com*0.9)
-    mt.spw("D", v_d*k_m+err_com*0.9)
+    mt.spw("B", v_b*k_m-err_com*1.8)
+    mt.spw("C", v_c*k_m-err_com*1)
+    mt.spw("D", v_d*k_m+err_com*1)
 }
 
 // odometry start -----------
@@ -457,31 +457,31 @@ btn.wait.release();
 //  threads
 // new.thread = buttons_thread
 new.thread = sensors
-//new.thread = bt
+new.thread = bt
 new.thread = odometry
 
 //  main
 while (true) {
     mt.spw("A", 50)
     while (close == 0) {
-        move(0, 0)
+        alga(0, 0)
     }
 
     t_def = time()
-    while (close == 1 and move_lock == 0) {    //ball is behind
-        move(-100, 0)
+    while (close == 1) {    //ball is behind
+        alga(-100, 0)
 
         if (time() - t_def > 3000 and mode == 0) {
             t_h = time()
             while (time() - t_h < 500) {
-                move(100, 0)
+                alga(100, 0)
             }
             t_def = time()
             move_lock = 1
         }
     }
     
-    while (move_lock == 1) {
+    while (move_lock == 1 and mode == 0) {
         mt.spw("B", 0);
         mt.spw("C", 0);
         mt.spw("D", 0);
@@ -491,12 +491,12 @@ while (true) {
     t_def = time()
     while (close == 2) {    //ball is in side
         move_lock = 0
-        move(-30, (dir - 5) * 100)
+        alga(-20, (dir - 5) * 100)
 
-        if (time() - t_def > 2000) {
+        if (time() - t_def > 4000) {
             t_h = time()
             while (time() - t_h < 350) {
-                move(100, 0)
+                alga(100, 0)
             }
             t_def = time()
         }
@@ -505,10 +505,10 @@ while (true) {
     v = 40
     while (close == 3) {    //ball is in front
         move_lock = 0
-        move(v, 0)
-        if (v < 100) {
-            v = v + 1.5
-        }
+        alga(100, 0)
+        // if (v < 100) {
+        //     v = v + 1.5
+        // }
     }
 
     t_attack = time()
@@ -517,7 +517,7 @@ while (true) {
     while (close == 4 or str3 > STR_MAX - 30) {    //attack
         move_lock = 0
         attack = 1
-        v = v + 1.5
+        //v = v + 1.5
         if (x_res > 500 and time() - time_odometry < 20000) {
             alpha_att = rm(compass - ALPHA_RIGHT + 900, 360) - 180
         } else {
@@ -530,16 +530,16 @@ while (true) {
 
         v_b = -alpha_att * k    
         if (k < 4) { 
-            k = k + 0.003
+            k = k + 0.002
         } else {
             tone(100,100,1)
         }
 
         mt.spw("B", v_b)
-        mt.spw("C", v)
-        mt.spw("D", v)
+        mt.spw("C", 100)
+        mt.spw("D", 100)
 
-        if (time() - t_attack > 1000 and time() - t_attack < 1200) {  //kicker
+        if (time() - t_attack > 800 and time() - t_attack < 1000) {  //kicker
             mt.spw("A", -100)
         } else {
             mt.spw("A", 50)
@@ -550,12 +550,12 @@ while (true) {
 
     while (close == 5) {    //avoid ball
         move_lock = 0
-        move(0, 100)
+        alga(0, 100)
         tone(100,1000,1)
     }
 
     while (close == 6) {
-        move(20, -x_res * 2)
+        alga(20, -x_res * 2)
     }
 
     while (close == 7) {
@@ -568,26 +568,27 @@ while (true) {
     t_def = time()
     while (close == 8) {
         move_lock = 0
-        move(30, (dir - 5) * 100)
+        alga(10, (dir - 5) * 100)
 
-        if (time() - t_def > 2000) {
+        if (time() - t_def > 5000) {
             t_h = time()
             while (time() - t_h < 350) {
-                move(100, 0)
+                alga(100, 0)
             }
             t_def = time()
         }
+
     }
 
     t_def = time()
     while (close == 9) {
         move_lock = 0
-        move(0, (dir - 5) * 100)
+        alga(0, (dir - 5) * 100)
 
-        if (time() - t_def > 2000) {
+        if (time() - t_def > 5000) {
             t_h = time()
             while (time() - t_h < 350) {
-                move(100, 0)
+                alga(100, 0)
             }
             t_def = time()
         }
