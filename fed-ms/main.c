@@ -174,6 +174,8 @@ void sensors {
     }
 }
 
+err_com_old = 0
+
 //  Motor manager
 func num alga(forward, side) {
     if (abs(forward) > 100) {
