@@ -287,6 +287,7 @@ void odometry {
         print("y", y_res)
         print("mode", mode)
         print("close", close)
+        print("a", mt.ampers)
     }
 }
 
