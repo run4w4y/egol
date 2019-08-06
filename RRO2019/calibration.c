@@ -9,7 +9,7 @@ PORT_LIGHT_BACK = 3
 
 handle = open.r("cal.txt");
 
-values_len = 7;
+values_len = 8;
 values = new.vector(values_len, 0);
 
 names[0] = "alpha";
@@ -19,38 +19,37 @@ names[3] = "strmax";
 names[4] = "back_lt";
 names[5] = "str2";
 names[6] = "str4";
+names[7] = "front_lt";
 
 if (handle == 0) {
 	COMPASS_ALPHA = 0;
-	values[0] = COMPASS_ALPHA;
 	ALPHA_LEFT = 0;
-	values[1] = ALPHA_LEFT;
 	ALPHA_RIGHT = 0;
-	values[2] = ALPHA_RIGHT;
 	STR_MAX = 0;
-	values[3] = STR_MAX;
 	BACK_LIGHT_VALUE = 0;
-	values[4] = BACK_LIGHT_VALUE;
 	STR_VALUE_2 = 0;
-	values[5] = STR_VALUE_2;
 	STR_VALUE_4 = 0;
-	values[6] = STR_VALUE_4;
+	LIGHT_FRONT = 0;
 } else {
 	COMPASS_ALPHA = tonum(readline(handle));
-	values[0] = COMPASS_ALPHA;
 	ALPHA_LEFT = tonum(readline(handle));
-	values[1] = ALPHA_LEFT;
 	ALPHA_RIGHT = tonum(readline(handle));
-	values[2] = ALPHA_RIGHT;
 	STR_MAX = tonum(readline(handle));
-	values[3] = STR_MAX;
 	BACK_LIGHT_VALUE = tonum(readline(handle));
-	values[4] = BACK_LIGHT_VALUE;
 	STR_VALUE_2 = tonum(readline(handle));
-	values[5] = STR_VALUE_2;
 	STR_VALUE_4 = tonum(readline(handle));
-	values[6] = STR_VALUE_4;
+	LIGHT_FRONT = tonum(readline(handle));
+	
 }
+
+values[0] = COMPASS_ALPHA;
+values[1] = ALPHA_LEFT;
+values[2] = ALPHA_RIGHT;
+values[3] = STR_MAX;
+values[4] = BACK_LIGHT_VALUE;
+values[5] = STR_VALUE_2;
+values[6] = STR_VALUE_4;
+values[7] = LIGHT_FRONT;
 
 closef(handle);
 
@@ -216,19 +215,7 @@ while (true) {
 			goto start;
 		}
 		
-		if (i == 0) {
-			compass_array = i2c.readregs(PORT_COMPASS, 1, 66, 4);
-        	compass = compass_array[0] * 2 + compass_array[1];
-			values[i] = compass;
-		}
-		
-		if (i == 1) {
-			compass_array = i2c.readregs(PORT_COMPASS, 1, 66, 4);
-        	compass = compass_array[0] * 2 + compass_array[1];
-			values[i] = compass;
-		}
-
-		if (i == 2) {
+		if (i == 0 or i == 1 or i == 2) {
 			compass_array = i2c.readregs(PORT_COMPASS, 1, 66, 4);
         	compass = compass_array[0] * 2 + compass_array[1];
 			values[i] = compass;
@@ -264,7 +251,7 @@ while (true) {
 			values[i] = strmax;
 		}
 
-		if (i == 4) {
+		if (i == 4 or i == 7) {
 			senball_calib1 = 0
 			for (j = 0; j < 600; ++j) { // progress bar
 				if (ispressed(6) == true) { // exit button
