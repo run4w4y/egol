@@ -221,8 +221,8 @@ base_length = 1;
 
 motor_koefficients = new.vector(3, 0);
 motor_koefficients[0] = 1;
-motor_koefficients[1] = -1.5;
-motor_koefficients[2] = 1.5;
+motor_koefficients[1] = 1;
+motor_koefficients[2] = 1;
 
 // define previous motor values for first odometry iteration
 
