@@ -131,6 +131,14 @@ func num alga(forward, side) {
 
 new.thread = sensors
 
-while () {
-    
+k = 0.5
+while (true) {
+    v = 100
+    if (k < 1.2) {
+        k = k + 0.003
+    }
+    mt.spw("B", err_com * 0.8)
+    mt.spw("C", -v)
+    mt.spw("D", v)
+
 }
