@@ -123,7 +123,7 @@ func num alga(forward, side) {
     v_d = 0.58*f - 0.33*s
 
     k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-    turn = err_com * 0.4 + (err_com - err_com_old) * 2
+    turn = err_com * 0.5 + (err_com - err_com_old) * 2
     err_com_old = err_com
 
     mt.spw("B", v_b*k_m+turn)
@@ -133,86 +133,15 @@ func num alga(forward, side) {
 
 new.thread = sensors
 
-//  main
 while (true) {
-    // if (kick == 1) {
-    //     mt.shd.pw("A", -100, 0, 100, 0, true)
-    //     kick = 0
-    // }
-    if (l_f > FRONT_LIGHT_VALUE) {
-        v = 60        
-        k = 0.5
-        t_attack = time()
-        while (l_f > FRONT_LIGHT_VALUE - 5) {
-
-            // if (time() - t_attack > 1000) {
-            //     mt.shd.pw("A", 100, 0, 100, 0, true)
-            //     t_attack = time()
-            //     kick = 1
-            // }
-
-            // if (kick == 1 and mt.isbusy("A") == "False") {
-            //     mt.shd.pw("A", -100, 0, 100, 0, true)
-            //     kick = 0
-            // }
-
-            if (v < 100) {
-                v = v + 0.5
-            }      
-            
-            if (k < 1.2) {
-                k = k + 0.005
-            }
-            mt.spw("B", err_com * k)
-            mt.spw("C", -v)
-            mt.spw("D", v)
-
-        }
+    v = (STR_MAX-strres) * (FRONT_LIGHT_VALUE - l_f)
+    
+    if (v < 20) {
+        v = 20
     } else {
-        if (abs(dir - 5) > 2 or (dir == 7  and strres < 55) or (dir == 3 and strres < 25)) {
-            alga(-100, 0)
-
-            if (l_b > BACK_LIGHT_VALUE) {
-                t0 = time()
-                while (time() - t0 < 300) {
-                    alga(0, 100)
-                    tone(100, 100, 1)
-                }
-
-                t0 = time()
-                while (time() - t0 < 300) {
-                    alga(-100, 0)
-                    tone(100, 100, 1)
-                }
-            }
-        } else {
-            if (abs(dir - 5) > 1) {
-                if (strres < 80) {
-                    alga(50, 50*(dir-5))
-                } else {
-                    alga(-20, 50*(dir-5))
-                } 
-            } else{
-
-
-                // if (l_b - 20 < 0) {
-                //     l_acc = 0
-                // } else {
-                //     l_acc = (l_acc - 20) * 1.5
-                // }
-                // v = 280-1.5*strres + l_acc
-
-                v = (STR_MAX-strres) * (FRONT_LIGHT_VALUE - l_f) * 0.9
-                
-                if (v < 60) {
-                    v = 60
-                } else {
-                    if (v > 100) {
-                        v = 100
-                    }
-                }
-                alga(v, 0)
-            }
+        if (v > 100) {
+            v = 100
         }
     }
+    alga(v, 0)
 }
