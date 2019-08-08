@@ -255,7 +255,7 @@ void odometry {
         insignificant_count = 0;
         for (i = 0; i < 3; i = i + 1) {
             encoders_delta[i] = (encoders_current[i] - encoders_prev[i]) * motor_koefficients[i];
-            if (encoders_delta[i] < 1) {
+            if (encoders_delta[i] < 0.25) {
                 insignificant_count = insignificant_count + 1;
             }
         }
