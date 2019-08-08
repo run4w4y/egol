@@ -3,7 +3,8 @@ handle = open.r("ports.txt"); // open the file with values
 
 PORT_SEEKER = 4
 PORT_COMPASS = 2
-PORT_LIGHT_BACK = 3
+PORT_LIGHT_BACK = 1
+PORT_LIGHT_FRONT = 3
 
 // reading from file
 
@@ -257,7 +258,11 @@ while (true) {
 				if (ispressed(6) == true) { // exit button
 					goto end
 				}
-				senball_calib1 = senball_calib1 + sen.percent(PORT_LIGHT_BACK);
+				if (i == 4) { 
+					senball_calib1 = senball_calib1 + sen.percent(PORT_LIGHT_BACK);
+				} else {
+					senball_calib1 = senball_calib1 + sen.percent(PORT_LIGHT_FRONT);
+				}
 				p = floor(j/6)
 				scr.clear()
 				scr.rect(1, 37, 48, 105, 10)

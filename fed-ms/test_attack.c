@@ -131,63 +131,6 @@ func num alga(forward, side) {
 
 new.thread = sensors
 
-//  main
-while (true) {
-    if (l_f > FRONT_LIGHT_VALUE) {
-        k = 0.2
-        t_attack = time()
-        while (l_f > FRONT_LIGHT_VALUE - 5) {
-            if (k < 1) {
-                k = k + 0.01
-            }
-
-            // if (time() - t_attack > 1000) {
-            //     mt.shd.pw("A", 100, 0, 100, 0, true)
-            //     t_attack = time()
-            // }
-            
-            mt.spw("B", err_com*k)
-            mt.spw("C", -100)
-            mt.spw("D", 100)
-
-            tone(50, 100, 1)
-        }
-    } else {
-        if (abs(dir - 5) > 3 or (dir == 7  and strres < 45) or (dir == 3 and strres < 25)) {
-            alga(-100, 0)
-
-            if (l_b > BACK_LIGHT_VALUE) {
-                t0 = time()
-                while (time() - t0 < 300) {
-                    alga(0, 100)
-                    tone(100, 100, 1)
-                }
-
-                t0 = time()
-                while (time() - t0 < 300) {
-                    alga(-100, 0)
-                    tone(100, 100, 1)
-                }
-            }
-        } else {
-            if (abs(dir - 5) > 1) {
-                if (strres < 90) {
-                    alga(60, 100*(dir-5))
-                } else {
-                    alga(-20, 100*(dir-5))
-                }
-            } else{
-
-
-                if (l_b - 20 < 0) {
-                    l_acc = 0
-                } else {
-                    l_acc = (l_acc - 20) * 1.5
-                }
-                v = 280-1.5*strres + l_acc
-
-                alga(v, 0)
-            }
-        }
-    }
+while () {
+    
 }
