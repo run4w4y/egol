@@ -252,9 +252,14 @@ void odometry {
         // calculate encoders delta
 
         encoders_delta = new.vector(3, 0);
+        insignificant_count = 0;
         for (i = 0; i < 3; i = i + 1) {
             encoders_delta[i] = (encoders_current[i] - encoders_prev[i]) * motor_koefficients[i];
+            if (encoders_delta[i] < 1) {
+                insignificant_count = insignificant_count + 1;
+            }
         }
+        tone(100, 100, 100);
 
         // now get the x and y vectors
 
@@ -287,7 +292,8 @@ void odometry {
         print("y", y_res)
         print("mode", mode)
         print("close", close)
-        print("a", mt.ampers)
+        print("del", encoders_delta[1])
+        print("ins", insignificant_count)
     }
 }
 
