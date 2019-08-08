@@ -61,6 +61,7 @@ y_res = 0
 time_odometry = time()
 stop_modes = 0
 move_lock = 0
+i_dx = 0
 
 /*  
     close = 0 stop
