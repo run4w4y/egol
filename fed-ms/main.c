@@ -28,7 +28,7 @@ connection_status = 1;
 
 sen.setmode(3, 1)
 mt.stop("ABCD", "false")
-mt.spw("a", 50)
+
 mt.resetcount("ABCD")
 //  calibration
 handle = open.r("cal.txt");
