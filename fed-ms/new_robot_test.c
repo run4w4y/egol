@@ -8,6 +8,7 @@ if (who_am_i == "BOBA") {
     mode = 0
 }
 
+mt.shd.pw("A", -100, 0, 100, 0, true)
 sen.setmode(3, 1)
 sen.setmode(1, 1)
 mt.stop("ABCD", "false")
@@ -48,6 +49,7 @@ err_com_old = 0
 r = 0
 g = 0
 b = 0
+kick = 0
 
 //  voids
 
@@ -121,7 +123,7 @@ func num alga(forward, side) {
     v_d = 0.58*f - 0.33*s
 
     k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-    turn = err_com * 0.7 + (err_com - err_com_old) * 2
+    turn = err_com * 0.5 + (err_com - err_com_old) * 2
     err_com_old = err_com
 
     mt.spw("B", v_b*k_m+turn)
@@ -133,27 +135,38 @@ new.thread = sensors
 
 //  main
 while (true) {
+    // if (kick == 1) {
+    //     mt.shd.pw("A", -100, 0, 100, 0, true)
+    //     kick = 0
+    // }
     if (l_f > FRONT_LIGHT_VALUE) {
-        k = 0.2
+        k = 0.5
         t_attack = time()
         while (l_f > FRONT_LIGHT_VALUE - 5) {
-            if (k < 1) {
-                k = k + 0.01
-            }
 
             // if (time() - t_attack > 1000) {
             //     mt.shd.pw("A", 100, 0, 100, 0, true)
             //     t_attack = time()
+            //     kick = 1
             // }
-            
-            mt.spw("B", err_com*k)
-            mt.spw("C", -100)
-            mt.spw("D", 100)
+
+            // if (kick == 1 and mt.isbusy("A") == "False") {
+            //     mt.shd.pw("A", -100, 0, 100, 0, true)
+            //     kick = 0
+            // }
+                    
+            v = 100
+            if (k < 1.2) {
+                k = k + 0.005
+            }
+            mt.spw("B", err_com * k)
+            mt.spw("C", -v)
+            mt.spw("D", v)
 
             tone(50, 100, 1)
         }
     } else {
-        if (abs(dir - 5) > 3 or (dir == 7  and strres < 45) or (dir == 3 and strres < 25)) {
+        if (abs(dir - 5) > 2 or (dir == 7  and strres < 55) or (dir == 3 and strres < 25)) {
             alga(-100, 0)
 
             if (l_b > BACK_LIGHT_VALUE) {
@@ -171,22 +184,22 @@ while (true) {
             }
         } else {
             if (abs(dir - 5) > 1) {
-                if (strres < 90) {
-                    alga(60, 100*(dir-5))
+                if (strres < 80) {
+                    alga(50, 50*(dir-5))
                 } else {
-                    alga(-20, 100*(dir-5))
-                }
+                    alga(-20, 50*(dir-5))
+                } 
             } else{
 
 
-                if (l_b - 20 < 0) {
-                    l_acc = 0
-                } else {
-                    l_acc = (l_acc - 20) * 1.5
-                }
-                v = 280-1.5*strres + l_acc
+                // if (l_b - 20 < 0) {
+                //     l_acc = 0
+                // } else {
+                //     l_acc = (l_acc - 20) * 1.5
+                // }
+                // v = 280-1.5*strres + l_acc
 
-                alga(v, 0)
+                alga(100, 0)
             }
         }
     }
