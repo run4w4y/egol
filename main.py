@@ -7,7 +7,6 @@ import os
 def error(error_msg):
     if config.get('error_displaying') == '1' or config.get('error_displaying') is None:
         print('error: '+error_msg)
-        print(line)
         input('press any key')
     exit(0)
 
@@ -42,8 +41,6 @@ def change_defined_funcs(s):
 
     while s.count('( ') != 0:
         s = s.replace('( ', '(')
-    while s.count('( ') != 0:
-        s = s.replace(' )', ')')
 
     s_split = s.split()
     s = ''
@@ -63,7 +60,7 @@ def change_defined_funcs(s):
                 error("found "+str(args_cur.count(',')+1)+" parameters instead of "+str(args_num)+" in the line "+str(i))
 
             s_split[it+1] = s_split[it+1][1:]
-            if len(args_cur) != 2:
+            if args_cur != '()':
                 s_split[it] = 'f.call' + str(args_num) + '("' + s_split[it] + '",'
             else:
                 s_split[it] = 'f.call0("' + s_split[it] + '"'
@@ -172,12 +169,7 @@ try:
 except BaseException:
     print("creating " + filename + " in the selected folder...")
 
-try:
-    open(path_to_file+'\\'+filename, 'w')
-except BaseException:
-    error("couldn't create file")
-
-output = open(path_to_file+'\\'+filename, 'w')
+output = open(path_to_file+'/'+filename, 'w')
 output_lines = []
 
 
@@ -250,16 +242,27 @@ func_props = {}
 local_vars = []
 i = 0
 for line in lines:
+    print(line)
     i += 1
     output_line = line
 
     while output_line.find('  ') != -1:
         output_line = output_line.replace('  ', ' ')
 
-    output_line = output_line.replace(';', '\n')
-
     if output_line.find('//') != -1:
         output_line = output_line.split('//')[0]
+
+    try:
+        if output_line[-1] == ';':
+            output_line = output_line[:-1]+'\n'
+
+        if output_line[-2] == ';':
+            output_line = output_line[:-2]+'\n'
+
+        if output_line[-3] == ';':
+            output_line = output_line[:-3]+'\n'
+    except IndexError:
+        pass
 
     tmp = output_line.split()
     tmp.append('\n')
@@ -469,6 +472,8 @@ for line in lines:
             output_line = matching_word
 
     output_line += '\n'
+    output_line = output_line.replace('> =', '>=')
+    output_line = output_line.replace('< =', '<=')
 
     output_lines.append(output_line)
 
