@@ -1,9 +1,0 @@
-read_path = C:\Users\4d4ch1\Desktop\cpp_projects\egol\fed-ms\main.c
-#read_path = /home/adachi/egol/2forwards/calibration_ports.c
-#read_path = /home/adachi/egol/2forwards/calibration.c
-#read_path = /home/adachi/egol/2forwards/threading_test.c
-save_path = C:\Users\4d4ch1\Desktop\sb
-#read_path = /home/adachi/Desktop/sb
-error_displaying = 1
-warning_displaying = 0
-waiting_after = 0
