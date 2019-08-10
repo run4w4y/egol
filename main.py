@@ -169,7 +169,7 @@ try:
 except BaseException:
     print("creating " + filename + " in the selected folder...")
 
-output = open(path_to_file+'/'+filename, 'w')
+output = open(path_to_file+'\\'+filename, 'w')
 output_lines = []
 
 
