@@ -143,6 +143,7 @@ try:
 except BaseException:
     error("couldn't find such file")
 
+
 lines = open(path_to_file).readlines()
 
 
