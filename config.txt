@@ -1,5 +1,6 @@
-﻿read_path = C:\Users\egor\egol\fed-ms\new_robot_test.c
-save_path = C:\C:\Users\egor\Desktop\EGOL
+﻿none = none
+read_path = C:\Users\egor\egol\fed-ms\new_robot_test.c
+save_path = C:\Users\egor\Desktop\EGOL
 error_displaying = 1
 warning_displaying = 0
 waiting_after = 0
