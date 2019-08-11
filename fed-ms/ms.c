@@ -61,7 +61,7 @@ void sensors {
 
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
-        dir = irseeker_array[0]
+        dir1 = irseeker_array[0]
         str1 = irseeker_array[1]
         str2 = irseeker_array[2]
         str3 = irseeker_array[3]
@@ -78,6 +78,12 @@ void sensors {
             strres = max(strres, irseeker_array[i_dx])
         } 
 
+        if (strres < 30) {
+            dir = 0
+        } else {
+            dir = dir1
+        }
+
         compass_array = i2c.readregs(2, 1, 66, 4)
         compass = compass_array[0] * 2 + compass_array[1]
         err_com = rm(compass - alpha + 900, 360) - 180
@@ -85,7 +91,6 @@ void sensors {
 
         l_f = sen.percent(3)
         l_b = sen.percent(1)
-
     }
 }
 
@@ -267,6 +272,7 @@ while (true) {
             if (k < 1.2) {
                 k = k + 0.005
             }
+            
             mt.spw("B", err_com * k)
             mt.spw("C", -v)
             mt.spw("D", v)
