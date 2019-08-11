@@ -1,3 +1,10 @@
+/*
+TODO:
+    #   wall checking
+    #   side detecting by odometry
+    #   kicker
+
+*/
 check.ports("ABCD 234")
 who_am_i = getname();
 if (who_am_i == "BOBA") {
@@ -272,7 +279,7 @@ while (true) {
             if (k < 1.2) {
                 k = k + 0.005
             }
-            
+
             mt.spw("B", err_com * k)
             mt.spw("C", -v)
             mt.spw("D", v)
@@ -296,6 +303,7 @@ while (true) {
                 }
             }
 
+            
             if (btn.rn == "R") {
                 flush()
                 
@@ -323,14 +331,6 @@ while (true) {
                         alga(-20, 50*(dir-5))
                     } 
                 } else{
-
-
-                    // if (l_b - 20 < 0) {
-                    //     l_acc = 0
-                    // } else {
-                    //     l_acc = (l_acc - 20) * 1.5
-                    // }
-                    // v = 280-1.5*strres + l_acc
 
                     // v = (STR_MAX-strres) * (FRONT_LIGHT_VALUE - l_f) * 0.8
                     

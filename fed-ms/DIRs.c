@@ -8,7 +8,6 @@ if (who_am_i == "BOBA") {
     mode = 0
 }
 
-mt.shd.pw("A", -100, 0, 100, 0, true)
 sen.setmode(3, 1)
 sen.setmode(1, 1)
 mt.stop("ABCD", "false")
