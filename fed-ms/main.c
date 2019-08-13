@@ -317,15 +317,52 @@ func num threads_resume() {
 }
 
 func num up_button() {
-    // action on up button press
+    alpha = ALPHA_RIGHT
+    t_start = time()
+    while (time() - t_start < 750) {
+        alga(100, 0)
+    }
+    alga(0, 0)
+    kicker() // change to the actual kicker motion
+    alpha = COMPASS_ALPHA
+    while (l_b > wall_value) { // change to the actual light sensor value
+        alga(-100, 0)
+    }
+    t_start = time()
+    while (time() - t_start < 750) {
+        alga(100, -100)
+    }
+    alga(0, 0)
 }
 
 func num left_button() {
-    // action on left button press
+    alpha = ALPHA_LEFT
+    t_start = time()
+    while (time() - t_start < 750) {
+        alga(100, 0)
+    }
+    alga(0, 0)
+    kicker() // change to the actual kicker motion
+    alpha = COMPASS_ALPHA
+    while (l_b > wall_value) { // change to the actual light sensor value
+        alga(-100, 0)
+    }
+    t_start = time()
+    while (time() - t_start < 750) {
+        alga(100, 100)
+    }
+    alga(0, 0)
 }
 
 func num down_button() {
-    // action on down button press
+    t_start = time()
+    while (time() - t_start < 750) {
+        alga(100, 0)
+    }
+    alga(0, 0)
+    while (dir > 2 and dir < 8 and strres < 100) {
+        alga(0, 0)
+    }
 }
 
 void buttons {
