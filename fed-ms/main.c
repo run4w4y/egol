@@ -1,11 +1,3 @@
-/*TODO:
-    +1. attack
-    +2. modes
-    +3. odometry
-    4. attack angles
-    5. starts 
-*/
-
 check.ports("ABCD 234")
 
 //  BT
@@ -295,8 +287,6 @@ void odometry {
         printupd()
         print("x", x_res)
         print("y", y_res)
-        print("mode", mode)
-        print("close", close)
         print("ins", insignificant_count)
     }
 }
@@ -316,14 +306,96 @@ func num reset_odometry() {
 
 // odometry end ----------------
 
+// buttons start
+
+func num threads_stop() {
+    main_lock = true
+}
+
+func num threads_resume() {
+    main_lock = false
+}
+
+func num up_button() {
+    alpha = ALPHA_RIGHT
+    t_start = time()
+    while (time() - t_start < 750) {
+        alga(100, 0)
+    }
+    alga(0, 0)
+    kicker() // change to the actual kicker motion
+    alpha = COMPASS_ALPHA
+    while (l_b > wall_value) { // change to the actual light sensor value
+        alga(-100, 0)
+    }
+    t_start = time()
+    while (time() - t_start < 750) {
+        alga(100, -100)
+    }
+    alga(0, 0)
+}
+
+func num left_button() {
+    alpha = ALPHA_LEFT
+    t_start = time()
+    while (time() - t_start < 750) {
+        alga(100, 0)
+    }
+    alga(0, 0)
+    kicker() // change to the actual kicker motion
+    alpha = COMPASS_ALPHA
+    while (l_b > wall_value) { // change to the actual light sensor value
+        alga(-100, 0)
+    }
+    t_start = time()
+    while (time() - t_start < 750) {
+        alga(100, 100)
+    }
+    alga(0, 0)
+}
+
+func num down_button() {
+    t_start = time()
+    while (time() - t_start < 750) {
+        alga(100, 0)
+    }
+    alga(0, 0)
+    while (dir > 2 and dir < 8 and strres < 100) {
+        alga(0, 0)
+    }
+}
+
+void buttons {
+    while (true) {
+        if (btn.rn == 'U') {
+            threads_stop()
+            up_button()
+            threads_resume()
+        } else { if (btn.rn == 'L') {
+            threads_stop()
+            left_button()
+            threads_resume()
+        } else { if (btn.rn == 'D') {
+            threads_stop()
+            down_button()
+            threads_resume()
+        } } }
+    }
+}
+
+// buttons end
+
 btn.wait.release();
 
 //  threads
-// new.thread = buttons_thread
+new.thread = buttons
 new.thread = sensors
 new.thread = odometry
 
 //  main
 while (true) {
+    while (main_lock) {
+        delay(1)
+    }
     alga(0, 100)
 }

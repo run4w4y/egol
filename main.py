@@ -133,6 +133,10 @@ for line in config_lines:
 # open file with code
 
 print(config)
+<<<<<<< HEAD
+
+=======
+>>>>>>> 83c07fc711f429b52dc5530a1d50678e46956255
 if config.get('read_path') is not None:
     path_to_file = config['read_path']
 else:
