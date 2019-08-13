@@ -1,6 +1,11 @@
 ﻿none = none
+<<<<<<< HEAD
 read_path = C:\egol\RRO2019\main.c
 save_path = C:\EGOLsb
+=======
+read_path = C:\Users\egor\egol\fed-ms\DIRs.c
+save_path = C:\Users\egor\Desktop\EGOL
+>>>>>>> 83c07fc711f429b52dc5530a1d50678e46956255
 error_displaying = 1
 warning_displaying = 0
 waiting_after = 0
