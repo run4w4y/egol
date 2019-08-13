@@ -132,6 +132,7 @@ for line in config_lines:
 
 # open file with code
 
+print(config)
 
 if config.get('read_path') is not None:
     path_to_file = config['read_path']
@@ -169,7 +170,7 @@ try:
 except BaseException:
     print("creating " + filename + " in the selected folder...")
 
-output = open(path_to_file+'/'+filename, 'w')
+output = open(path_to_file+'\\'+filename, 'w')
 output_lines = []
 
 

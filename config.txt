@@ -1,5 +1,6 @@
-﻿read_path = C:\Users\Данил\egol\RRO2019\main.c
-save_path = C:\Users\Данил\Desktop\EGOL
+﻿none = none
+read_path = C:\egol\RRO2019\main.c
+save_path = C:\EGOLsb
 error_displaying = 1
 warning_displaying = 0
 waiting_after = 0
