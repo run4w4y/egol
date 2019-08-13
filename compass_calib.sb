@@ -1,0 +1,23 @@
+Program.Delay(3000) 
+Motor.StartPower("B", -20) 
+Motor.StartPower("C", -20) 
+Motor.StartPower("D", -20) 
+Sensor.WriteI2CRegister(2, 1, 65, 67) 
+Program.Delay(50) 
+Motor.StartPower("B", -7) 
+Motor.StartPower("C", -7) 
+Motor.StartPower("D", -7) 
+Program.Delay(9200) 
+Motor.Stop("DCB","True") 
+Sensor.WriteI2CRegister(2, 1, 65, 0) 
+'LCD.Clear() 
+'LCD.Write(0, 0, Sensor.ReadI2CRegister(1, 1, 65)) 
+Motor.Stop("DCB", "True") 
+'Sensor.WriteI2CRegister(1, 1, 65, 0) 
+Program.Delay(5000) 
+While "True" 
+  Compass = Sensor.ReadI2CRegisters(2, 1, 68, 2) 
+  Compas = Compass[0] + 256 * Compass[1] 
+  LCD.Clear() 
+  LCD.Write(0, 10, Compas) 
+EndWhile

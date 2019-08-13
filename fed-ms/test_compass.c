@@ -1,13 +1,21 @@
+/*
+TODO:
+    #   wall checking
+    #   side detecting by odometry
+    #   kicker
+
+*/
 check.ports("ABCD 234")
 who_am_i = getname();
 if (who_am_i == "BOBA") {
-  who_aint_me = "BIBA";
+    who_aint_me = "BIBA";
     mode = 1
 } else {
-  who_aint_me = "BOBA";
+    who_aint_me = "BOBA";
     mode = 0
 }
 
+mt.shd.pw("A", -100, 0, 100, 0, true)
 sen.setmode(3, 1)
 sen.setmode(1, 1)
 mt.stop("ABCD", "false")
@@ -60,7 +68,7 @@ void sensors {
 
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
-        dir = irseeker_array[0]
+        dir1 = irseeker_array[0]
         str1 = irseeker_array[1]
         str2 = irseeker_array[2]
         str3 = irseeker_array[3]
@@ -77,26 +85,51 @@ void sensors {
             strres = max(strres, irseeker_array[i_dx])
         } 
 
+        if (strres < 30) {
+            dir = 0
+        } else {
+            dir = dir1
+        }
+
         compass_array = i2c.readregs(2, 1, 66, 4)
         compass = compass_array[0] * 2 + compass_array[1]
         err_com = rm(compass - alpha + 900, 360) - 180
-        
+        turn = err_com
+
         l_f = sen.percent(3)
         l_b = sen.percent(1)
-
     }
+}
+
+//  Motor manager
+func num alga(forward, side) {
+    if (abs(forward) > 100) {
+        f = 100 * forward / abs(forward)
+    } else {
+        f = forward
+    }
+
+    if (abs(side) > 100) {
+        s = 100 * side / abs(side)
+    } else {
+        s = side
+    }
+    
+    v_b = 0.67*s
+    v_c = -0.58*f - 0.33*s 
+    v_d = 0.58*f - 0.33*s
+
+    k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
+    turn = err_com * 0.65 + (err_com - err_com_old) * 1.5
+    err_com_old = err_com
+
+    mt.start("B", v_b*k_m+turn)
+    mt.start("C", v_c*k_m+turn)
+    mt.start("D", v_d*k_m+turn)
 }
 
 new.thread = sensors
 
-//  main
 while (true) {
-    printupd()
-    print("dir", dir)
-    print("str1", str1)
-    print("str2", str2)
-    print("str3", str3)
-    print("str4", str4)
-    print("str5", str5)
-    print("strres", strres)
+    alga(100, 0)
 }

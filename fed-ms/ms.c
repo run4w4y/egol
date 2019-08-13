@@ -68,7 +68,7 @@ void sensors {
 
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
-        dir1 = irseeker_array[0]
+        dir = irseeker_array[0]
         str1 = irseeker_array[1]
         str2 = irseeker_array[2]
         str3 = irseeker_array[3]
@@ -83,18 +83,11 @@ void sensors {
         strres = irseeker_array[1]
         for (i_dx = 2; i_dx < 6; i_dx++) {
             strres = max(strres, irseeker_array[i_dx])
-        } 
-
-        if (strres < 30) {
-            dir = 0
-        } else {
-            dir = dir1
         }
 
         compass_array = i2c.readregs(2, 1, 66, 4)
         compass = compass_array[0] * 2 + compass_array[1]
         err_com = rm(compass - alpha + 900, 360) - 180
-        turn = err_com
 
         l_f = sen.percent(3)
         l_b = sen.percent(1)
@@ -120,12 +113,12 @@ func num alga(forward, side) {
     v_d = 0.58*f - 0.33*s
 
     k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-    turn = err_com * 0.8 + (err_com - err_com_old) * 2
+    turn = err_com * 0.7 + (err_com - err_com_old) * 0
     err_com_old = err_com
 
-    mt.spw("B", v_b*k_m+turn)
-    mt.spw("C", v_c*k_m+turn)
-    mt.spw("D", v_d*k_m+turn)
+    mt.start("B", v_b*k_m+turn)
+    mt.start("C", v_c*k_m+turn)
+    mt.start("D", v_d*k_m+turn)
 }
 
 // odometry start -----------
@@ -256,7 +249,7 @@ while (true) {
     //  attack
     if (l_f > FRONT_LIGHT_VALUE) {
         bm_block = 0
-        v = 60        
+        v = 100     //60       
         k = 0.5
         t_attack = time()
         while (l_f > FRONT_LIGHT_VALUE - 5) {
@@ -272,12 +265,12 @@ while (true) {
             //     kick = 0
             // }
 
-            if (v < 100) {
-                v = v + 0.4
-            }      
+            // if (v < 100) {
+            //     v = v + 0.4
+            // }      
             
-            if (k < 1.2) {
-                k = k + 0.005
+            if (k < 1) {
+                k = k + 0.007
             }
 
             mt.spw("B", err_com * k)
@@ -287,50 +280,51 @@ while (true) {
     } else {
         //  move back
         if ((abs(dir - 5) > 2 or (dir == 7  and strres < 50) or (dir == 3 and strres < 25)) and bm_block == 0) {
-            alga(-100, 0)
+            alga(-80, 0)    //-100
 
             if (l_b > BACK_LIGHT_VALUE) {
                 t0 = time()
                 while (time() - t0 < 300) {
-                    alga(0, 100)
+                    alga(0, 80)     //100
                     tone(100, 100, 1)
                 }
 
                 t0 = time()
                 while (time() - t0 < 300) {
-                    alga(-100, 0)
+                    alga(-80, 0)    //-100
                     tone(100, 100, 1)
                 }
             }
 
-            
-            if (btn.rn == "R") {
-                flush()
+
+            // if (btn.rn == "R") {
+            //     flush()
                 
-                t0 = time()
-                while (time() - t0 < 300) {
-                    alga(50, 0)
-                }
+            //     t0 = time()
+            //     while (time() - t0 < 300) {
+            //         alga(80, 0)
+            //     }
 
-                bm_block = 1
-            }
+            //     bm_block = 1
+            // }
         } else {
 
             if (bm_block == 1) {
-                while (abs(dir - 5) > 2 or (dir == 7  and strres < 50) or (dir == 3 and strres < 25)) {
-                    alga(0, 0)
-                }
-                bm_block = 0
+                // while (abs(dir - 5) > 2 or (dir == 7  and strres < 50) or (dir == 3 and strres < 25)) {
+                //     alga(0, 0)
+                // }
+                // bm_block = 0
             } else {
-                if (abs(dir - 5) > 1) {
-                    bm_block = 0
+                if (abs(dir - 5) > 0) {
+                    //bm_block = 0
 
-                    if (strres < 80) {
-                        alga(50, 50*(dir-5))
+                    if ((dir == 3 and strres > STR_VALUE_2) or (dir == 7 and strres > STR_VALUE_4)) {
+                        alga(0, 100*(dir - 5))
                     } else {
-                        alga(-20, 50*(dir-5))
-                    } 
-                } else{
+                        alga(70, 100*(dir - 5))
+                    }
+
+                } else {
 
                     // v = (STR_MAX-strres) * (FRONT_LIGHT_VALUE - l_f) * 0.8
                     
@@ -342,8 +336,8 @@ while (true) {
                     //     }
                     // }
                     
-                    alga(100, 0)
-                    bm_block = 0
+                    alga(80, 0)     //100
+                    //bm_block = 0
                 }
             }
         }

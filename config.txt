@@ -1,5 +1,5 @@
 ﻿none = none
-read_path = C:\Users\egor\egol\fed-ms\DIRs.c
+read_path = C:\Users\egor\egol\fed-ms\ms.c
 save_path = C:\Users\egor\Desktop\EGOL
 error_displaying = 1
 warning_displaying = 0
