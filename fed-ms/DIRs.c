@@ -1,4 +1,4 @@
-check.ports("ABCD 234")
+check.ports("BCD 234")
 who_am_i = getname();
 if (who_am_i == "BOBA") {
   who_aint_me = "BIBA";
@@ -80,7 +80,7 @@ void sensors {
         compass_array = i2c.readregs(2, 1, 66, 4)
         compass = compass_array[0] * 2 + compass_array[1]
         err_com = rm(compass - alpha + 900, 360) - 180
-        
+
         l_f = sen.percent(3)
         l_b = sen.percent(1)
 

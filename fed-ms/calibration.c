@@ -56,8 +56,6 @@ closef(handle);
 
 // sensors
 
-sen.setmode(PORT_LIGHT_BACK, 1);
-
 name = getname();
 
 void bottom { // values in the bottom of the screen
