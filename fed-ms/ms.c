@@ -1,9 +1,10 @@
 /*
 TODO:
-    #   wall checking
-    #   side detecting by odometry
+    #   base moves
+    #   padik
+    #   attack
     #   kicker
-
+    #   odometry or check back wall(make back light sensor)
 */
 check.ports("ABCD 234")
 who_am_i = getname();
