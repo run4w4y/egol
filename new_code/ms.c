@@ -39,16 +39,15 @@ g = 0
 b = 0
 kick = 0
 main_lock = 0
-speed = 75
+is_aligned = 0
+prev_dir = -1
+dir_count = 0
+mode = 1
 
 // voids
 
 // sensors thread
 void sensors {
-    attacks_count = 0;
-    str_res2 = 0;
-    dir2 = 0;
-
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
         dir = irseeker_array[0]
@@ -62,12 +61,6 @@ void sensors {
         for (i_dx = 2; i_dx < 6; i_dx++) {
             strres = max(strres, irseeker_array[i_dx])
         }
-
-		// if (strres < STR_MAX) {
-		// 	dir = 0
-		// } else {
-		// 	dir = dir1
-		// }
 		
         compass_array = i2c.readregs(2, 1, 66, 4)
         compass = compass_array[0] * 2 + compass_array[1]
@@ -140,6 +133,7 @@ void odometry {
 			printupd()
 			print("x", x_res)
 			print("y", y_res)
+			print("dir", dir)
 			yield()
 		}
 	}
@@ -176,7 +170,7 @@ func num alga(forward, side) {
 	v_d = -0.58*f + 0.33*s
 
 	k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-	turn = err_com * 1.2 + (err_com - err_com_old) * 0
+	turn = err_com * 0.6 + (err_com - err_com_old) * 1.5
 	err_com_old = err_com
 
 	mt.spw("B", v_b*k_m - turn)
@@ -189,6 +183,11 @@ func num alga(forward, side) {
 // kicker function
 func num kicker() {
 	// ... 
+}
+
+// attack function
+func num attack() {
+	// ...
 }
 
 // check if back light sensor has detected a ball behind the robot
@@ -260,46 +259,50 @@ func num up_button() {
 	alpha = ALPHA_RIGHT
 	t_start = time()
 	while (time() - t_start < 750) {
-		alga(speed, 0)
+		alga(100, 0)
 	}
 	alga(0, 0)
 	kicker()
 	alpha = COMPASS_ALPHA
 	while (wall_button() == 0) {
-		alga(-speed, 0)
+		alga(-100, 0)
 	}
 	t_start = time()
 	while (time() - t_start < 750) {
-		alga(speed, -speed)
+		alga(100, -100)
 	}
 	alga(0, 0)
 }
 
 // action on the LEFT button press
 func num left_button() {
+	return 0 // disabled atm
+
 	alpha = ALPHA_LEFT
 	t_start = time()
 	while (time() - t_start < 750) { 
-		alga(speed, 0)
+		alga(100, 0)
 	}
 	alga(0, 0)
 	kicker()
 	alpha = COMPASS_ALPHA
 	while (wall_button() == 0) {
-		alga(-speed, 0)
+		alga(-100, 0)
 	}
 	t_start = time()
 	while (time() - t_start < 750) { 
-		alga(speed, speed)
+		alga(100, 100)
 	}
 	alga(0, 0)
 }
 
 // action on the DOWN button press
 func num down_button() {
+	return 0 // disabled atm
+
 	t_start = time()
 	while (time() - t_start < 750) {
-		alga(speed, 0)
+		alga(100, 0)
 	}
 	alga(0, 0)
 	while (dir > 2 and dir < 8 and strres < 100) {
@@ -307,28 +310,10 @@ func num down_button() {
 	}
 }
 
+right_buff = 0
 // action on the RIGHT button press
 func num right_button() {
-	alga(0, 0)
-	tmp_zone = current_zone()
-	if (tmp_zone == 0) {
-		t_start = time()
-		while (time() - t_start < 750) {
-			alga(speed, speed)
-		}
-	} else {
-		if (tmp_zone == 1) {
-			t_start = time()
-			while (time() - t_start < 750) {
-				alga(speed, 0)
-			}
-		} else {
-			t_start = time()
-			while (time() - t_start < 750) {
-				alga(speed, -100)
-			}
-		} 
-	}
+	right_buff = 1
 }
 
 // action on the ENTER button press
@@ -387,54 +372,180 @@ new.thread = sensors
 new.thread = odometry
 new.thread = buttons
 
+// set up mailboxes and other bt stuff
+my_name = getname()
+if (my_name == "BIBA") {
+	other_name = "BOBA"
+	other_mail = "mailbox_boba"
+} else {
+	if (my_name == "BOBA") {
+		other_name = "BIBA"
+		other_mail = "mailbox_biba"
+	} else {
+		other_name = ""
+	}
+}
+
+mail_biba = new.mailbox("mail_biba")
+mail_boba = new.mailbox("mail_boba")
+
+bt_iteration = 0;
+bt_iteration2 = -1;
+bt_loss_count = 0;
+
+// bluetooth function, returns mode
+// 1 - attack
+// 0 - go back
+func num bluetooth() { 
+	// prepare data to be sent
+	btstr = bt_iteration + " " + strres + " " + dir
+	// put the data into the mailbox
+	bt.send(other_name, other_mail, btstr)
+
+	// now check mailbox and parse data from there
+	if (my_name == "BIBA") {
+		btstr2 = bt.last(mail_biba)
+	} else {
+		btstr2 = bt.last(mail_boba)
+	}
+	
+	res_arr = parse(3, btstr2)
+	prev_bt2 = bt_iteration2
+	bt_iteration2 = tonum(res_arr[0])
+	strres2 = tonum(res_arr[1])
+	dir2 = tonum(res_arr[2])
+
+	// check if the other robot is alive
+	if (bt_iteration2 == prev_bt2) {
+		if (bt_loss_count < 50) {
+			bt_loss_count = bt_loss_count + 1;
+		} else {
+			connection_status = 0;
+		}
+	} else {
+		bt_loss_count = 0;
+		connection_status = 1;
+	}
+
+	// if not, then we go into the attack mode
+	if (connection_status == 0) {
+		return 1
+	}
+
+	// compare values and measure the mode
+	if (abs(strres - strres2) < 15) {
+		if (abs(dir - 5) == abs(dir2 - 5)) {
+			if (strres > strres2) {
+				return 1;
+			} else {
+				return 0;
+			}
+		} else {
+			if (abs(dir - 5) > abs(dir2 - 5)) {
+				return 0;
+			} else {
+				return 1;
+			}
+		}
+	} else {
+		if (strres > strres2) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	bt_iteration = bt_iteration + 1;
+	bt_iteration = rm(bt_iteration, 100);
+}
+
 // TODO:
-// 1. add to calibration str range, after which we consider the dir we got is 0
+// 1. fix odometry behavior when only one wheel is working
 
 //  main thread
 while (true) {
 	while (main_lock == 1) {
 		yield()
 	}
-	
-	if (l_f > FRONT_LIGHT_VALUE) {
-		//attack
-		t_attack = time()
-		while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0) {
-			alga(100, 0)
-			tone(20, 100, 1)
-			
-			// if (time() - t_attack > 1000) {
-			// 	mt.shd.pw("A", 100, 0, 80, 0, true)
-			// 	kick = 1
-			// } 
-			
-			// if (time() - t_attack > 1500 and time() - t_attack < 1800) {
-			// 	mt.shd.pw("A", -100, 0, 90, 0, true)
-			// }
+
+	if (other_name != "") {
+		current_action = bluetooth()
+	} else {
+		current_action = 1
+	}
+
+	if (current_action == 1) {
+		right_buff = 0
+		is_aligned = 0
+		if (l_f > FRONT_LIGHT_VALUE) {
+			//attack
+			t_attack = time()
+			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0) {
+				alga(100, 0)
+				
+				
+				// if (time() - t_attack > 1000) {
+				// 	mt.shd.pw("A", 100, 0, 80, 0, true)
+				// 	kick = 1
+				// } 
+				
+				// if (time() - t_attack > 1500 and time() - t_attack < 1800) {
+				// 	mt.shd.pw("A", -100, 0, 90, 0, true)
+				// }
+			}
+		} else {
+			//back
+			if (abs(dir - 5) > 2 or (dir == 7 and strres < 40)) {
+				go_back()
+			} else {
+				if (dir != 5) {
+					if (strres < 50) {
+						v = (133 - strres) * 1.1 + 20
+						
+						if (v < 40) {
+							v = 40
+						}
+						tone(100, 100, 1)
+						alga(50, v*(dir-5)/abs(dir-5))
+					} else {
+						v = (133 - strres) * 1.68 + 50
+						
+						if (v < 50) {
+							v = 50
+						}
+						alga(0, v*(dir-5)/abs(dir-5))
+					}
+				} else {
+					alga(100, 0)
+				}
+			}
 		}
 	} else {
-		//back
-		if (abs(dir - 5) > 2 or (dir == 7 and strres < 40)) {
+		if (right_buff = 0) {
 			go_back()
 		} else {
-			if (dir != 5) {
-				if (strres < 80) {
-					v = (133 - strres) * 1.1 + 20
-					
-					if (v < 40) {
-						v = 40
+			alga(0, 0)
+			if (is_aligned == 0) {
+				tmp_zone = current_zone()
+				if (tmp_zone == 0) {
+					t_start = time()
+					while (time() - t_start < 750 and main_lock == 0) {
+						alga(100, 100)
 					}
-					alga(50, v*(dir-5)/abs(dir-5))
 				} else {
-					v = (133 - strres) * 1.68 + 60
-					
-					if (v < 50) {
-						v = 50
+					if (tmp_zone == 1) {
+						t_start = time()
+						while (time() - t_start < 750 and main_lock == 0) {
+							alga(100, 0)
+						}
+					} else {
+						t_start = time()
+						while (time() - t_start < 750 and main_lock == 0) {
+							alga(100, -100)
+						}
 					}
-					alga(0, v*(dir-5)/abs(dir-5))
 				}
-			} else {
-				alga(100, 0)
+				is_aligned = 1
 			}
 		}
 	}

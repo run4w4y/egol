@@ -243,6 +243,7 @@ func_props = {}
 local_vars = []
 i = 0
 for line in lines:
+    print(line)
     i += 1
     output_line = line
 
