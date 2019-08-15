@@ -51,7 +51,7 @@ void sensors {
 
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
-        dir1 = irseeker_array[0]
+        dir = irseeker_array[0]
         str1 = irseeker_array[1]
         str2 = irseeker_array[2]
         str3 = irseeker_array[3]
@@ -63,11 +63,11 @@ void sensors {
             strres = max(strres, irseeker_array[i_dx])
         }
 
-		if (strres < STR_MAX) {
-			dir = 0
-		} else {
-			dir = dir1
-		}
+		// if (strres < STR_MAX) {
+		// 	dir = 0
+		// } else {
+		// 	dir = dir1
+		// }
 		
         compass_array = i2c.readregs(2, 1, 66, 4)
         compass = compass_array[0] * 2 + compass_array[1]
@@ -176,7 +176,7 @@ func num alga(forward, side) {
 	v_d = -0.58*f + 0.33*s
 
 	k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-	turn = err_com * 0.5 + (err_com - err_com_old) * 1.5
+	turn = err_com * 1.2 + (err_com - err_com_old) * 0
 	err_com_old = err_com
 
 	mt.spw("B", v_b*k_m - turn)
@@ -189,11 +189,6 @@ func num alga(forward, side) {
 // kicker function
 func num kicker() {
 	// ... 
-}
-
-// attack function
-func num attack() {
-	// ...
 }
 
 // check if back light sensor has detected a ball behind the robot
@@ -402,25 +397,44 @@ while (true) {
 	}
 	
 	if (l_f > FRONT_LIGHT_VALUE) {
-		//attack()
+		//attack
+		t_attack = time()
 		while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0) {
 			alga(100, 0)
+			tone(20, 100, 1)
+			
+			// if (time() - t_attack > 1000) {
+			// 	mt.shd.pw("A", 100, 0, 80, 0, true)
+			// 	kick = 1
+			// } 
+			
+			// if (time() - t_attack > 1500 and time() - t_attack < 1800) {
+			// 	mt.shd.pw("A", -100, 0, 90, 0, true)
+			// }
 		}
 	} else {
 		//back
-		if (abs(dir - 5) > 2 or (dir == 7 and strres < 50)) {
+		if (abs(dir - 5) > 2 or (dir == 7 and strres < 40)) {
 			go_back()
 		} else {
 			if (dir != 5) {
-				v = (133 - strres) * 2 + 50
-				
-				if (v < 50) {
-					v = 50
+				if (strres < 80) {
+					v = (133 - strres) * 1.1 + 20
+					
+					if (v < 40) {
+						v = 40
+					}
+					alga(50, v*(dir-5)/abs(dir-5))
+				} else {
+					v = (133 - strres) * 1.68 + 60
+					
+					if (v < 50) {
+						v = 50
+					}
+					alga(0, v*(dir-5)/abs(dir-5))
 				}
-				alga(0, v*(dir-5)/abs(dir-5))
-				
 			} else {
-				alga(80, 0)
+				alga(100, 0)
 			}
 		}
 	}
