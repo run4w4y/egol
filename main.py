@@ -243,7 +243,6 @@ func_props = {}
 local_vars = []
 i = 0
 for line in lines:
-    print(line)
     i += 1
     output_line = line
 
@@ -399,7 +398,7 @@ for line in lines:
     elif fw == 'return':
         if return_type == '':
             error('unexpected return in the line '+str(i))
-        val = output_line[7:].split('\n')[0]
+        val = output_line.split('\n')[0].split(' ')[-1]
         if return_type == 'num':
             output_line = 'f.returnnumber(' + val + ')'
         else:

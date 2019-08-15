@@ -123,31 +123,42 @@ new.thread = sensors
 //  main
 while (true) {
 
-    //  forward
-    turn = err_com * 0.7 + (err_com - err_com_old) * 2
-    err_com_old = err_com
-    mt.start("B", -turn)
-    mt.start("C", 100-turn*0.4)
-    mt.start("D", 100+turn*0.4)
+    t0 = time()
+    while (time() - t0 < 500) {
+        //  forward
+        turn = err_com * 0.7 + (err_com - err_com_old) * 2
+        err_com_old = err_com
+        mt.start("B", -turn)
+        mt.start("C", 100-turn*0.4)
+        mt.start("D", 100+turn*0.4)
+    }
 
-    //  back 
-    turn = err_com * 0.7 + (err_com - err_com_old) * 2
-    err_com_old = err_com
-    mt.start("B", -turn)
-    mt.start("C", -100-turn*0.4)
-    mt.start("D", -100+turn*0.4)
+    t0 = time()
+    while (time() - t0 < 500) {
+        //  back 
+        turn = err_com * 0.7 + (err_com - err_com_old) * 2
+        err_com_old = err_com
+        mt.start("B", -turn)
+        mt.start("C", -100-turn*0.4)
+        mt.start("D", -100+turn*0.4)
+    }
 
-    //  right
-    turn = err_com * 0.7 + (err_com - err_com_old) * 2
-    err_com_old = err_com
-    mt.start("B", -100-turn)
-    mt.start("C", 41-turn*0.4)
-    mt.start("D", -41+turn*0.4)
+    t0 = time()
+    while (time() - t0 < 500) {
+        //  right
+        turn = err_com * 0.7 + (err_com - err_com_old) * 2
+        err_com_old = err_com
+        mt.start("B", -100-turn)
+        mt.start("C", 41-turn*0.4)
+        mt.start("D", -41+turn*0.4)
+    }
 
-    //  left
-    turn = err_com * 0.7 + (err_com - err_com_old) * 2
-    err_com_old = err_com
-    mt.start("B", 100-turn)
-    mt.start("C", -41-turn*0.4)
-    mt.start("D", +41+turn*0.4)
+    t0 = time()
+    while (time() - t0 < 500) {
+        turn = err_com * 0.7 + (err_com - err_com_old) * 2
+        err_com_old = err_com
+        mt.start("B", 100-turn)
+        mt.start("C", -41-turn*0.4)
+        mt.start("D", 41+turn*0.4)
+    }
 }
