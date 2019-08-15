@@ -186,7 +186,7 @@ func num up_button() {
 	alga(0, 0)
 	kicker()
 	alpha = COMPASS_ALPHA
-	while (wall_button == 0) {
+	while (wall_button() == 0) {
 		alga(-speed, 0)
 	}
 	t_start = time()
@@ -206,7 +206,7 @@ func num left_button() {
 	alga(0, 0)
 	kicker()
 	alpha = COMPASS_ALPHA
-	while (wall_button == 0) {
+	while (wall_button() == 0) {
 		alga(-speed, 0)
 	}
 	t_start = time()
