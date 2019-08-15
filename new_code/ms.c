@@ -196,7 +196,17 @@ func num check_back() {
 }
 
 func num avoid_ball() {
-	alga(0, speed)
+	t0 = time()
+	while (time() - t0 < 300) {
+		alga(0, 80)     //100
+		tone(100, 100, 1)
+	}
+
+	t0 = time()
+	while (time() - t0 < 300) {
+		alga(-80, 0)    //-100
+		tone(100, 100, 1)
+	}
 }
 
 // go_back function
@@ -388,11 +398,12 @@ while (true) {
 			go_back()
 		} else {
 			if (dir != 5) {
-				if ((dir == 3 and strres < STR_VALUE_2) or (dir == 7 and strres < STR_VALUE_4)) {
-					alga(0, 100*(dir - 5))
-				} else {
-					alga(0, 70*(dir - 5))
+				v = (133 - strres) * 1 + 50
+				
+				if (v < 50) {
+					v = 50
 				}
+				alga(0, v*(dir-5)/abs(dir-5))
 				
 			} else {
 				alga(80, 0)
