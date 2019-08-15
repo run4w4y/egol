@@ -10,7 +10,7 @@ PORT_LIGHT_FRONT = 3
 
 handle = open.r("cal.txt");
 
-values_len = 8;
+values_len = 9;
 values = new.vector(values_len, 0);
 
 names[0] = "alpha";
@@ -21,6 +21,7 @@ names[4] = "back_lt";
 names[5] = "str2";
 names[6] = "str4";
 names[7] = "front_lt";
+names[8] = "str_ran";
 
 if (handle == 0) {
 	COMPASS_ALPHA = 0;
@@ -31,6 +32,7 @@ if (handle == 0) {
 	STR_VALUE_2 = 0;
 	STR_VALUE_4 = 0;
 	LIGHT_FRONT = 0;
+	STR_RANGE = 0;
 } else {
 	COMPASS_ALPHA = tonum(readline(handle));
 	ALPHA_LEFT = tonum(readline(handle));
@@ -40,7 +42,7 @@ if (handle == 0) {
 	STR_VALUE_2 = tonum(readline(handle));
 	STR_VALUE_4 = tonum(readline(handle));
 	LIGHT_FRONT = tonum(readline(handle));
-	
+	STR_RANGE = tonum(readline(handle));
 }
 
 values[0] = COMPASS_ALPHA;
@@ -51,6 +53,7 @@ values[4] = BACK_LIGHT_VALUE;
 values[5] = STR_VALUE_2;
 values[6] = STR_VALUE_4;
 values[7] = LIGHT_FRONT;
+values[8] = STR_RANGE;
 
 closef(handle);
 
@@ -285,6 +288,23 @@ while (true) {
 		if (i == 6) {
 			irseeker_array = i2c.readregs(PORT_SEEKER, 8, 73, 6);
 			values[i] = irseeker_array[4];
+		}
+
+		if (i == 8) {
+			irseeker_array = i2c.readregs(4, 8, 73, 6)
+			dir = irseeker_array[0]
+			str1 = irseeker_array[1]
+			str2 = irseeker_array[2]
+			str3 = irseeker_array[3]
+			str4 = irseeker_array[4]
+			str5 = irseeker_array[5]
+
+			strres = irseeker_array[1]
+			for (i_dx = 2; i_dx < 6; i_dx++) {
+				strres = max(strres, irseeker_array[i_dx])
+			}
+
+			values[i] = strres
 		}
 	}
 	
