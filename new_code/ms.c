@@ -50,7 +50,7 @@ void sensors {
 
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
-        dir = irseeker_array[0]
+        dir1 = irseeker_array[0]
         str1 = irseeker_array[1]
         str2 = irseeker_array[2]
         str3 = irseeker_array[3]
@@ -62,6 +62,12 @@ void sensors {
             strres = max(strres, irseeker_array[i_dx])
         }
 
+		if (strres < STR_MAX) {
+			dir = 0
+		} else {
+			dir = dir1
+		}
+		
         compass_array = i2c.readregs(2, 1, 66, 4)
         compass = compass_array[0] * 2 + compass_array[1]
         err_com = rm(compass - alpha + 900, 360) - 180
@@ -391,14 +397,16 @@ while (true) {
 	
 	if (l_f > FRONT_LIGHT_VALUE) {
 		//attack()
-		alga(80, 0)
+		while (l_f-FRONT_LIGHT_VALUE > -5) {
+			alga(100, 0)
+		}
 	} else {
 		//back
 		if (abs(dir - 5) > 2 or (dir == 7 and strres < 50)) {
 			go_back()
 		} else {
 			if (dir != 5) {
-				v = (133 - strres) * 1 + 50
+				v = (133 - strres) * 2 + 50
 				
 				if (v < 50) {
 					v = 50
