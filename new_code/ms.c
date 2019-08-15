@@ -1,5 +1,5 @@
 // check if all of the ports we are using are working correctly
-check.ports("ABCD 1234")
+//check.ports("ABCD 1234")
 sen.setmode(1, 1)
 sen.setmode(3, 1)
 
@@ -182,6 +182,30 @@ func num alga(forward, side) {
 	mt.spw("B", v_b*k_m - turn)
 	mt.spw("C", v_c*k_m - turn)
 	mt.spw("D", v_d*k_m - turn)
+}
+
+func num alga_pizda(v_r, tizlek) {
+	if (v_r < 0) {
+		motor_Power_D = tizlek * (cos(60+v_r) * cos(180) - sin(60+v_r) * sin(180)) + turn
+    	motor_Power_B = tizlek * (cos(60+v_r) * cos(300) - sin(60+v_r) * sin(300)) + turn
+    	motor_Power_C = tizlek * (cos(60+v_r) * cos(180) - sin(60+v_r) * sin(180)) + turn
+	} else {
+		if (v_r > 0) {
+			motor_Power_D = tizlek * (cos(v_r) * cos(60) - sin(v_r) * sin(180)) + turn
+    		motor_Power_B = tizlek * (cos(v_r) * cos(60) - sin(v_r) * sin(120)) + turn
+    		motor_Power_C = tizlek * (cos(v_r) * cos(180) - sin(v_r) * sin(180)) + turn
+		} else {
+			if (v_r == 0) {
+				motor_Power_D = tizlek + turn
+    			motor_Power_B = turn
+    			motor_Power_C = -tizlek + turn
+			}
+		}
+	}
+
+    motor.Start("D",motor_Power_D)
+    motor.Start("B",motor_Power_B)
+    motor.Start("C",motor_Power_C)
 }
 
 // interface functions go there 
