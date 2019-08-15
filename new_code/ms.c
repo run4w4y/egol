@@ -40,15 +40,13 @@ b = 0
 kick = 0
 main_lock = 0
 is_aligned = 0
+prev_dir = -1
+dir_count = 0
 
 // voids
 
 // sensors thread
 void sensors {
-    attacks_count = 0;
-    str_res2 = 0;
-    dir2 = 0;
-
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
         dir1 = irseeker_array[0]
@@ -64,9 +62,21 @@ void sensors {
         }
 
 		if (strres < STR_MAX) {
-			dir = 0
+			udir = 0
 		} else {
-			dir = dir1
+			udir = dir1
+		}
+
+		if (prev_dir == -1 or prev_dir == udir) {
+			dir = udir
+			dir_count = 0
+		} else {
+			if (dir_count < 5) {
+				dir_count = dir_count + 1
+			} else {
+				dir_count = 0
+				dir = udir
+			}
 		}
 		
         compass_array = i2c.readregs(2, 1, 66, 4)
