@@ -135,6 +135,7 @@ void odometry {
 // reset odometry function
 func num odometry_reset() {
 	mt.resetcount("BCD")
+	time_odometry = time()
 	x_res = 0
 	y_res = 0
 	
@@ -253,10 +254,10 @@ func num right_button() {
 
 // action on the ENTER button press
 func num enter_button() {
-	odometry_reset()
 	while (btn.rn == "") {
 		yield()
 	}
+	odometry_reset()
 }
 
 func num check_buttons() {
