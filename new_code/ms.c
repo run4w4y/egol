@@ -14,6 +14,7 @@ BACK_LIGHT_VALUE = tonum(readline(handle));
 STR_VALUE_2 = tonum(readline(handle));
 STR_VALUE_4 = tonum(readline(handle));
 FRONT_LIGHT_VALUE = tonum(readline(handle));
+STR_RANGE = tonum(readline(handle));
 closef(handle);
 
 // define global variables
@@ -136,6 +137,9 @@ void odometry {
 		
 		// delay
 		while (time() - iter_start < freq) {
+			printupd()
+			print("x", x_res)
+			print("y", y_res)
 			yield()
 		}
 	}
@@ -334,7 +338,9 @@ func num right_button() {
 
 // action on the ENTER button press
 func num enter_button() {
+	btn.wait.release()
 	while (btn.rn == "") {
+		alga(0, 0)
 		yield()
 	}
 	odometry_reset()
@@ -397,7 +403,7 @@ while (true) {
 	
 	if (l_f > FRONT_LIGHT_VALUE) {
 		//attack()
-		while (l_f-FRONT_LIGHT_VALUE > -5) {
+		while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0) {
 			alga(100, 0)
 		}
 	} else {
