@@ -36,6 +36,7 @@ g = 0
 b = 0
 kick = 0
 main_lock = 0
+speed = 75
 
 // voids
 
@@ -62,8 +63,8 @@ void sensors {
         compass_array = i2c.readregs(2, 1, 66, 4)
         compass = compass_array[0] * 2 + compass_array[1]
         err_com = rm(compass - alpha + 900, 360) - 180
-	// we are using this in odometry, abs stands for absolute
-	err_com_abs = rm(compass - COMPASS_ALPHA + 900, 360) - 180
+		// we are using this in odometry, abs stands for absolute
+		err_com_abs = rm(compass - COMPASS_ALPHA + 900, 360) - 180
 
         l_f = sen.percent(3)
     }
@@ -179,17 +180,17 @@ func num up_button() {
 	alpha = ALPHA_RIGHT
 	t_start = time()
 	while (time() - t_start < 750) {
-		alga(100, 0)
+		alga(speed, 0)
 	}
 	alga(0, 0)
 	kicker()
 	alpha = COMPASS_ALPHA
 	while (wall_button == 0) {
-		alga(-100, 0)
+		alga(-speed, 0)
 	}
 	t_start = time()
 	while (time() - t_start < 750) {
-		alga(100, -100)
+		alga(speed, -speed)
 	}
 	alga(0, 0)
 }
@@ -199,17 +200,17 @@ func num left_button() {
 	alpha = ALPHA_LEFT
 	t_start = time()
 	while (time() - t_start < 750) { 
-		alga(100, 0)
+		alga(speed, 0)
 	}
 	alga(0, 0)
 	kicker()
 	alpha = COMPASS_ALPHA
 	while (wall_button == 0) {
-		alga(-100, 0)
+		alga(-speed, 0)
 	}
 	t_start = time()
 	while (time() - t_start < 750) { 
-		alga(100, 100)
+		alga(speed, speed)
 	}
 	alga(0, 0)
 }
@@ -218,7 +219,7 @@ func num left_button() {
 func num down_button() {
 	t_start = time()
 	while (time() - t_start < 750) {
-		alga(100, 0)
+		alga(speed, 0)
 	}
 	alga(0, 0)
 	while (dir > 2 and dir < 8 and strres < 100) {
@@ -233,8 +234,20 @@ func num right_button() {
 	if (tmp_zone == 0) {
 		t_start = time()
 		while (time() - t_start < 750) {
-			alga(100, 100)
-		}	
+			alga(speed, speed)
+		}
+	} else {
+		if (tmp_zone == 1) {
+			t_start = time()
+			while (time() - t_start < 750) {
+				alga(speed, 0)
+			}
+		} else {
+			t_start = time()
+			while (time() - t_start < 750) {
+				alga(speed, -100)
+			}
+		} 
 	}
 }
 
@@ -341,13 +354,13 @@ func num check_back() {
 }
 
 func num avoid_ball() {
-	alga(0, 100)
+	alga(0, speed)
 }
 
 // go_back function
 func num go_back() {
 	// NOTE: might be incorrect way to go back, idk
-	alga(-100, 0)
+	alga(-speed, 0)
 	if (check_back() == 1) {
 		avoid_ball()
 	} 
@@ -358,5 +371,13 @@ func num go_back() {
 
 //  main thread
 while (true) {
-	// bruh
+	while (main_lock == 1) {
+		yield()
+	}
+
+	if (dir > 2 and dir < 9) {
+		attack()
+	} else {
+		go_back()
+	}
 }
