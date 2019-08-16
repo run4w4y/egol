@@ -170,7 +170,7 @@ func num alga(forward, side) {
 	v_d = -0.58*f + 0.33*s
 
 	k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-	turn = err_com * 0.3 + (err_com - err_com_old) * 0.6
+	turn = err_com * 0.6 + (err_com - err_com_old) * 0.3
 	err_com_old = err_com
 
 	mt.spw("B", v_b*k_m - turn)
@@ -480,21 +480,24 @@ while (true) {
 		if (l_f > FRONT_LIGHT_VALUE) {
 			//attack
 			t_attack = time()
+			k = 2
 			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0) {
-				if (time() < 20000) {
-					if (current_zone() == 0) {
-						turn = rm(compass - ALPHA_LEFT + 900, 360) - 180
-					} else {
-						if (current_zone() == 2) {
-							turn = rm(compass - ALPHA_RIGHT + 900, 360) - 180
-						} else {
-							turn = err_com
-						}
-					}
-				}
+				// if (time() < 20000) {
+				// 	if (current_zone() == 0) {
+				// 		turn = rm(compass - ALPHA_LEFT + 900, 360) - 180
+				// 	} else {
+				// 		if (current_zone() == 2) {
+				// 			turn = rm(compass - ALPHA_RIGHT + 900, 360) - 180
+				// 		} else {
+				// 			turn = err_com
+				// 		}
+				// 	}
+				// }
+
+				turn = err_com
 
 				if (k < 4) { 
-            		k = k + 0.002
+            		k = k + 0.001
         		}
 
 				mt.start("B", -turn * k)
