@@ -1,6 +1,7 @@
 // check if all of the ports we are using are working correctly
 //check.ports("ABCD 1234")
 sen.setmode(1, 1)
+sen.setmode(3, 1)
 
 // read all of the calibration values from file
 handle = open.r("cal.txt");
@@ -151,36 +152,33 @@ func num odometry_reset() {
 }
 
 // alga function
+func num alga(forward, side) {
+	if (abs(forward) > 100) {
+		f = 100 * forward / abs(forward)
+	} else {
+		f = forward
+	}
 
-// func num alga(forward, side) {
-// 	if (abs(forward) > 100) {
-// 		f = 100 * forward / abs(forward)
-// 	} else {
-// 		f = forward
-// 	}
+	if (abs(side) > 100) {
+		s = 100 * side / abs(side)
+	} else {
+		s = side
+	}
 
-// 	if (abs(side) > 100) {
-// 		s = 100 * side / abs(side)
-// 	} else {
-// 		s = side
-// 	}
+	v_b = -0.67*s
+	v_c = 0.58*f + 0.33*s
+	v_d = -0.58*f + 0.33*s
 
-// 	v_b = -0.67*s
-// 	v_c = 0.58*f + 0.33*s
-// 	v_d = -0.58*f + 0.33*s
+	k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
+	turn = err_com * 0.6 + (err_com - err_com_old) * 1.5
+	err_com_old = err_com
 
-// 	k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-// 	turn = err_com * 0.6 + (err_com - err_com_old) * 1.5
-// 	err_com_old = err_com
-
-// 	mt.spw("B", v_b*k_m - turn)
-// 	mt.spw("C", v_c*k_m - turn)
-// 	mt.spw("D", v_d*k_m - turn)
-// }
+	mt.spw("B", v_b*k_m - turn)
+	mt.spw("C", v_c*k_m - turn)
+	mt.spw("D", v_d*k_m - turn)
+}
 
 func num alga_pizda(v_r, tizlek) {
-	turn = err_com * 0.3 + (err_com - err_com_old) * 0.6
-	err_com_old = err_com
 	if (v_r < 0) {
 		motor_Power_D = tizlek * (cos(60+v_r) * cos(180) - sin(60+v_r) * sin(180)) + turn
     	motor_Power_B = tizlek * (cos(60+v_r) * cos(300) - sin(60+v_r) * sin(300)) + turn
@@ -199,9 +197,9 @@ func num alga_pizda(v_r, tizlek) {
 		}
 	}
 
-    mt.start("D",-motor_Power_D)
-    mt.start("B",-motor_Power_B)
-    mt.start("C",-motor_Power_C)
+    motor.Start("D",motor_Power_D)
+    motor.Start("B",motor_Power_B)
+    motor.Start("C",motor_Power_C)
 }
 
 // interface functions go there 
@@ -228,21 +226,20 @@ func num check_back() {
 func num avoid_ball() {
 	t0 = time()
 	while (time() - t0 < 300) {
-		
-		alga_pizda(0, 80)//alga(0, 80)     //100
+		alga(0, 80)     //100
 		tone(100, 100, 1)
 	}
 
 	t0 = time()
 	while (time() - t0 < 300) {
-		alga_pizda(180, 80)//alga(-80, 0)    //-100
+		alga(-80, 0)    //-100
 		tone(100, 100, 1)
 	}
 }
 
 // go_back function
 func num go_back() {
-	alga_pizda(180, 100)//alga(-100, 0)
+	alga(-100, 0)
 
 	if (check_back() == 1) {
 		avoid_ball()
@@ -286,19 +283,19 @@ func num up_button() {
 	alpha = ALPHA_RIGHT
 	t_start = time()
 	while (time() - t_start < 750) {
-		alga_pizda(0, 100)//alga(100, 0)
+		alga(100, 0)
 	}
-	alga_pizda(0, 0)
+	alga(0, 0)
 	kicker()
 	alpha = COMPASS_ALPHA
 	while (wall_button() == 0) {
-		alga_pizda(180, 100)
+		alga(-100, 0)
 	}
 	t_start = time()
 	while (time() - t_start < 750) {
-		alga_pizda(45, 100)
+		alga(100, -100)
 	}
-	alga_pizda(0, 0)
+	alga(0, 0)
 }
 
 // action on the LEFT button press
@@ -308,19 +305,19 @@ func num left_button() {
 	alpha = ALPHA_LEFT
 	t_start = time()
 	while (time() - t_start < 750) { 
-		alga_pizda(0, 100)
+		alga(100, 0)
 	}
-	alga_pizda(0, 0)
+	alga(0, 0)
 	kicker()
 	alpha = COMPASS_ALPHA
 	while (wall_button() == 0) {
-		alga_pizda(180, 100)
+		alga(-100, 0)
 	}
 	t_start = time()
 	while (time() - t_start < 750) { 
-		alga_pizda(-45, 100)
+		alga(100, 100)
 	}
-	alga_pizda(0, 0)
+	alga(0, 0)
 }
 
 // action on the DOWN button press
@@ -329,9 +326,9 @@ func num down_button() {
 
 	t_start = time()
 	while (time() - t_start < 750) {
-		alga_pizda(0, 100)
+		alga(100, 0)
 	}
-	alga_pizda(0, 0)
+	alga(0, 0)
 	while (dir > 2 and dir < 8 and strres < 100) {
 		yield()
 	}
@@ -347,7 +344,7 @@ func num right_button() {
 func num enter_button() {
 	btn.wait.release()
 	while (btn.rn == "") {
-		alga_pizda(0, 0)
+		alga(0, 0)
 		yield()
 	}
 	odometry_reset()
@@ -508,7 +505,7 @@ while (true) {
 			//attack
 			t_attack = time()
 			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0) {
-				alga_pizda(0, 100)
+				alga(100, 0)
 				
 				
 				// if (time() - t_attack > 1000) {
@@ -533,21 +530,17 @@ while (true) {
 							v = 40
 						}
 						tone(100, 100, 1)
-						angle = 45*(5-dir)/abs(5-dir)
-						alga_pizda(angle, v)
+						alga(50, v*(dir-5)/abs(dir-5))
 					} else {
 						v = (133 - strres) * 1.68 + 50
 						
 						if (v < 50) {
 							v = 50
 						}
-
-						angle = 90*(5-dir)/abs(5-dir)
-
-						alga_pizda(angle, v)
+						alga(0, v*(dir-5)/abs(dir-5))
 					}
 				} else {
-					alga_pizda(0, 100)
+					alga(100, 0)
 				}
 			}
 		}
@@ -555,24 +548,24 @@ while (true) {
 		if (right_buff = 0) {
 			go_back()
 		} else {
-			alga_pizda(0, 0)
+			alga(0, 0)
 			if (is_aligned == 0) {
 				tmp_zone = current_zone()
 				if (tmp_zone == 0) {
 					t_start = time()
 					while (time() - t_start < 750 and main_lock == 0) {
-						alga_pizda(-45, 100)
+						alga(100, 100)
 					}
 				} else {
 					if (tmp_zone == 1) {
 						t_start = time()
 						while (time() - t_start < 750 and main_lock == 0) {
-							alga_pizda(0, 100)
+							alga(100, 0)
 						}
 					} else {
 						t_start = time()
 						while (time() - t_start < 750 and main_lock == 0) {
-							alga_pizda(45, 100)
+							alga(100, -100)
 						}
 					}
 				}

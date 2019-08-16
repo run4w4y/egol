@@ -74,24 +74,24 @@ void sensors {
 
 new.thread = sensors
 
-func num alga_pizda(v_r, tizlek) {
+func num alga_pizda(Vector_R, tizlek) {
 
     turn = err_com * 0.3 + (err_com - err_com_old) * 0.6
 	err_com_old = err_com
 
 
-	if (v_r < 0) {
-		motor_Power_D = tizlek * (cos(rad(60+v_r)) * cos(rad(180)) - sin(rad(60+v_r)) * sin(rad(180))) + turn
-    	motor_Power_B = tizlek * (cos(rad(60+v_r)) * cos(rad(300)) - sin(rad(60+v_r)) * sin(rad(300))) + turn
-    	motor_Power_C = tizlek * (cos(rad(60+v_r)) * cos(rad(180)) - sin(rad(60+v_r)) * sin(rad(180))) + turn
+	if (Vector_R < 0) {
+		motor_Power_A = tizlek * (cos(rad(60+Vector_R)) * cos(rad(180)) - sin(rad(60+Vector_R)) * sin(rad(180))) + turn
+    	motor_Power_B = tizlek * (cos(rad(60+Vector_R)) * cos(rad(300)) - sin(rad(60+Vector_R)) * sin(rad(300))) + turn
+    	motor_Power_C = tizlek * (cos(rad(60+Vector_R)) * cos(rad(180)) - sin(rad(60+Vector_R)) * sin(rad(180))) + turn
 	} else {
-		if (v_r > 0) {
-			motor_Power_D = tizlek * (cos(rad(v_r)) * cos(rad(60)) - sin(rad(v_r)) * sin(rad(180))) + turn
-    		motor_Power_B = tizlek * (cos(rad(v_r)) * cos(rad(60)) - sin(rad(v_r)) * sin(rad(120))) + turn
-    		motor_Power_C = tizlek * (cos(rad(v_r)) * cos(rad(180)) - sin(rad(v_r)) * sin(rad(180))) + turn
+		if (Vector_R > 0) {
+			motor_Power_A = tizlek * (cos(rad(Vector_R)) * cos(rad(60)) - sin(rad(Vector_R)) * sin(rad(180))) + turn
+    		motor_Power_B = tizlek * (cos(rad(Vector_R)) * cos(rad(60)) - sin(rad(Vector_R)) * sin(rad(120))) + turn
+    		motor_Power_C = tizlek * (cos(rad(Vector_R)) * cos(rad(180)) - sin(rad(Vector_R)) * sin(rad(180))) + turn
 		} else {
-			if (v_r == 0) {
-				motor_Power_D = tizlek + turn
+			if (Vector_R == 0) {
+				motor_Power_A = tizlek + turn
     			motor_Power_B = turn
     			motor_Power_C = -tizlek + turn
 			}
