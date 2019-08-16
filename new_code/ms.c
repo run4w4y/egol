@@ -159,6 +159,8 @@ void odometry {
 			print("x", x_res)
 			print("y", y_res)
 			print("dir", dir)
+			print("conn", connection_status)
+			print("mode", mode)
 			yield()
 		}
 	}
@@ -482,7 +484,14 @@ void buttons {
 		if (other_name != "") {
 			mode = bluetooth()
 		} else {
+			tone(100, 100, 100)
 			mode = 1
+		}
+
+		if (mode == 1) {
+			led(2)
+		} else {
+			led(1)
 		}
 	}
 }
