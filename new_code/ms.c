@@ -549,10 +549,10 @@ while (true) {
 			} else {
 				if (dir != 5) {
 					if (strres < 50) {
-						v = (133 - strres) * 1.1 + 20
+						v = (133 - strres) * 1 + 20
 						
-						if (v < 40) {
-							v = 40
+						if (v < 35) {
+							v = 35
 						}
 						tone(100, 100, 1)
 						alga(50, v*(dir-5)/abs(dir-5))
