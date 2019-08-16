@@ -1,5 +1,5 @@
 ﻿none = none
-read_path = C:\egol\new_code\new_motor_man.c
+read_path = C:\egol\new_code\ms.c
 save_path = C:\EGOLsb
 error_displaying = 1
 warning_displaying = 0
