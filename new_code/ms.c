@@ -199,9 +199,9 @@ func num alga_pizda(v_r, tizlek) {
 		}
 	}
 
-    mt.Start("D",-motor_Power_D)
-    mt.Start("B",-motor_Power_B)
-    mt.Start("C",-motor_Power_C)
+    mt.start("D",-motor_Power_D)
+    mt.start("B",-motor_Power_B)
+    mt.start("C",-motor_Power_C)
 }
 
 // interface functions go there 
@@ -533,14 +533,18 @@ while (true) {
 							v = 40
 						}
 						tone(100, 100, 1)
-						alga_pizda(45*(5-dir)/abs(5-dir), v)
+						angle = 45*(5-dir)/abs(5-dir)
+						alga_pizda(angle, v)
 					} else {
 						v = (133 - strres) * 1.68 + 50
 						
 						if (v < 50) {
 							v = 50
 						}
-						alga_pizda(90*(5-dir)/abs(5-dir), v)
+
+						angle = 90*(5-dir)/abs(5-dir)
+
+						alga_pizda(angle, v)
 					}
 				} else {
 					alga_pizda(0, 100)
