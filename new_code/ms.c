@@ -197,7 +197,7 @@ func num alga(forward, side) {
 	v_d = -0.58*f + 0.33*s
 
 	k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-	turn = err_com * 0.5 + (err_com - err_com_old) * 1
+	turn = err_com * 0.5 + (err_com - err_com_old) * 1.5
 	err_com_old = err_com
 
 	mt.spw("B", v_b*k_m - turn)
@@ -558,10 +558,10 @@ while (true) {
 			} else {
 				if (dir != 5) {
 					if (strres < 50) {
-						v = (133 - strres) * 1.1 + 20
+						v = (133 - strres) * 1 + 20
 						
-						if (v < 40) {
-							v = 40
+						if (v < 35) {
+							v = 35
 						}
 						tone(100, 100, 1)
 						alga(50, v*(dir-5)/abs(dir-5))
