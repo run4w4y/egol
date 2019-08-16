@@ -43,14 +43,35 @@ is_aligned = 0
 prev_dir = -1
 dir_count = 0
 mode = 1
+kicker_done = 0
+kicker_time = 0
+connection_status = 0
 
 // voids
+
+prev_dir = 0
+zeroes_cnt = 0
+
+func num filter_dir(raw_dir) {
+    if (raw_dir == 0 and prev_dir != 0 and prev_dir != 1 and prev_dir != 9) {
+        if (zeroes_cnt < 15) {
+            zeroes_cnt = zeroes_cnt + 1
+        } else {
+            zeroes_cnt = 0
+            prev_dir = raw_dir
+        }
+    } else {
+        zeroes_cnt = 0
+        prev_dir = raw_dir
+    }
+    return prev_dir
+}
 
 // sensors thread
 void sensors {
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
-        dir = irseeker_array[0]
+        dir = filter_dir(irseeker_array[0])
         str1 = irseeker_array[1]
         str2 = irseeker_array[2]
         str3 = irseeker_array[3]
@@ -70,6 +91,11 @@ void sensors {
 
         l_f = sen.percent(3)
 		l_b = sen.percent(1)
+
+		if (kicker_done == 1 and time() - kicker_time > 500) {
+			kicker_done = 0
+			mt.shd.pw("A", -100, 0, 100, 0, true)
+		}
     }
 }
 
@@ -134,6 +160,8 @@ void odometry {
 			print("x", x_res)
 			print("y", y_res)
 			print("dir", dir)
+			print("conn", connection_status)
+			print("mode", mode)
 			yield()
 		}
 	}
@@ -170,7 +198,7 @@ func num alga(forward, side) {
 	v_d = -0.58*f + 0.33*s
 
 	k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-	turn = err_com * 0.3 + (err_com - err_com_old) * 0.6
+	turn = err_com * 0.5 + (err_com - err_com_old) * 1.5
 	err_com_old = err_com
 
 	mt.spw("B", v_b*k_m - turn)
@@ -181,13 +209,15 @@ func num alga(forward, side) {
 // interface functions go there 
 
 // kicker function
-func num kicker() {
-	// ... 
-}
-
-// attack function
-func num attack() {
-	// ...
+func num kicker(attack_start) {
+	if (time() - attack_start < 500) {
+		return 0
+	}
+	if (kicker_done == 0) {
+		mt.shd.pw("A", -100, 0, 100, 0, true)
+		kicker_time = time()
+		kicker_done = 1
+	}
 }
 
 // check if back light sensor has detected a ball behind the robot
@@ -262,7 +292,7 @@ func num up_button() {
 		alga(100, 0)
 	}
 	alga(0, 0)
-	kicker()
+	// kicker()
 	alpha = COMPASS_ALPHA
 	while (wall_button() == 0) {
 		alga(-100, 0)
@@ -357,23 +387,9 @@ func num check_buttons() {
 	}
 }
 
-// buttons thread
-void buttons {
-	while (true) {
-		btn_code = check_buttons()
-		if (btn_code == 1) {
-			main_resume()
-		}
-	}
-}
-
-// start all of the previously defined threads
-new.thread = sensors
-new.thread = odometry
-new.thread = buttons
-
 // set up mailboxes and other bt stuff
 my_name = getname()
+who_am_i = my_name
 if (my_name == "BIBA") {
 	other_name = "BOBA"
 	other_mail = "mailbox_boba"
@@ -385,9 +401,11 @@ if (my_name == "BIBA") {
 		other_name = ""
 	}
 }
+who_aint_me = other_name
 
 mail_biba = new.mailbox("mail_biba")
 mail_boba = new.mailbox("mail_boba")
+mail_mode = new.mailbox("mail_mode")
 
 bt_iteration = 0;
 bt_iteration2 = -1;
@@ -397,6 +415,8 @@ bt_loss_count = 0;
 // 1 - attack
 // 0 - go back
 func num bluetooth() { 
+	bt_iteration = bt_iteration + 1;
+	bt_iteration = rm(bt_iteration, 100);
 	// prepare data to be sent
 	btstr = bt_iteration + " " + strres + " " + dir
 	// put the data into the mailbox
@@ -454,10 +474,161 @@ func num bluetooth() {
 			return 0;
 		}
 	}
-
-	bt_iteration = bt_iteration + 1;
-	bt_iteration = rm(bt_iteration, 100);
 }
+
+// buttons thread
+void buttons {
+	while (true) {
+		btn_code = check_buttons()
+		if (btn_code == 1) {
+			main_resume()
+		}
+
+		// if (other_name != "") {
+		// 	mode = bluetooth()
+		// } else {
+		// 	tone(100, 100, 100)
+		// 	mode = 1
+		// }
+
+
+		if (mode == 1) {
+			led(2)
+		} else {
+			led(1)
+		}
+	}
+}
+
+void bt {
+    bt_iteration = 0;
+    bt_iteration2 = -1;
+    bt_loss_count = 0;
+    while (true) {
+        start_bt:
+
+        // while (stop_modes == 1) {
+        //     thread.yield();
+        // }
+
+        str_scaled = round(strres * 100 / STR_MAX);
+
+        if (who_am_i == "BIBA") {
+            mybtstr = attack + " " + bt_iteration + " " + str_scaled + " " + dir;
+        } else {
+            mybtstr = str_scaled + " " + dir + " " + attack + " " + bt_iteration;
+        }
+        
+        if (who_am_i == "BIBA") {
+            bt.send(who_aint_me, "mail_biba", mybtstr);
+
+            btstr2 = bt.last(mail_boba);
+            res = parse(4, btstr2);
+
+            str_res2 = res[0];
+            dir2 = res[1];
+            attack2 = res[2];
+            prev_bt2 = bt_iteration2;
+            bt_iteration2 = res[3];
+        } else {
+            bt.send(who_aint_me, "mail_boba", mybtstr);
+
+            btstr2 = bt.last(mail_biba);
+            res = parse(2, btstr2);
+
+            attack2 = res[0];
+            prev_bt2 = bt_iteration2;
+            bt_iteration2 = res[1];
+            str_res2 = res[2];
+
+            mode = tonum(bt.last(mail_mode));
+        }
+            
+        if (bt_iteration2 == prev_bt2) {
+            if (bt_loss_count < 50) {
+                bt_loss_count = bt_loss_count + 1;
+            } else {
+                connection_status = 0;
+            }
+        } else {
+            bt_loss_count = 0;
+            connection_status = 1;
+        }
+
+        if (connection_status == 0) {
+            // tone(100, 100, 100);
+            mode = 1;
+            goto start_bt;
+        }
+        
+        //////////////////////////////////////////////////////////////////////
+        
+        if (who_am_i == "BIBA") {
+            // if (attack == 1 and attack2 == 0) {
+            //     mode = 1;
+            // } else {
+            //     if (attack == 0 and attack2 == 1) {
+            //         mode = 0;
+            //     } else {
+            //         if (abs(str_scaled - str_res2) < 15) {
+            //             if (abs(dir - 5) == abs(dir2 - 5)) {
+            //                 if (str_scaled > str_res2) {
+            //                     mode = 1;
+            //                 } else {
+            //                     mode = 0;
+            //                 }
+            //             } else {
+            //                 if (abs(dir - 5) > abs(dir2 - 5)) {
+            //                     mode = 0;
+            //                 } else {
+            //                     mode = 1;
+            //                 }
+            //             }
+            //         } else {
+            //             if (str_scaled > str_res2) {
+            //                 mode = 1;
+            //             } else {
+            //                 mode = 0;
+            //             }
+            //         }
+            //     }
+            // }
+
+            if (abs(str_scaled - str_res2) < 15) {
+                if (abs(dir - 5) == abs(dir2 - 5)) {
+                    if (str_scaled > str_res2) {
+                        mode = 1;
+                    } else {
+                        mode = 0;
+                    }
+                } else {
+                    if (abs(dir - 5) > abs(dir2 - 5)) {
+                        mode = 0;
+                    } else {
+                        mode = 1;
+                    }
+                }
+            } else {
+                if (str_scaled > str_res2) {
+                    mode = 1;
+                } else {
+                    mode = 0;
+                }
+            }
+            
+            bt.send(who_aint_me, "mail_mode", abs(mode-1));
+        }
+
+        bt_iteration = bt_iteration + 1;
+        bt_iteration = rm(bt_iteration, 100);
+    }
+}
+
+// start all of the previously defined threads
+new.thread = sensors
+new.thread = odometry
+new.thread = buttons
+new.thread = bt
 
 // TODO:
 // 1. fix odometry behavior when only one wheel is working
@@ -468,38 +639,36 @@ while (true) {
 		yield()
 	}
 
-	if (other_name != "") {
-		current_action = bluetooth()
-	} else {
-		current_action = 1
-	}
-
-	if (current_action == 1) {
+	if (mode == 1) {
 		right_buff = 0
 		is_aligned = 0
 		if (l_f > FRONT_LIGHT_VALUE) {
 			//attack
 			t_attack = time()
-			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0) {
-				if (time() < 20000) {
-					if (current_zone() == 0) {
-						turn = rm(compass - ALPHA_LEFT + 900, 360) - 180
-					} else {
-						if (current_zone() == 2) {
-							turn = rm(compass - ALPHA_RIGHT + 900, 360) - 180
-						} else {
-							turn = err_com
-						}
-					}
-				}
+			k = 2
+			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0 and mode == 1) {
+				// if (time() < 20000) {
+				// 	if (current_zone() == 0) {
+				// 		turn = rm(compass - ALPHA_LEFT + 900, 360) - 180
+				// 	} else {
+				// 		if (current_zone() == 2) {
+				// 			turn = rm(compass - ALPHA_RIGHT + 900, 360) - 180
+				// 		} else {
+				// 			turn = err_com
+				// 		}
+				// 	}
+				// }
+
+				turn = err_com
 
 				if (k < 4) { 
-            		k = k + 0.002
+            		k = k + 0.001
         		}
 
 				mt.start("B", -turn * k)
 				mt.start("C", 100)
 				mt.start("D", -100)
+				kicker(t_attack)
 				
 				
 				// if (time() - t_attack > 1000) {
@@ -518,10 +687,10 @@ while (true) {
 			} else {
 				if (dir != 5) {
 					if (strres < 50) {
-						v = (133 - strres) * 1.1 + 20
+						v = (133 - strres) * 1 + 20
 						
-						if (v < 40) {
-							v = 40
+						if (v < 35) {
+							v = 35
 						}
 						tone(100, 100, 1)
 						alga(50, v*(dir-5)/abs(dir-5))
@@ -531,7 +700,7 @@ while (true) {
 						if (v < 50) {
 							v = 50
 						}
-						alga(0, v*(dir-5)/abs(dir-5))
+						alga(-20, v*(dir-5)/abs(dir-5))
 					}
 				} else {
 					alga(100, 0)
