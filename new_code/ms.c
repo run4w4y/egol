@@ -177,7 +177,7 @@ func num alga(forward, side) {
 	v_d = -0.58*f + 0.33*s
 
 	k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-	turn = err_com * 0.5 + (err_com - err_com_old) * 1
+	turn = err_com * 0.5 + (err_com - err_com_old) * 1.5
 	err_com_old = err_com
 
 	mt.spw("B", v_b*k_m - turn)
