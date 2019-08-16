@@ -366,21 +366,6 @@ func num check_buttons() {
 	}
 }
 
-// buttons thread
-void buttons {
-	while (true) {
-		btn_code = check_buttons()
-		if (btn_code == 1) {
-			main_resume()
-		}
-	}
-}
-
-// start all of the previously defined threads
-new.thread = sensors
-new.thread = odometry
-new.thread = buttons
-
 // set up mailboxes and other bt stuff
 my_name = getname()
 if (my_name == "BIBA") {
@@ -468,6 +453,27 @@ func num bluetooth() {
 	bt_iteration = rm(bt_iteration, 100);
 }
 
+// buttons thread
+void buttons {
+	while (true) {
+		btn_code = check_buttons()
+		if (btn_code == 1) {
+			main_resume()
+		}
+
+		if (other_name != "") {
+			mode = bluetooth()
+		} else {
+			mode = 1
+		}
+	}
+}
+
+// start all of the previously defined threads
+new.thread = sensors
+new.thread = odometry
+new.thread = buttons
+
 // TODO:
 // 1. fix odometry behavior when only one wheel is working
 
@@ -477,20 +483,14 @@ while (true) {
 		yield()
 	}
 
-	if (other_name != "") {
-		current_action = bluetooth()
-	} else {
-		current_action = 1
-	}
-
-	if (current_action == 1) {
+	if (mode == 1) {
 		right_buff = 0
 		is_aligned = 0
 		if (l_f > FRONT_LIGHT_VALUE) {
 			//attack
 			t_attack = time()
 			k = 2
-			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0) {
+			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0 and mode == 1) {
 				// if (time() < 20000) {
 				// 	if (current_zone() == 0) {
 				// 		turn = rm(compass - ALPHA_LEFT + 900, 360) - 180
@@ -502,11 +502,6 @@ while (true) {
 				// 		}
 				// 	}
 				// }
-				if (other_name != "") {
-					current_action = bluetooth()
-				} else {
-					current_action = 1
-				}
 
 				turn = err_com
 
