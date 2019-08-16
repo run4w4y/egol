@@ -502,6 +502,11 @@ while (true) {
 				// 		}
 				// 	}
 				// }
+				if (other_name != "") {
+					current_action = bluetooth()
+				} else {
+					current_action = 1
+				}
 
 				turn = err_com
 
