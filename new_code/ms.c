@@ -628,7 +628,7 @@ void bt {
 new.thread = sensors
 new.thread = odometry
 new.thread = buttons
-new.thread = bt
+// new.thread = bt
 
 // TODO:
 // 1. fix odometry behavior when only one wheel is working
@@ -687,7 +687,7 @@ while (true) {
 			} else {
 				if (dir != 5) {
 					if (strres < 50) {
-						v = (133 - strres) * 1 + 20
+						v = (133 - strres) * 1.1 + 20
 						
 						if (v < 35) {
 							v = 35
