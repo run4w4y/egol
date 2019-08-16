@@ -56,6 +56,7 @@ values[7] = LIGHT_FRONT;
 values[8] = STR_RANGE;
 
 closef(handle);
+sen.setmode(1, 1)
 
 // sensors
 

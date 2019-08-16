@@ -143,23 +143,23 @@ void sensors {
 
 //  Motor manager
 func num alga(Vector_R, tizlek) {
-    v_r = err_com * 0.3 + (err_com - err_com_old) * 0.6
+    v_r = err_com * 0.6 + (err_com - err_com_old) * 2
     err_com_old = err_com
 
     if (Vector_R < 0) {
-        motor_Power_A = tizlek * (cos(rad(360+Vector_R)) * cos(rad(330)) - sin(rad(360+Vector_R)) * sin(rad(330))) + v_r
-        motor_Power_B = tizlek * (cos(rad(360+Vector_R)) * cos(rad(90)) - sin(rad(360+Vector_R)) * sin(rad(90))) + v_r
-        motor_Power_C = tizlek * (cos(rad(360+Vector_R)) * cos(rad(210)) - sin(rad(360+Vector_R)) * sin(rad(210))) + v_r
+        motor_Power_A = tizlek * (cos(rad(360+Vector_R)) * cos(rad(330)) - sin(rad(360+Vector_R)) * sin(rad(330))) - v_r
+        motor_Power_B = tizlek * (cos(rad(360+Vector_R)) * cos(rad(90)) - sin(rad(360+Vector_R)) * sin(rad(90))) - v_r
+        motor_Power_C = tizlek * (cos(rad(360+Vector_R)) * cos(rad(210)) - sin(rad(360+Vector_R)) * sin(rad(210))) - v_r
     } else {
         if (Vector_R > 0) {
-            motor_Power_A = tizlek * (cos(rad(Vector_R)) * cos(rad(330)) - sin(rad(Vector_R)) * sin(rad(330))) + v_r
-            motor_Power_B = tizlek * (cos(rad(Vector_R)) * cos(rad(90)) - sin(rad(Vector_R)) * sin(rad(90))) + v_r
-            motor_Power_C = tizlek * (cos(rad(Vector_R)) * cos(rad(210)) - sin(rad(Vector_R)) * sin(rad(210))) + v_r
+            motor_Power_A = tizlek * (cos(rad(Vector_R)) * cos(rad(330)) - sin(rad(Vector_R)) * sin(rad(330))) - v_r
+            motor_Power_B = tizlek * (cos(rad(Vector_R)) * cos(rad(90)) - sin(rad(Vector_R)) * sin(rad(90))) - v_r
+            motor_Power_C = tizlek * (cos(rad(Vector_R)) * cos(rad(210)) - sin(rad(Vector_R)) * sin(rad(210))) - v_r
         } else {
             if (Vector_R == 0) {
-                motor_Power_A = tizlek + v_r
-                motor_Power_B = v_r
-                motor_Power_C = -tizlek + v_r
+                motor_Power_A = tizlek - v_r
+                motor_Power_B = -v_r
+                motor_Power_C = -tizlek - v_r
             }
         }
     }
@@ -444,16 +444,18 @@ while (true) {
             if ((abs(dir - 5) < 3) or (attacks_count == 1 and abs(str_res2 - 100) < 20)) {
             // if ((abs(dir - 5) < 3) or abs(str_res2 - 100) < 20) {
                 if (strres < 100) {
-                    alga(90*(5-dir)/abs(5-dir), 40)
+                    angle = 90*(dir-5)/abs(5-dir)
+                    alga(angle, 40)
                 } else {
-                    alga(90*(5-dir)/abs(5-dir), 70)
+                    angle = 90*(dir-5)/abs(5-dir)
+                    alga(angle, 70)
                 }
             } else {
                 alga(180, 100)
                 if (l_b > BACK_LIGHT_VALUE) {
                     t0 = time()
                     while (time() - t0 < 300) {
-                        alga(-90, 100)     //100
+                        alga(90, 100)     //100
                         tone(100, 100, 1)
                     }
 
@@ -466,6 +468,7 @@ while (true) {
             }
         }
     } else {
+        led(2)
         right_buff = 0
 		is_aligned = 0
 		if (l_f > FRONT_LIGHT_VALUE) {
@@ -512,7 +515,7 @@ while (true) {
                 if (l_b > BACK_LIGHT_VALUE) {
                     t0 = time()
                     while (time() - t0 < 300) {
-                        alga(-90, 100)     //100
+                        alga(90, 100)     //100
                         tone(100, 100, 1)
                     }
 
@@ -530,15 +533,17 @@ while (true) {
 						if (v < 45) {
 							v = 45
 						}
-						tone(100, 100, 1)
-						alga(60*(5-dir), v)
+					
+                        angle = 60*(dir-5)/abs(5-dir)
+						alga(angle, v)
 					} else {
-						v = (133 - strres) * 1.68 + 50
+						v = (133 - strres) * 0.9 + 50
 						
 						if (v < 50) {
 							v = 50
 						}
-						alga(110*(5-dir), v)
+                        angle = 110*(dir-5)/abs(5-dir)
+						alga(angle, v)
 					}
 				} else {
 					alga(0, 100)

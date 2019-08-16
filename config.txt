@@ -1,6 +1,6 @@
 ﻿none = none
-read_path = C:\egol\new_code\new_motor_man.c
-save_path = C:\EGOLsb
+read_path = C:\Users\egor\egol\new_code\mss.c
+save_path = C:\Users\egor\Desktop\EGOL
 error_displaying = 1
 warning_displaying = 0
 waiting_after = 0
