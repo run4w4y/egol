@@ -43,6 +43,8 @@ is_aligned = 0
 prev_dir = -1
 dir_count = 0
 mode = 1
+kicker_done = 0
+kicker_time = 0
 
 // voids
 
@@ -70,6 +72,11 @@ void sensors {
 
         l_f = sen.percent(3)
 		l_b = sen.percent(1)
+
+		if (kicker_done == 1 and time() - kicker_time > 500) {
+			kicker_done = 0
+			mt.shd.pw("A", -100, 0, 100, 0, true)
+		}
     }
 }
 
@@ -181,13 +188,15 @@ func num alga(forward, side) {
 // interface functions go there 
 
 // kicker function
-func num kicker() {
-	// ... 
-}
-
-// attack function
-func num attack() {
-	// ...
+func num kicker(attack_start) {
+	if (time() - attack_start < 500) {
+		return 0
+	}
+	if (kicker_done == 0) {
+		mt.shd.pw("A", -100, 0, 100, 0, true)
+		kicker_time = time()
+		kicker_done = 1
+	}
 }
 
 // check if back light sensor has detected a ball behind the robot
@@ -262,7 +271,7 @@ func num up_button() {
 		alga(100, 0)
 	}
 	alga(0, 0)
-	kicker()
+	// kicker()
 	alpha = COMPASS_ALPHA
 	while (wall_button() == 0) {
 		alga(-100, 0)
@@ -503,6 +512,7 @@ while (true) {
 				mt.start("B", -turn * k)
 				mt.start("C", 100)
 				mt.start("D", -100)
+				kicker(t_attack)
 				
 				
 				// if (time() - t_attack > 1000) {
