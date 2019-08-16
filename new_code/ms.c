@@ -481,7 +481,25 @@ while (true) {
 			//attack
 			t_attack = time()
 			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0) {
-				alga(100, 0)
+				if (time() < 20000) {
+					if (current_zone() == 0) {
+						turn = rm(compass - ALPHA_LEFT + 900, 360) - 180
+					} else {
+						if (current_zone() == 2) {
+							turn = rm(compass - ALPHA_RIGHT + 900, 360) - 180
+						} else {
+							turn = err_com
+						}
+					}
+				}
+
+				if (k < 4) { 
+            		k = k + 0.002
+        		}
+
+				mt.start("B", -turn * k)
+				mt.start("C", 100)
+				mt.start("D", -100)
 				
 				
 				// if (time() - t_attack > 1000) {
