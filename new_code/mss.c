@@ -92,6 +92,7 @@ mode = 1
 kicker_done = 0
 kicker_time = 0
 connection_status = 0
+prev_mode = 1
 
 /*  
     close = 0 stop
@@ -199,79 +200,6 @@ encoders_prev = new.vector(3, 0);
 
 odometry_frequency = 50;
 
-// main odometry thread
-
-void odometry {
-    while (true) {
-        // define current thetta
-
-        current_angle_delta = err_com;
-        thetta = rad(current_angle_delta) + thetta_base;
-
-        // read encoders
-
-        encoders_current = new.vector(3, 0);
-
-        encoders_current[0] = mt.getcount(PORT_FIRST_MOTOR);
-        encoders_current[1] = mt.getcount(PORT_SECOND_MOTOR);
-        encoders_current[2] = mt.getcount(PORT_THIRD_MOTOR);
-
-        // calculate encoders delta
-
-        encoders_delta = new.vector(3, 0);
-        for (i = 0; i < 3; i = i + 1) {
-            encoders_delta[i] = (encoders_current[i] - encoders_prev[i]) * motor_koefficients[i];
-        }
-
-        // now get the x and y vectors
-
-        x_delta = (-2 * sin(thetta) / 3) * encoders_delta[0] + (-2 * sin(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
-        y_delta = (2 * cos(thetta) / 3) * encoders_delta[0] + (-2 * cos(pi / 3 - thetta) / 3) * encoders_delta[1] + (-2 * cos(pi / 3 + thetta) / 3) * encoders_delta[2];
-
-        x_res = (x_res + x_delta);
-        y_res = (y_res + y_delta);
-
-        // save current encoder values for future
-
-        for (i = 0; i < 3; i = i + 1) {
-            encoders_prev[i] = encoders_current[i];
-        }
-
-        // wait for new encoder values
-
-        delay(odometry_frequency);
-        
-        if (x_res > 1100) {
-            x = 1100
-        } else {
-            if (x_res < -1100) {
-                x = -1100
-            }
-        }
-
-        printupd()
-        print("x", x_res)
-        print("y", y_res)
-        print("mode", mode)
-        print("close", close)
-    }
-}
-
-func num reset_odometry() {
-    mt.resetcount("B");
-    mt.resetcount("C");
-    mt.resetcount("D");
-    x_res = 0;
-    y_res = 0;
-    time_odometry = time()
-
-    for (i = 0; i < 3; i = i + 1) {
-        encoders_prev[i] = 0;
-    }
-}
-
-// odometry end ----------------
-
 //  bluetooth
 void bt {
     bt_iteration = 0;
@@ -280,9 +208,10 @@ void bt {
     while (true) {
         start_bt:
 
-        // while (stop_modes == 1) {
-        //     thread.yield();
-        // }
+        while (mode == 3) {
+            tone(100, 100, 100)
+            yield()
+        }
 
         str_scaled = round(strres * 100 / STR_MAX);
 
@@ -337,36 +266,6 @@ void bt {
         //////////////////////////////////////////////////////////////////////
         
         if (who_am_i == "BIBA") {
-            // if (attack == 1 and attack2 == 0) {
-            //     mode = 1;
-            // } else {
-            //     if (attack == 0 and attack2 == 1) {
-            //         mode = 0;
-            //     } else {
-            //         if (abs(str_scaled - str_res2) < 15) {
-            //             if (abs(dir - 5) == abs(dir2 - 5)) {
-            //                 if (str_scaled > str_res2) {
-            //                     mode = 1;
-            //                 } else {
-            //                     mode = 0;
-            //                 }
-            //             } else {
-            //                 if (abs(dir - 5) > abs(dir2 - 5)) {
-            //                     mode = 0;
-            //                 } else {
-            //                     mode = 1;
-            //                 }
-            //             }
-            //         } else {
-            //             if (str_scaled > str_res2) {
-            //                 mode = 1;
-            //             } else {
-            //                 mode = 0;
-            //             }
-            //         }
-            //     }
-            // }
-
             if (abs(str_scaled - str_res2) < 15) {
                 if (abs(dir - 5) == abs(dir2 - 5)) {
                     if (str_scaled > str_res2) {
@@ -397,42 +296,77 @@ void bt {
     }
 }
 
-// buttons
-// void buttons_thread {
-//     stop_modes = 0;
-//     while (true) {
-//         if (btn.rn == "E") {
-//             stop_modes = 1;
-//             prev_mode = mode; 
-//             mode = 3;
-//             btn.wait.release();
-//             while (btn.rn != "E") {
-//                 mode = 3;
-//                 thread.yield(); // do nothing
-//             }
-//             reset_odometry();
-//             mode = prev_mode;
-//             stop_modes = 0;
-//             btn.wait.release();
-//         }
-
-//         time_buttons = time();
-//         while (time() - time_buttons < 50) {
-//             thread.yield();
-//         }
-//     }
-// }
-
 btn.wait.release();
 
+// stop main thread execution
+func num main_pause() {
+    prev_mode = mode
+    mode = 3
+}
+
+// resume main thread execution
+func num main_resume() {
+    mode = prev_mode
+}
+
+// action on the UP button press
+func num up_button() {
+    while (dir > 3 and dir < 7) {
+        mode = 3
+        alga(0, 100)
+    }
+}
+
+// action on the ENTER button press
+func num enter_button() {
+    t_enter = time()
+    while (time() - t_enter < 750) {
+        alga(0, 0)
+        mode = 3
+    }
+}
+
+func num check_buttons() {
+	cur_btn = btn.rn()
+
+	if (cur_btn == "") {
+		return 0
+	} else {
+		main_pause()
+	}
+	
+	if (cur_btn == "E") {
+		enter_button()
+		return 1
+	}
+	if (cur_btn == "U") {
+		up_button()
+		return 1
+	}
+}
+
+
+// buttons thread
+void buttons {
+	while (true) {
+		btn_code = check_buttons()
+		if (btn_code == 1) {
+			main_resume()
+		}
+	}
+}
+
 //  threads
-// new.thread = buttons_thread
 new.thread = sensors
 new.thread = bt
-new.thread = odometry
+new.thread = buttons
 
 //  main
 while (true) {
+    while (mode == 3) {
+        yield()
+    }
+
     if (mode == 0) {
         if (attack2 = 1) {
             attacks_count = 1;
