@@ -571,7 +571,7 @@ while (true) {
 						if (v < 50) {
 							v = 50
 						}
-						alga(0, v*(dir-5)/abs(dir-5))
+						alga(-20, v*(dir-5)/abs(dir-5))
 					}
 				} else {
 					alga(100, 0)
