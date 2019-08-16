@@ -170,36 +170,12 @@ func num alga(forward, side) {
 	v_d = -0.58*f + 0.33*s
 
 	k_m = max(abs(f), abs(s))/max(abs(v_b), max(abs(v_c), abs(v_d)))
-	turn = err_com * 0.6 + (err_com - err_com_old) * 1.5
+	turn = err_com * 0.3 + (err_com - err_com_old) * 0.6
 	err_com_old = err_com
 
 	mt.spw("B", v_b*k_m - turn)
 	mt.spw("C", v_c*k_m - turn)
 	mt.spw("D", v_d*k_m - turn)
-}
-
-func num alga_pizda(v_r, tizlek) {
-	if (v_r < 0) {
-		motor_Power_D = tizlek * (cos(60+v_r) * cos(180) - sin(60+v_r) * sin(180)) + turn
-    	motor_Power_B = tizlek * (cos(60+v_r) * cos(300) - sin(60+v_r) * sin(300)) + turn
-    	motor_Power_C = tizlek * (cos(60+v_r) * cos(180) - sin(60+v_r) * sin(180)) + turn
-	} else {
-		if (v_r > 0) {
-			motor_Power_D = tizlek * (cos(v_r) * cos(60) - sin(v_r) * sin(180)) + turn
-    		motor_Power_B = tizlek * (cos(v_r) * cos(60) - sin(v_r) * sin(120)) + turn
-    		motor_Power_C = tizlek * (cos(v_r) * cos(180) - sin(v_r) * sin(180)) + turn
-		} else {
-			if (v_r == 0) {
-				motor_Power_D = tizlek + turn
-    			motor_Power_B = turn
-    			motor_Power_C = -tizlek + turn
-			}
-		}
-	}
-
-    motor.Start("D",motor_Power_D)
-    motor.Start("B",motor_Power_B)
-    motor.Start("C",motor_Power_C)
 }
 
 // interface functions go there 
