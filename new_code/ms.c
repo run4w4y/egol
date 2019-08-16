@@ -45,6 +45,7 @@ dir_count = 0
 mode = 1
 kicker_done = 0
 kicker_time = 0
+connection_status = 0
 
 // voids
 
