@@ -43,6 +43,8 @@ is_aligned = 0
 prev_dir = -1
 dir_count = 0
 mode = 1
+kicker_done = 0
+kicker_time = 0
 
 // voids
 
@@ -70,6 +72,11 @@ void sensors {
 
         l_f = sen.percent(3)
 		l_b = sen.percent(1)
+
+		if (kicker_done == 1 and time() - kicker_time > 500) {
+			kicker_done = 0
+			mt.shd.pw("A", -100, 0, 100, 0, true)
+		}
     }
 }
 
@@ -181,13 +188,15 @@ func num alga(forward, side) {
 // interface functions go there 
 
 // kicker function
-func num kicker() {
-	// ... 
-}
-
-// attack function
-func num attack() {
-	// ...
+func num kicker(attack_start) {
+	if (time() - attack_start < 500) {
+		return 0
+	}
+	if (kicker_done == 0) {
+		mt.shd.pw("A", -100, 0, 100, 0, true)
+		kicker_time = time()
+		kicker_done = 1
+	}
 }
 
 // check if back light sensor has detected a ball behind the robot
@@ -262,7 +271,7 @@ func num up_button() {
 		alga(100, 0)
 	}
 	alga(0, 0)
-	kicker()
+	// kicker()
 	alpha = COMPASS_ALPHA
 	while (wall_button() == 0) {
 		alga(-100, 0)
@@ -357,21 +366,6 @@ func num check_buttons() {
 	}
 }
 
-// buttons thread
-void buttons {
-	while (true) {
-		btn_code = check_buttons()
-		if (btn_code == 1) {
-			main_resume()
-		}
-	}
-}
-
-// start all of the previously defined threads
-new.thread = sensors
-new.thread = odometry
-new.thread = buttons
-
 // set up mailboxes and other bt stuff
 my_name = getname()
 if (my_name == "BIBA") {
@@ -459,6 +453,27 @@ func num bluetooth() {
 	bt_iteration = rm(bt_iteration, 100);
 }
 
+// buttons thread
+void buttons {
+	while (true) {
+		btn_code = check_buttons()
+		if (btn_code == 1) {
+			main_resume()
+		}
+
+		if (other_name != "") {
+			mode = bluetooth()
+		} else {
+			mode = 1
+		}
+	}
+}
+
+// start all of the previously defined threads
+new.thread = sensors
+new.thread = odometry
+new.thread = buttons
+
 // TODO:
 // 1. fix odometry behavior when only one wheel is working
 
@@ -468,20 +483,14 @@ while (true) {
 		yield()
 	}
 
-	if (other_name != "") {
-		current_action = bluetooth()
-	} else {
-		current_action = 1
-	}
-
-	if (current_action == 1) {
+	if (mode == 1) {
 		right_buff = 0
 		is_aligned = 0
 		if (l_f > FRONT_LIGHT_VALUE) {
 			//attack
 			t_attack = time()
 			k = 2
-			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0) {
+			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0 and mode == 1) {
 				// if (time() < 20000) {
 				// 	if (current_zone() == 0) {
 				// 		turn = rm(compass - ALPHA_LEFT + 900, 360) - 180
@@ -503,6 +512,7 @@ while (true) {
 				mt.start("B", -turn * k)
 				mt.start("C", 100)
 				mt.start("D", -100)
+				kicker(t_attack)
 				
 				
 				// if (time() - t_attack > 1000) {
