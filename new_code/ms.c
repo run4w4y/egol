@@ -1,7 +1,7 @@
 // check if all of the ports we are using are working correctly
-//check.ports("ABCD 1234")
+check.ports("ABCD 1234")
 sen.setmode(1, 1)
-//sen.setmode(3, 1)
+sen.setmode(3, 1)
 
 // read all of the calibration values from file
 handle = open.r("cal.txt");
