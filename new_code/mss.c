@@ -113,7 +113,7 @@ connection_status = 0
 void sensors {
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
-        dir = filter_dir(irseeker_array[0])
+        dir = irseeker_array[0]
         str1 = irseeker_array[1]
         str2 = irseeker_array[2]
         str3 = irseeker_array[3]
@@ -143,7 +143,6 @@ void sensors {
 
 //  Motor manager
 func num alga(Vector_R, tizlek) {
-
     v_r = err_com * 0.3 + (err_com - err_com_old) * 0.6
     err_com_old = err_com
 
