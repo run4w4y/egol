@@ -412,6 +412,8 @@ bt_loss_count = 0;
 // 1 - attack
 // 0 - go back
 func num bluetooth() { 
+	bt_iteration = bt_iteration + 1;
+	bt_iteration = rm(bt_iteration, 100);
 	// prepare data to be sent
 	btstr = bt_iteration + " " + strres + " " + dir
 	// put the data into the mailbox
@@ -469,9 +471,6 @@ func num bluetooth() {
 			return 0;
 		}
 	}
-
-	bt_iteration = bt_iteration + 1;
-	bt_iteration = rm(bt_iteration, 100);
 }
 
 // buttons thread
