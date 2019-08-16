@@ -48,11 +48,29 @@ kicker_time = 0
 
 // voids
 
+prev_dir = 0
+zeroes_cnt = 0
+
+func num filter_dir(raw_dir) {
+    if (raw_dir == 0 and prev_dir != 0 and prev_dir != 1 and prev_dir != 9) {
+        if (zeroes_cnt < 15) {
+            zeroes_cnt = zeroes_cnt + 1
+        } else {
+            zeroes_cnt = 0
+            prev_dir = raw_dir
+        }
+    } else {
+        zeroes_cnt = 0
+        prev_dir = raw_dir
+    }
+    return prev_dir
+}
+
 // sensors thread
 void sensors {
     while (true) {
         irseeker_array = i2c.readregs(4, 8, 73, 6)
-        dir = irseeker_array[0]
+        dir = filter_dir(irseeker_array[0])
         str1 = irseeker_array[1]
         str2 = irseeker_array[2]
         str3 = irseeker_array[3]
