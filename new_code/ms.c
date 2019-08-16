@@ -389,6 +389,7 @@ func num check_buttons() {
 
 // set up mailboxes and other bt stuff
 my_name = getname()
+who_am_i = my_name
 if (my_name == "BIBA") {
 	other_name = "BOBA"
 	other_mail = "mailbox_boba"
@@ -400,9 +401,11 @@ if (my_name == "BIBA") {
 		other_name = ""
 	}
 }
+who_aint_me = other_name
 
 mail_biba = new.mailbox("mail_biba")
 mail_boba = new.mailbox("mail_boba")
+mail_mode = new.mailbox("mail_mode")
 
 bt_iteration = 0;
 bt_iteration2 = -1;
@@ -481,12 +484,13 @@ void buttons {
 			main_resume()
 		}
 
-		if (other_name != "") {
-			mode = bluetooth()
-		} else {
-			tone(100, 100, 100)
-			mode = 1
-		}
+		// if (other_name != "") {
+		// 	mode = bluetooth()
+		// } else {
+		// 	tone(100, 100, 100)
+		// 	mode = 1
+		// }
+
 
 		if (mode == 1) {
 			led(2)
@@ -496,10 +500,135 @@ void buttons {
 	}
 }
 
+void bt {
+    bt_iteration = 0;
+    bt_iteration2 = -1;
+    bt_loss_count = 0;
+    while (true) {
+        start_bt:
+
+        // while (stop_modes == 1) {
+        //     thread.yield();
+        // }
+
+        str_scaled = round(strres * 100 / STR_MAX);
+
+        if (who_am_i == "BIBA") {
+            mybtstr = attack + " " + bt_iteration + " " + str_scaled + " " + dir;
+        } else {
+            mybtstr = str_scaled + " " + dir + " " + attack + " " + bt_iteration;
+        }
+        
+        if (who_am_i == "BIBA") {
+            bt.send(who_aint_me, "mail_biba", mybtstr);
+
+            btstr2 = bt.last(mail_boba);
+            res = parse(4, btstr2);
+
+            str_res2 = res[0];
+            dir2 = res[1];
+            attack2 = res[2];
+            prev_bt2 = bt_iteration2;
+            bt_iteration2 = res[3];
+        } else {
+            bt.send(who_aint_me, "mail_boba", mybtstr);
+
+            btstr2 = bt.last(mail_biba);
+            res = parse(2, btstr2);
+
+            attack2 = res[0];
+            prev_bt2 = bt_iteration2;
+            bt_iteration2 = res[1];
+            str_res2 = res[2];
+
+            mode = tonum(bt.last(mail_mode));
+        }
+            
+        if (bt_iteration2 == prev_bt2) {
+            if (bt_loss_count < 50) {
+                bt_loss_count = bt_loss_count + 1;
+            } else {
+                connection_status = 0;
+            }
+        } else {
+            bt_loss_count = 0;
+            connection_status = 1;
+        }
+
+        if (connection_status == 0) {
+            // tone(100, 100, 100);
+            mode = 1;
+            goto start_bt;
+        }
+        
+        //////////////////////////////////////////////////////////////////////
+        
+        if (who_am_i == "BIBA") {
+            // if (attack == 1 and attack2 == 0) {
+            //     mode = 1;
+            // } else {
+            //     if (attack == 0 and attack2 == 1) {
+            //         mode = 0;
+            //     } else {
+            //         if (abs(str_scaled - str_res2) < 15) {
+            //             if (abs(dir - 5) == abs(dir2 - 5)) {
+            //                 if (str_scaled > str_res2) {
+            //                     mode = 1;
+            //                 } else {
+            //                     mode = 0;
+            //                 }
+            //             } else {
+            //                 if (abs(dir - 5) > abs(dir2 - 5)) {
+            //                     mode = 0;
+            //                 } else {
+            //                     mode = 1;
+            //                 }
+            //             }
+            //         } else {
+            //             if (str_scaled > str_res2) {
+            //                 mode = 1;
+            //             } else {
+            //                 mode = 0;
+            //             }
+            //         }
+            //     }
+            // }
+
+            if (abs(str_scaled - str_res2) < 15) {
+                if (abs(dir - 5) == abs(dir2 - 5)) {
+                    if (str_scaled > str_res2) {
+                        mode = 1;
+                    } else {
+                        mode = 0;
+                    }
+                } else {
+                    if (abs(dir - 5) > abs(dir2 - 5)) {
+                        mode = 0;
+                    } else {
+                        mode = 1;
+                    }
+                }
+            } else {
+                if (str_scaled > str_res2) {
+                    mode = 1;
+                } else {
+                    mode = 0;
+                }
+            }
+            
+            bt.send(who_aint_me, "mail_mode", abs(mode-1));
+        }
+
+        bt_iteration = bt_iteration + 1;
+        bt_iteration = rm(bt_iteration, 100);
+    }
+}
+
 // start all of the previously defined threads
 new.thread = sensors
 new.thread = odometry
 new.thread = buttons
+new.thread = bt
 
 // TODO:
 // 1. fix odometry behavior when only one wheel is working
