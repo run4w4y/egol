@@ -310,7 +310,7 @@ func num main_resume() {
 
 // action on the UP button press
 func num up_button() {
-    while (dir > 3 and dir < 7) {
+    while (dir > 2 and dir < 8) {
         mode = 3
         alga(0, 100)
     }
@@ -408,7 +408,7 @@ while (true) {
 		if (l_f > FRONT_LIGHT_VALUE) {
 			//attack
 			t_attack = time()
-			k = 2
+			k = 1
 			while (l_f - FRONT_LIGHT_VALUE > -5 and main_lock == 0 and mode == 1) {
 				// if (time() < 20000) {
 				// 	if (current_zone() == 0) {
@@ -424,7 +424,7 @@ while (true) {
 
 				turn = err_com
 
-				if (k < 4) { 
+				if (k < 2.5) { 
             		k = k + 0.001
         		}
 
