@@ -143,7 +143,7 @@ void sensors {
 
 //  Motor manager
 func num alga(Vector_R, tizlek) {
-    v_r = err_com * 0.6 + (err_com - err_com_old) * 2
+    v_r = err_com * 0.5 + (err_com - err_com_old) * 1.7
     err_com_old = err_com
 
     if (Vector_R < 0) {
@@ -537,12 +537,12 @@ while (true) {
                         angle = 60*(dir-5)/abs(5-dir)
 						alga(angle, v)
 					} else {
-						v = (133 - strres) * 0.9 + 50
+						v = (133 - strres) * 0.8 + 50
 						
 						if (v < 50) {
 							v = 50
 						}
-                        angle = 110*(dir-5)/abs(5-dir)
+                        angle = 100*(dir-5)/abs(5-dir)
 						alga(angle, v)
 					}
 				} else {
